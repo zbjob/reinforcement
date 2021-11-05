@@ -18,13 +18,9 @@ AC training example.
 
 #pylint: disable=C0413
 import os
-import sys
-ROOT_PATH = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-sys.path.insert(0, ROOT_PATH)
-
 import argparse
-from ac.src import config
-from ac.src.ac_trainer import ACTrainer
+from src import config
+from src.ac_trainer import ACTrainer
 from mindspore import context
 from mindspore_rl.core import Session
 

@@ -18,10 +18,10 @@ AC eval example.
 
 import os
 import argparse
-from ac_trainer import ACTrainer
+from src import config
+from src.ac_trainer import ACTrainer
 from mindspore_rl.core import Session
 from mindspore import context
-from src import config
 
 parser = argparse.ArgumentParser(description='MindSpore Reinforcement AC')
 parser.add_argument('--device_target', type=str, default='Auto', choices=['Ascend', 'CPU', 'GPU', 'Auto'],

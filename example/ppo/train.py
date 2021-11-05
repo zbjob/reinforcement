@@ -18,13 +18,9 @@ PPO training example.
 
 #pylint: disable=C0413
 import os
-import sys
-ROOT_PATH = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-sys.path.insert(0, ROOT_PATH)
-
 import argparse
-from ppo.src import config
-from ppo.src.ppo_trainer import PPOTrainer
+from src import config
+from src.ppo_trainer import PPOTrainer
 from mindspore import context
 from mindspore_rl.core import Session
 

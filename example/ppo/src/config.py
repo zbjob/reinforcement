@@ -16,9 +16,9 @@
 PPO config.
 """
 
-from ppo.src.ppo import PPOActor, PPOLearner, PPOPolicy
 import mindspore
 from mindspore_rl.environment import GymEnvironment
+from .ppo import PPOActor, PPOLearner, PPOPolicy
 
 env_params = {'name': 'HalfCheetah-v2'}
 eval_env_params = {'name': 'HalfCheetah-v2'}

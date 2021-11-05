@@ -16,9 +16,9 @@
 DQN config.
 """
 
-from dqn.src.dqn import DQNActor, DQNLearner, DQNPolicy
 import mindspore as ms
 from mindspore_rl.environment import GymEnvironment
+from .dqn import DQNActor, DQNLearner, DQNPolicy
 
 learner_params = {'gamma': 0.99}
 trainer_params = {
