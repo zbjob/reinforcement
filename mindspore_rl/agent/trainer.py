@@ -51,7 +51,7 @@ class Trainer(nn.Cell):
 
     def save_ckpt(self, path, model, episode, max_ckpt_nums=5):
         """
-        Save the checkpoint file for all the model weights. And keep the latest 'max_ckpt_nums` checkpoint files.
+        Save the checkpoint file for all the model weights. And keep the latest `max_ckpt_nums` checkpoint files.
 
         Args:
             path (str): The checkpoint path.

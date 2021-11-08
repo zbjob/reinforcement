@@ -16,8 +16,8 @@
 AC config.
 """
 
-from ac.src.ac import ACPolicyAndNetwork, ACLearner, ACActor
 from mindspore_rl.environment import GymEnvironment
+from .ac import ACPolicyAndNetwork, ACLearner, ACActor
 
 env_params = {'name': 'CartPole-v0'}
 policy_params = {
