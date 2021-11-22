@@ -19,5 +19,6 @@ Component used to implement custom environments.
 
 from mindspore_rl.environment.gym_environment import GymEnvironment
 from mindspore_rl.environment.gym_multi_environment import GymMultiEnvironment
+from mindspore_rl.environment.space import Space
 
-__all__ = ["GymEnvironment", "GymMultiEnvironment"]
+__all__ = ["GymEnvironment", "GymMultiEnvironment", "Space"]
