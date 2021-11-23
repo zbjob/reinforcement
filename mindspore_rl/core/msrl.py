@@ -12,17 +12,16 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # ============================================================================
-
 """
 Implementation of MSRL class.
 """
 
 import inspect
-from mindspore_rl.core import ReplayBuffer
-from mindspore_rl.environment import GymMultiEnvironment
-from mindspore_rl.agent import Agent
+
 import mindspore.nn as nn
 from mindspore.ops import operations as P
+
+from mindspore_rl.environment import GymMultiEnvironment
 
 
 class MSRL(nn.Cell):
@@ -81,6 +80,8 @@ class MSRL(nn.Cell):
         self.agent = None
         self.buffers = []
         self.env_num = 1
+        self.collect_environment = None
+        self.eval_environment = None
 
         # apis
         self.agent_act_init = None
@@ -92,11 +93,20 @@ class MSRL(nn.Cell):
         self.agent_learn = None
         self.buffer_full = None
 
-        for item in ['environment', 'policy_and_network', 'actor', 'learner']:
-            if item not in config:
-                raise ValueError(f"The `{item}` configuration should be provided.")
+        compulsory_items = [
+            'eval_environment', 'collect_environment', 'policy_and_network',
+            'actor', 'learner'
+        ]
+        self._compulsory_items_check(config, compulsory_items, 'config')
 
         self.init(config)
+
+    def _compulsory_items_check(self, config, compulsory_item, position):
+        for item in compulsory_item:
+            if item not in config:
+                raise ValueError(
+                    f"The `{item}` configuration in `{position}` should be provided."
+                )
 
     def _create_instance(self, sub_config, actor_id=None):
         """
@@ -132,17 +142,16 @@ class MSRL(nn.Cell):
             - eval_env (object), created evaluation environment object.
         """
 
-        env = None
-        if 'number' in config['environment']:
-            self.env_num = config['environment']['number']
+        if 'number' in config['collect_environment']:
+            self.env_num = config['collect_environment']['number']
 
         if self.env_num > 1:
-            config['environment']['type'] = GymMultiEnvironment
-            config['environment']['params']['env_nums'] = self.env_num
+            config['collect_environment']['type'] = GymMultiEnvironment
+            config['collect_environment']['params']['env_nums'] = self.env_num
             config['eval_environment']['type'] = GymMultiEnvironment
             config['eval_environment']['params']['env_nums'] = 1
 
-        env = self._create_instance(config['environment'])
+        env = self._create_instance(config['collect_environment'])
 
         if 'eval_environment' in config:
             eval_env = self._create_instance(config['eval_environment'])
@@ -176,14 +185,127 @@ class MSRL(nn.Cell):
         Returns:
             replay_buffer (object), created replay buffer object.
         """
+        replay_buffer_config = config['replay_buffer']
+        compulsory_item = ['type', 'capacity', 'data_shape', 'data_type']
+        self._compulsory_items_check(replay_buffer_config, compulsory_item,
+                                     'replay_buffer')
 
-        capacity = config['capacity']
-        buffer_shapes = config['shape']
-        sample_size = config['sample_size']
-        types = config['type']
-        replay_buffer = ReplayBuffer(
-            sample_size, capacity, buffer_shapes, types)
-        return replay_buffer
+        num_replay_buffer = replay_buffer_config.get('number')
+        replay_buffer_type = replay_buffer_config['type']
+        capacity = replay_buffer_config['capacity']
+        buffer_data_shapes = replay_buffer_config['data_shape']
+        buffer_data_type = replay_buffer_config['data_type']
+
+        sample_size = replay_buffer_config.get('sample_size')
+        if not sample_size:
+            sample_size = 32
+
+        if (not num_replay_buffer) or num_replay_buffer == 1:
+            buffer = replay_buffer_type(sample_size, capacity,
+                                        buffer_data_shapes, buffer_data_type)
+        else:
+            buffer = [
+                replay_buffer_type(sample_size, capacity, buffer_data_shapes,
+                                   buffer_data_type) for _ in num_replay_buffer
+            ]
+        return buffer
+
+    def __create_policy_and_network(self, config):
+        """
+        Create an instance of XXXPolicy class in algorithm, it contains the networks. collect policy
+        and eval policy of algorithm.
+
+        Args:
+            config (dict): A dictionary of configuration
+
+        Returns:
+            policy_and_network (object): The instance of policy and network
+        """
+        policy_and_network_config = config['policy_and_network']
+        compulsory_items = ['type']
+        self._compulsory_items_check(policy_and_network_config,
+                                     compulsory_items, 'policy_and_network')
+
+        params = policy_and_network_config.get('params')
+        if params:
+            if not params.get('state_space_dim'):
+                config['policy_and_network']['params'][
+                    'state_space_dim'] = self.collect_environment.state_space_dim
+            if not params.get('action_space_dim'):
+                config['policy_and_network']['params'][
+                    'action_space_dim'] = self.collect_environment.action_space_dim
+
+        policy_and_network = self._create_instance(policy_and_network_config)
+        return policy_and_network
+
+    def __create_actor(self, config, policy_and_network):
+        """
+        Create an instance of actor or a list of instances of actor
+        Args:
+            config (dict): A dictionary of configuration
+            policy_and_network (object): The instance of policy_and_network
+
+        Returns:
+            actor (object or List(object)): An instance of actor a list of instances of actor
+        """
+        compulsory_items = ['number', 'type', 'policies']
+        self._compulsory_items_check(config['actor'], compulsory_items,
+                                     'actor')
+
+        params = config['actor'].get('params')
+        if not params:
+            config['actor']['params'] = {}
+        if config['actor'].get('environment'):
+            config['actor']['params'][
+                'collect_environment'] = self.collect_environment
+            config['actor']['params'][
+                'eval_environment'] = self.eval_environment
+
+        config['actor']['params']['replay_buffer'] = self.buffers
+
+        if config['actor'].get('policies'):
+            self.__params_generate(config, policy_and_network, 'actor',
+                                   'policies')
+        if config['actor'].get('networks'):
+            self.__params_generate(config, policy_and_network, 'actor',
+                                   'networks')
+
+        num_actors = config['actor']['number']
+        if num_actors == 1:
+            actor = self._create_instance(config['actor'])
+        else:
+            raise ValueError(
+                "Sorry, the current version only supports one actor !")
+        return actor
+
+    def __create_learner(self, config, policy_and_network):
+        """
+        Create an instance of learner or a list of instances of learner
+        Args:
+            config (dict): A dictionary of configuration
+            policy_and_network (object): The instance of policy_and_network
+
+        Returns:
+            actor (object or List(object)): An instance of learner a list of instances of learner
+        """
+        compulsory_items = ['type', 'networks']
+        self._compulsory_items_check(config['learner'], compulsory_items,
+                                     'learner')
+
+        params = config['actor'].get('params')
+        if not params:
+            config['learner']['params'] = {}
+        if config['learner'].get('networks'):
+            self.__params_generate(config, policy_and_network, 'learner',
+                                   'networks')
+
+        num_learner = config['learner']['number']
+        if num_learner == 1:
+            learner = self._create_instance(config['learner'])
+        else:
+            raise ValueError(
+                "Sorry, the current version only supports one learner !")
+        return learner
 
     def init(self, config):
         """
@@ -194,56 +316,28 @@ class MSRL(nn.Cell):
         Args:
             config (dict): algorithm configuration file.
         """
+        # ---------------------- Environment ----------------------
+        self.collect_environment, self.eval_environment = self.__create_environments(
+            config)
 
-        env, eval_env = self.__create_environments(config)
-        state_space_dim = env.state_space_dim
+        # ---------------------- ReplayBuffer ----------------------
+        replay_buffer = config.get('replay_buffer')
+        if replay_buffer:
+            self.buffers = self.__create_replay_buffer(config)
+            self.replay_buffer_sample = self.buffers.sample
+            self.replay_buffer_insert = self.buffers.insert
+            self.replay_buffer_full = self.buffers.full
+            self.replay_buffer_reset = self.buffers.reset
 
-        if 'state_space_dim' in config['policy_and_network']['params']:
-            config['policy_and_network']['params']['state_space_dim'] = state_space_dim
-        # special cases
-        if 'action_space_dim' in config['policy_and_network']['params'] and \
-                config['policy_and_network']['params']['action_space_dim'] == 0:
-            action_space_dim = env.action_space_dim
-            config['policy_and_network']['params']['action_space_dim'] = action_space_dim
-
-        policy_and_network = self._create_instance(
-            config['policy_and_network'])
-
-        if 'params' not in config['actor'] or config['actor']['params'] is None:
-            config['actor']['params'] = {}
-        if 'params' not in config['learner'] or config['learner']['params'] is None:
-            config['learner']['params'] = {}
-
-        if 'policies' in config['actor']:
-            self.__params_generate(config, policy_and_network, 'actor', 'policies')
-
-        if 'networks' in config['actor']:
-            self.__params_generate(config, policy_and_network, 'actor', 'networks')
-
-        if 'environment' in config['actor']:
-            config['actor']['params']['environment'] = env
-            config['actor']['params']['eval_environment'] = eval_env
-
-        if 'replay_buffer' in config['actor']:  # doesn't work for multi buffer
-            conf = config['actor']['replay_buffer']
-            self.buffers = self.__create_replay_buffer(conf)
-            config['actor']['params']['replay_buffer'] = self.buffers
-
-        if 'networks' in config['learner']:
-            self.__params_generate(config, policy_and_network, 'learner', 'networks')
-
-        actor_num = config['actor']['number']
-
-        if actor_num == 1:
-            self.actors = self._create_instance(config['actor'])
+        # ---------------------- Agent ----------------------
+        agent_config = config.get('agent')
+        if not agent_config:
+            policy_and_network = self.__create_policy_and_network(config)
+            self.actors = self.__create_actor(config, policy_and_network)
+            self.learner = self.__create_learner(config, policy_and_network)
         else:
-            raise ValueError("Sorry, the current version only support one actor!")
-
-        if 'state_space_dim' in config['learner']['params']:
-            config['learner']['params']['state_space_dim'] = env.state_space_dim
-
-        self.learner = self._create_instance(config['learner'])
-        self.agent = Agent(actor_num, self.actors, self.learner)
+            raise ValueError(
+                "Sorry, the current does not support multi-agent yet")
 
         self.agent_act = self.actors.act
         self.agent_act_init = self.actors.act_init
@@ -252,12 +346,6 @@ class MSRL(nn.Cell):
         self.agent_reset_collect = self.actors.reset_collect_actor
         self.agent_reset_eval = self.actors.reset_eval_actor
         self.agent_learn = self.learner.learn
-
-        if self.buffers:
-            self.replay_buffer_sample = self.buffers.sample
-            self.replay_buffer_insert = self.buffers.insert
-            self.replay_buffer_full = self.buffers.full
-            self.replay_buffer_reset = self.buffers.reset
 
     def get_replay_buffer(self):
         """

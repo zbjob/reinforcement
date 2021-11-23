@@ -18,6 +18,7 @@ PPO config.
 
 import mindspore
 from mindspore_rl.environment import GymEnvironment
+from mindspore_rl.core.replay_buffer import ReplayBuffer
 from .ppo import PPOActor, PPOLearner, PPOPolicy
 
 env_params = {'name': 'HalfCheetah-v2'}
@@ -59,16 +60,6 @@ algorithm_config = {
         'networks': ['actor_net'],
         'environment': True,
         'eval_environment': True,
-        'replay_buffer': {
-            'capacity':
-            1000,
-            'shape': [(30, 17), (30, 6), (30, 1), (30, 17), (30, 6), (30, 6)],
-            'type': [
-                mindspore.float32, mindspore.float32, mindspore.float32,
-                mindspore.float32, mindspore.float32, mindspore.float32,
-            ],
-            'sample_size': 1,
-        }
     },
     'learner': {
         'number': 1,
@@ -80,7 +71,7 @@ algorithm_config = {
         'type': PPOPolicy,
         'params': policy_params
     },
-    'environment': {
+    'collect_environment': {
         'number': 30,
         'type': GymEnvironment,
         'params': env_params
@@ -88,5 +79,14 @@ algorithm_config = {
     'eval_environment': {
         'type': GymEnvironment,
         'params': eval_env_params
+    },
+    'replay_buffer': {
+        'type': ReplayBuffer,
+        'capacity': 1000,
+        'data_shape': [(30, 17), (30, 6), (30, 1), (30, 17), (30, 6), (30, 6)],
+        'data_type': [
+            mindspore.float32, mindspore.float32, mindspore.float32,
+            mindspore.float32, mindspore.float32, mindspore.float32,
+        ],
     }
 }
