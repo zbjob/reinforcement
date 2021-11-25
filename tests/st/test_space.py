@@ -37,11 +37,10 @@ def test_discrete_space():
     low, high = 2, 5
     action_space = Space(feature_shape=(6,), low=low, high=high, dtype=np.int32, batch_shape=(10,))
     assert action_space.is_discrete
-    assert not action_space.is_continuous
     assert action_space.shape == (10, 6)
     assert action_space.np_dtype == np.int32
     assert action_space.ms_dtype == mstype.int32
-    assert action_space.num_enums == (5 - 2) ** 6
+    assert action_space.num_values == (5 - 2) ** 6
     sample = action_space.sample()
     assert sample.shape, action_space.shape
     assert np.max(sample) < high
@@ -65,7 +64,6 @@ def test_continuous_space():
     low, high = 0., 10.
     action_space = Space(feature_shape=(6,), dtype=np.float32, low=low, high=high, batch_shape=(20, 5))
     assert not action_space.is_discrete
-    assert action_space.is_continuous
     assert action_space.shape == (20, 5, 6)
     assert action_space.np_dtype == np.float32
     assert action_space.ms_dtype == mstype.float32

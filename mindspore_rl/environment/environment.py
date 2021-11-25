@@ -43,3 +43,11 @@ class Environment(nn.Cell):
     @property
     def reward_space(self):
         raise NotImplementedError("Method should be overridden by subclass.")
+
+    @property
+    def done_space(self):
+        raise NotImplementedError("Method should be overridden by subclass.")
+
+    @property
+    def config(self):
+        raise NotImplementedError("Method should be overridden by subclass.")

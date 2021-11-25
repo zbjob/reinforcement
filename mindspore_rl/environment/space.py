@@ -79,15 +79,10 @@ class Space:
         return issubclass(self._dtype, np.integer)
 
     @property
-    def is_continuous(self):
-        '''Is continuous space'''
-        return issubclass(self._dtype, (np.float32, np.float64))
-
-    @property
-    def num_enums(self):
+    def num_values(self):
         '''The number of optional enumeration values'''
         if not self.is_discrete:
-            raise ValueError("`num_enums` not supported in continuous space")
+            raise ValueError("`num_values` not supported in continuous space")
 
         enums_range = self._high - self._low
         num = 1
@@ -99,10 +94,8 @@ class Space:
         '''Return the space range.'''
         if self.is_discrete:
             dtype_low, dtype_high = np.iinfo(self._dtype).min, np.iinfo(self._dtype).max
-        elif self.is_continuous:
-            dtype_low, dtype_high = np.finfo(self._dtype).min, np.finfo(self._dtype).max
         else:
-            raise ValueError("Dtype {} not supported!".format(self._dtype))
+            dtype_low, dtype_high = np.finfo(self._dtype).min, np.finfo(self._dtype).max
 
         low = dtype_low if low is None else low
         high = dtype_high if high is None else high
