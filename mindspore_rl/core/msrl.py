@@ -230,10 +230,10 @@ class MSRL(nn.Cell):
         if params:
             if not params.get('state_space_dim'):
                 config['policy_and_network']['params'][
-                    'state_space_dim'] = self.collect_environment.state_space_dim
+                    'state_space_dim'] = self.collect_environment.observation_space.shape[-1]
             if not params.get('action_space_dim'):
                 config['policy_and_network']['params'][
-                    'action_space_dim'] = self.collect_environment.action_space_dim
+                    'action_space_dim'] = self.collect_environment.action_space.num_values
 
         policy_and_network = self._create_instance(policy_and_network_config)
         return policy_and_network

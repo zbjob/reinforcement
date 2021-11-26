@@ -19,12 +19,12 @@ The GymEnvironment base class.
 import gym
 from gym import spaces
 import numpy as np
-import mindspore as ms
-import mindspore.nn as nn
 from mindspore.ops import operations as P
+from mindspore_rl.environment.environment import Environment
+from mindspore_rl.environment.space import Space
 
 
-class GymEnvironment(nn.Cell):
+class GymEnvironment(Environment):
     """
     The GymEnvironment class provides the functions to interact with
     different environments.
@@ -43,65 +43,32 @@ class GymEnvironment(nn.Cell):
         GymEnvironment<>
     """
 
-    def __init__(self,
-                 params):
-        super(GymEnvironment, self).__init__(auto_prefix=False)
+    def __init__(self, params):
+        super(GymEnvironment, self).__init__()
         self.params = params
         self._name = params['name']
         self._env = gym.make(self._name)
 
-        np_to_ms_dtype_output = {
-            np.dtype(np.float32): ms.float32,
-            np.dtype(np.float64): ms.float32,
-            np.dtype(np.int64): ms.int32,
-            np.dtype(np.int32): ms.int32
-        }
-
-        np_to_ms_dtype_input = {
-            np.dtype(np.float32): ms.float32,
-            np.dtype(np.float64): ms.float64,
-            np.dtype(np.int64): ms.int64,
-            np.dtype(np.int32): ms.int32
-        }
-
-        self.np_to_ms_suitable_np_dtype_output = {
-            np.dtype(np.float32): np.float32,
-            np.dtype(np.float64): np.float32,
-            np.dtype(np.int64): np.int32,
-            np.dtype(np.int32): np.int32
-        }
-
-        pyfunc_state_shape = self._env.observation_space.shape
-        pyfunc_action_shape = self._env.action_space.shape
-
-        self._pyfunc_state_dtype = self._env.observation_space.dtype
-        self._pyfunc_action_dtype = self._env.action_space.dtype
-
-        self._state_space_dim = pyfunc_state_shape[0]
-        action_space = self._env.action_space
-        if isinstance(action_space, spaces.Discrete):
-            self._action_space_dim = action_space.n
-        elif isinstance(action_space, spaces.Box):
-            self._action_space_dim = action_space.shape[0]
-
-        self.input_action_dtype = np_to_ms_dtype_input[self._pyfunc_action_dtype]
-
-        # step op
-        step_input_type = [self.input_action_dtype,]
-        step_input_shape = [pyfunc_action_shape,]
-        step_output_type = [
-            np_to_ms_dtype_output[self._pyfunc_state_dtype], ms.float32, ms.bool_]
-        step_output_shape = [pyfunc_state_shape, (1,), (1,)]
-        self.step_ops = P.PyFunc(
-            self._step, step_input_type, step_input_shape, step_output_type, step_output_shape)
+        self._observation_space = self._space_adapter(self._env.observation_space)
+        self._action_space = self._space_adapter(self._env.action_space)
+        self._reward_space = Space((1,), np.float32)
+        self._done_space = Space((1,), np.bool_, low=0, high=2)
 
         # reset op
         reset_input_type = []
         reset_input_shape = []
-        reset_output_type = [np_to_ms_dtype_output[self._pyfunc_state_dtype],]
-        reset_output_shape = [pyfunc_state_shape,]
-        self.reset_ops = P.PyFunc(self._reset, reset_input_type,
+        reset_output_type = [self._observation_space.ms_dtype,]
+        reset_output_shape = [self._observation_space.shape,]
+        self._reset_op = P.PyFunc(self._reset, reset_input_type,
                                   reset_input_shape, reset_output_type, reset_output_shape)
+
+        # step op
+        step_input_type = (self._action_space.ms_dtype,)
+        step_input_shape = (self._action_space.shape,)
+        step_output_type = (self.observation_space.ms_dtype, self._reward_space.ms_dtype, self._done_space.ms_dtype)
+        step_output_shape = (self._observation_space.shape, self._reward_space.shape, self._done_space.shape)
+        self._step_op = P.PyFunc(
+            self._step, step_input_type, step_input_shape, step_output_type, step_output_shape)
 
     def reset(self):
         """
@@ -113,7 +80,7 @@ class GymEnvironment(nn.Cell):
 
         """
 
-        return self.reset_ops()[0]
+        return self._reset_op()[0]
 
     def step(self, action):
         r"""
@@ -127,41 +94,42 @@ class GymEnvironment(nn.Cell):
             - reward (Tensor), the reward after performing the action.
             - done (mindspore.bool\_), whether the simulation finishes or not.
         """
-        action = action.astype(self.input_action_dtype)
-        return self.step_ops(action)
 
-    def clone(self):
-        """
-        Make a copy of the environment.
-
-        Returns:
-            env (object), a copy of the original environment object.
-        """
-
-        env = GymEnvironment(self.params)
-        return env
+        return self._step_op(action)
 
     @property
-    def state_space_dim(self):
+    def observation_space(self):
         """
-        Get the state space dim of the environment.
+        Get the state space of the environment.
 
         Returns:
-            A tuple which states for the space dimension of state
+            A tuple which states for the space of state
         """
 
-        return self._state_space_dim
+        return self._observation_space
 
     @property
-    def action_space_dim(self):
+    def action_space(self):
         """
-        Get the action space dim of the environment.
+        Get the action space of the environment.
 
         Returns:
-            A tuple which states for the space dimension of action
+            A tuple which states for the space of action
         """
 
-        return self._action_space_dim
+        return self._action_space
+
+    @property
+    def reward_space(self):
+        return self._reward_space
+
+    @property
+    def done_space(self):
+        return self._done_space
+
+    @property
+    def config(self):
+        return {}
 
     def _reset(self):
         """
@@ -173,10 +141,9 @@ class GymEnvironment(nn.Cell):
             A numpy array which states for the initial state of environment.
         """
 
-        self._done = False
         s0 = self._env.reset()
-        s0 = s0.astype(
-            self.np_to_ms_suitable_np_dtype_output[self._pyfunc_state_dtype])
+        # In same gym version, the obvervation space is announced to be float32, but get float64 from reset and step.
+        s0 = s0.astype(self.observation_space.np_dtype)
         return s0
 
     def _step(self, action):
@@ -195,9 +162,18 @@ class GymEnvironment(nn.Cell):
             - done (boolean), whether the simulation finishes or not.
         """
 
-        s1, r1, done, _ = self._env.step(action)
-        s1 = s1.astype(
-            self.np_to_ms_suitable_np_dtype_output[self._pyfunc_state_dtype])
-        r1 = np.array([r1]).astype(np.float32)
+        s, r, done, _ = self._env.step(action)
+        # In same gym version, the obvervation space is announced to be float32, but get float64 from reset and step.
+        s = s.astype(self.observation_space.np_dtype)
+        r = np.array([r]).astype(np.float32)
         done = np.array([done])
-        return s1, r1, done
+        return s, r, done
+
+    def _space_adapter(self, gym_space):
+        shape = gym_space.shape
+        # The dtype get from gym.space is np.int64, but step() accept np.int32 actually.
+        dtype = np.int32 if gym_space.dtype.type == np.int64 else gym_space.dtype.type
+        if isinstance(gym_space, spaces.Discrete):
+            return Space(shape, dtype, low=0, high=gym_space.n)
+
+        return Space(shape, dtype, low=gym_space.low, high=gym_space.high)
