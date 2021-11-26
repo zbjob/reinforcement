@@ -76,24 +76,31 @@ class Space:
     @property
     def is_discrete(self):
         '''Is discrete space'''
-        return issubclass(self._dtype, np.integer)
+        return issubclass(self._dtype, np.integer) or self._dtype == np.bool_
 
     @property
     def num_values(self):
         '''The number of optional enumeration values'''
         if not self.is_discrete:
-            raise ValueError("`num_values` not supported in continuous space")
+            return self.shape[-1]
 
         enums_range = self._high - self._low
+        if enums_range.shape == ():
+            return enums_range.item(0)
+
         num = 1
         for i in enums_range:
-            num *= i
+            num *= i.item(0)
         return num
 
     def _range(self, low, high):
         '''Return the space range.'''
+
         if self.is_discrete:
-            dtype_low, dtype_high = np.iinfo(self._dtype).min, np.iinfo(self._dtype).max
+            if self._dtype == np.bool_:
+                dtype_low, dtype_high = 0, 2
+            else:
+                dtype_low, dtype_high = np.iinfo(self._dtype).min, np.iinfo(self._dtype).max
         else:
             dtype_low, dtype_high = np.finfo(self._dtype).min, np.finfo(self._dtype).max
 

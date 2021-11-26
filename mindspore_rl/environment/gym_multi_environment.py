@@ -18,11 +18,12 @@ import gym
 from gym import spaces
 import numpy as np
 import mindspore as ms
-import mindspore.nn as nn
 from mindspore.ops import operations as P
+from mindspore_rl.environment.environment import Environment
+from mindspore_rl.environment.space import Space
 
 
-class GymMultiEnvironment(nn.Cell):
+class GymMultiEnvironment(Environment):
     """
     The GymMultiEnvironment class provides the functions to interact with
     different environments. It is the multi-environment version of GymEnvironment.
@@ -43,7 +44,7 @@ class GymMultiEnvironment(nn.Cell):
 
     def __init__(self,
                  params):
-        super(GymMultiEnvironment, self).__init__(auto_prefix=False)
+        super(GymMultiEnvironment, self).__init__()
         self.params = params
         self._name = params['name']
         self._nums = params['env_nums']
@@ -51,51 +52,19 @@ class GymMultiEnvironment(nn.Cell):
         for _ in range(self._nums):
             self._envs.append(gym.make(self._name))
 
-        self.np_to_ms_dtype_output = {
-            np.dtype(np.float32): ms.float32,
-            np.dtype(np.float64): ms.float32,
-            np.dtype(np.int64): ms.int32,
-            np.dtype(np.int32): ms.int32
-        }
+        self._observation_space = self._space_adapter(self._envs[0].observation_space, self._nums)
+        self._action_space = self._space_adapter(self._envs[0].action_space, self._nums)
+        self._reward_space = Space((1,), np.float32, batch_shape=(self._nums,))
+        self._done_space = Space((1,), np.int32, low=0, high=2, batch_shape=(self._nums,))
 
-        self.np_to_ms_dtype_input = {
-            np.dtype(np.float32): ms.float32,
-            np.dtype(np.float64): ms.float64,
-            np.dtype(np.int64): ms.int64,
-            np.dtype(np.int32): ms.int32
-        }
-
-        self.np_to_ms_suitable_np_dtype_output = {
-            np.dtype(np.float32): np.float32,
-            np.dtype(np.float64): np.float32,
-            np.dtype(np.int64): np.int32,
-            np.dtype(np.int32): np.int32
-        }
-
-        pyfunc_state_shape = self._envs[0].observation_space.shape
-        pyfunc_action_shape = self._envs[0].action_space.shape
-
-        self._pyfunc_state_dtype = self._envs[0].observation_space.dtype
-        self._pyfunc_action_dtype = self._envs[0].action_space.dtype
-
-        self._state_space_dim = pyfunc_state_shape[0]
-        action_space = self._envs[0].action_space
-        if isinstance(action_space, spaces.Discrete):
-            self._action_space_dim = action_space.n
-        elif isinstance(action_space, spaces.Box):
-            self._action_space_dim = action_space.shape[0]
-
-        self.input_action_dtype = self.np_to_ms_dtype_input[self._pyfunc_action_dtype]
-        self.output_state_dtype = self.np_to_ms_dtype_output[self._pyfunc_state_dtype]
-
-        self.step_ops = P.PyFunc(self._step,
-                                 [self.input_action_dtype,],
-                                 [(self._nums,) + pyfunc_action_shape],
-                                 [self.output_state_dtype, ms.float32, ms.bool_],
-                                 [(self._nums,) + pyfunc_state_shape, (self._nums, 1), (self._nums, 1)])
-        self.reset_ops = P.PyFunc(self._reset, [], [],
-                                  [self.output_state_dtype,],
-                                  [(self._nums,) + pyfunc_state_shape])
+        self._step_op = P.PyFunc(self._step,
+                                 [self.action_space.ms_dtype,],
+                                 [self.action_space.shape,],
+                                 [self.observation_space.ms_dtype, ms.float32, ms.bool_],
+                                 [self.observation_space.shape, (self._nums, 1), (self._nums, 1)])
+        self._reset_op = P.PyFunc(self._reset, [], [],
+                                  [self.observation_space.ms_dtype,],
+                                  [self.observation_space.shape,])
 
     def reset(self):
         """
@@ -107,7 +76,7 @@ class GymMultiEnvironment(nn.Cell):
 
         """
 
-        return self.reset_ops()[0]
+        return self._reset_op()[0]
 
     def step(self, action):
         """
@@ -121,22 +90,12 @@ class GymMultiEnvironment(nn.Cell):
             - reward (Tensor), a list of reward after performing the action.
             - done (Tensor), whether the simulations of each environment finishes or not
         """
-        action = action.astype(self.input_action_dtype)
-        return self.step_ops(action)
 
-    def clone(self):
-        """
-        Make a copy of the environment.
+        return self._step_op(action)
 
-        Returns:
-            env (object). A copy of the original environment object.
-        """
-
-        env = GymMultiEnvironment(self.params)
-        return env
 
     @property
-    def state_space_dim(self):
+    def observation_space(self):
         """
         Get the state space dim of the environment.
 
@@ -144,10 +103,10 @@ class GymMultiEnvironment(nn.Cell):
             A tuple which states for the space dimension of state
         """
 
-        return self._state_space_dim
+        return self._observation_space
 
     @property
-    def action_space_dim(self):
+    def action_space(self):
         """
         Get the action space dim of the environment.
 
@@ -155,7 +114,19 @@ class GymMultiEnvironment(nn.Cell):
             A tuple which states for the space dimension of action
         """
 
-        return self._action_space_dim
+        return self._action_space
+
+    @property
+    def reward_space(self):
+        return self._reward_space
+
+    @property
+    def done_space(self):
+        return self._done_space
+
+    @property
+    def config(self):
+        return {}
 
     def _reset(self):
         """
@@ -168,8 +139,7 @@ class GymMultiEnvironment(nn.Cell):
         """
 
         self._done = False
-        s0 = [(env.reset()).astype(self.np_to_ms_suitable_np_dtype_output[self._pyfunc_state_dtype])
-              for env in self._envs]
+        s0 = [env.reset().astype(self.observation_space.np_dtype) for env in self._envs]
         return s0
 
     def _step(self, action):
@@ -190,10 +160,21 @@ class GymMultiEnvironment(nn.Cell):
         s1, r1, done = [], [], []
         for i in range(self._nums):
             s, r, d, _ = self._envs[i].step(action[i])
-            s1.append(s.astype(self.np_to_ms_suitable_np_dtype_output[self._pyfunc_state_dtype]))
+            s1.append(s.astype(self.observation_space.np_dtype))
             r1.append(np.array([r]).astype(np.float32))
             done.append(np.array([d]))
         s1 = np.stack(s1)
         r1 = np.stack(r1)
         done = np.stack(done)
         return s1, r1, done
+
+    def _space_adapter(self, gym_space, environment_num):
+        shape = gym_space.shape
+        # The dtype get from gym.space is np.int64, but step() accept np.int32 actually.
+        dtype = np.int32 if gym_space.dtype.type == np.int64 else gym_space.dtype.type
+        # The float64 is not supported, cast to float32
+        dtype = np.float32 if gym_space.dtype.type == np.float64 else gym_space.dtype.type
+        if isinstance(gym_space, spaces.Discrete):
+            return Space(shape, dtype, low=0, high=gym_space.n, batch_shape=(environment_num,))
+
+        return Space(shape, dtype, low=gym_space.low, high=gym_space.high, batch_shape=(environment_num,))

@@ -45,10 +45,10 @@ class TagEnvironment(Environment):
             self._config[key] = kwargs[key]
 
         # Create environment instance.
-        handle = P.EnvCreate('Tag', **self.config)()
+        handle = P.EnvCreate('Tag', **self.config)().asnumpy().item(0)
 
-        environment_num = self.params['environment_num']
-        agent_num = self.params['predator_num'] + self.params['prey_num']
+        environment_num = self._config['environment_num']
+        agent_num = self._config['predator_num'] + self._config['prey_num']
 
         # Action space.
         batch_shape = (environment_num, agent_num)
