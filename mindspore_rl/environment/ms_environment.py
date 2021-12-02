@@ -93,7 +93,7 @@ class MsEnvironment(Environment):
             >>> env = MsEnvironment('Tag', predator_num=4, prey_num=1)
             >>> observation = env.reset()
         """
-        return self.env.reset_op()
+        return self.env.reset()
 
     def step(self, action):
         r"""
@@ -116,12 +116,12 @@ class MsEnvironment(Environment):
             >>> ret = env.step(action)
             >>> print(len(ret))
         """
-        return self.env.step_op(action)
+        return self.env.step(action)
 
     @property
     def action_space(self):
         r"""Get the valid action space of the environment."""
-        return self.action_space
+        return self.env.action_space
 
     @property
     def observation_space(self):

@@ -19,7 +19,8 @@ The environment registration class.
 import numpy as np
 from mindspore_rl.environment.space import Space
 from mindspore_rl.environment.environment import Environment
-from mindspore import ops as P
+from mindspore.ops.operations._rl_inner_ops import EnvCreate, EnvReset, EnvStep
+
 
 class TagEnvironment(Environment):
     """The tag environment."""
@@ -45,29 +46,29 @@ class TagEnvironment(Environment):
             self._config[key] = kwargs[key]
 
         # Create environment instance.
-        handle = P.EnvCreate('Tag', **self.config)().asnumpy().item(0)
+        handle = EnvCreate('Tag', **self.config)().asnumpy().item(0)
 
         environment_num = self._config['environment_num']
         agent_num = self._config['predator_num'] + self._config['prey_num']
 
         # Action space.
         batch_shape = (environment_num, agent_num)
-        self._action_space = Space((1,), np.int32, low=0, high=5, batch_shape=batch_shape)
+        self._action_space = Space((), np.int32, low=0, high=5, batch_shape=batch_shape)
 
         # Observation space.
         obs_per_agent = (4 * agent_num + 1,)
         self._observation_space = Space(obs_per_agent, np.float32, low=0, high=1, batch_shape=batch_shape)
 
         # Reward space.
-        self._reward_space = Space((1,), np.float32, low=0, high=1, batch_shape=batch_shape)
+        self._reward_space = Space((), np.float32, low=0, high=1, batch_shape=batch_shape)
 
         # Done space
-        self._done_space = Space((1,), np.int32, low=0, high=2, batch_shape=(environment_num,))
+        self._done_space = Space((), np.int32, low=0, high=2, batch_shape=(environment_num,))
 
         # Environment Operators.
-        self._reset_op = P.EnvReset(handle, self._observation_space.shape, self._observation_space.ms_dtype)
-        self._step_op = P.EnvStep(handle, self._observation_space.shape, self._observation_space.ms_dtype,
-                                  self._reward_space.shape, self._reward_space.ms_dtype)
+        self._reset_op = EnvReset(handle, self._observation_space.shape, self._observation_space.ms_dtype)
+        self._step_op = EnvStep(handle, self._observation_space.shape, self._observation_space.ms_dtype,
+                                self._reward_space.shape, self._reward_space.ms_dtype)
 
     def reset(self):
         return self._reset_op()
