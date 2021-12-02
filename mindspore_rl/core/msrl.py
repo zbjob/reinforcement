@@ -241,6 +241,7 @@ class MSRL(nn.Cell):
     def __create_actor(self, config, policy_and_network):
         """
         Create an instance of actor or a list of instances of actor
+
         Args:
             config (dict): A dictionary of configuration
             policy_and_network (object): The instance of policy_and_network
@@ -281,6 +282,7 @@ class MSRL(nn.Cell):
     def __create_learner(self, config, policy_and_network):
         """
         Create an instance of learner or a list of instances of learner
+
         Args:
             config (dict): A dictionary of configuration
             policy_and_network (object): The instance of policy_and_network
@@ -361,9 +363,10 @@ class MSRL(nn.Cell):
     def get_replay_buffer_elements(self, transpose=False, shape=None):
         """
         It will return all the elements in the replay buffer.
+
         Args:
             transpose (boolean): whether the output element needs to be transpose,
-            if transpose is true, shape will also need to be filled. Default: False
+                if transpose is true, shape will also need to be filled. Default: False
             shape (Tuple[int]): the shape used in transpose. Default: None
 
         Returns:
