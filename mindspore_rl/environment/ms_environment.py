@@ -36,7 +36,6 @@ class MsEnvironment(Environment):
     Class encapsulates built-in environment.
 
     Args:
-        name (str): Name of environment, the value must be in ['Tag',].
         kwargs (dict): The dictionary of environment specific configurations. See below table for details:
 
             +--------------------+------------------------------+------------------+----------------------------+
