@@ -20,6 +20,8 @@ import mindspore
 import mindspore.nn as nn
 from mindspore import Tensor
 from mindspore.ops import operations as P
+from mindspore import context
+import mindspore.ops.operations._rl_inner_ops as rl_ops
 
 
 class DiscountedReturn(nn.Cell):
@@ -58,6 +60,10 @@ class DiscountedReturn(nn.Cell):
         if gamma > 1.0 or gamma < 0.0:
             raise ValueError('The discounted factor should be a number in range [0, 1], but got {}.'.format(gamma))
 
+        # Fused operator only supported in GPU backend so far. Ascend and CPU backends will support it soon.
+        self.enable_op_fusion = context.get_context('device_target') in ['GPU']
+        self.fused_op = rl_ops.DiscountedReturn(gamma)
+
         self.gamma = Tensor([gamma], mindspore.float32)
         self.zeros_like = P.ZerosLike()
 
@@ -65,6 +71,9 @@ class DiscountedReturn(nn.Cell):
         """
         Returns discounted return.
         """
+
+        if self.enable_op_fusion:
+            return self.fused_op(reward, done, last_state_value)
 
         discounted_return = self.zeros_like(reward)
         step = reward.shape[0] - 1
