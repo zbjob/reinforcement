@@ -27,4 +27,4 @@ else
   echo "Example: bash run_standalone_eval.sh ./ckpt/checkpoint_950.ckpt"
 fi
 export OMP_NUM_THREADS=10
-python -s ${slef_path}/../eval.py --device_target=$DEVICE --ckpt_path=$CKPT > log.txt 2>&1 &
+python -s ${slef_path}/../eval.py --device_target=$DEVICE --ckpt_path=$CKPT > ac_eval_log.txt 2>&1 &

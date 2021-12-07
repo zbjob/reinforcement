@@ -27,4 +27,4 @@ else
   echo "Example: bash run_standalone_train.sh ./ckpt"
 fi
 export OMP_NUM_THREADS=10
-python -s ${self_path}/../train.py --device_target=$DEVICE --ckpt_path=$CKPT > log.txt 2>&1 &
+python -s ${self_path}/../train.py --device_target=$DEVICE --ckpt_path=$CKPT > ac_train_log.txt 2>&1 &
