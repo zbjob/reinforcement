@@ -49,8 +49,15 @@ class GymMultiEnvironment(Environment):
         self._name = params['name']
         self._nums = params['env_nums']
         self._envs = []
-        for _ in range(self._nums):
+        for i in range(self._nums):
             self._envs.append(gym.make(self._name))
+            if 'seed' in params:
+                self._envs[i].seed(params['seed'] + i)
+            elif 'seeds' in params:
+                seeds = params['seeds']
+                if seeds.size() != self._nums:
+                    raise ValueError("Seeds size should equal to envirenment numbers.")
+                self._envs[i].seed(seeds[i])
 
         self._observation_space = self._space_adapter(self._envs[0].observation_space, self._nums)
         self._action_space = self._space_adapter(self._envs[0].action_space, self._nums)
