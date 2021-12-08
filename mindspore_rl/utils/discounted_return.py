@@ -13,7 +13,7 @@
 # limitations under the License.
 # ============================================================================
 """
-Advantage.
+Discounted return.
 """
 
 import mindspore
