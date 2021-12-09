@@ -79,4 +79,4 @@ class Trainer(nn.Cell):
         """
         The interface of the eval function.
         """
-        raise NotImplementedError("Method should be overridden by subclass.")
+        print("Method should be overridden by subclass.")
