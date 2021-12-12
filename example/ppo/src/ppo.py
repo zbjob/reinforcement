@@ -183,7 +183,7 @@ class PPOActor(Actor):
         return reward, new_state, action, miu, sigma
 
     def evaluate(self, state):
-        """collect experience (used during evaluation)"""
+        """collect experience (used during evaluate)"""
         action, _ = self.actor_net(state)
         new_state, reward, _ = self._eval_env.step(action)
         return reward, new_state

@@ -30,6 +30,7 @@ from ac.src import config
 from ac.src.ac_trainer import ACTrainer
 from mindspore import context
 from mindspore_rl.core import Session
+from mindspore_rl.utils.callback import LossCallback
 
 
 @pytest.mark.level0
@@ -41,8 +42,7 @@ def test_train_ac():
     Train the AC.
     '''
     context.set_context(mode=context.GRAPH_MODE)
-    config.trainer_params.update({'save_ckpt': '0'})
-    config.trainer_params.update({'ckpt_path': './ckpt'})
+    loss_cb = LossCallback()
     ac_session = Session(config.algorithm_config)
-    ac_session.run(class_type=ACTrainer, episode=5, params=config.trainer_params)
+    ac_session.run(class_type=ACTrainer, episode=5, params=config.trainer_params, callbacks=[loss_cb])
     assert True

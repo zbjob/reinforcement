@@ -15,8 +15,6 @@
 """
 DQN eval example.
 """
-
-import os
 import argparse
 from src.dqn_trainer import DQNTrainer
 from src import config
@@ -33,7 +31,7 @@ def dqn_eval():
     if args.device_target != 'Auto':
         context.set_context(device_target=args.device_target)
     context.set_context(mode=context.GRAPH_MODE)
-    config.trainer_params.update({'ckpt_path': os.path.realpath(args.ckpt_path)})
+    config.trainer_params.update({'ckpt_path': args.ckpt_path})
     dqn_session = Session(config.algorithm_config)
     dqn_session.run(class_type=DQNTrainer, is_train=False, params=config.trainer_params)
 

@@ -23,10 +23,8 @@ from .dqn import DQNActor, DQNLearner, DQNPolicy
 
 learner_params = {'gamma': 0.99}
 trainer_params = {
-    'evaluation_interval': 10,
-    'num_evaluation_episode': 10,
-    'keep_checkpoint_max': 5,
-    'metrics': False,
+    'num_evaluate_episode': 10,
+    'ckpt_path': './ckpt',
 }
 
 env_params = {'name': 'CartPole-v0'}

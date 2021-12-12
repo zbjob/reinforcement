@@ -30,7 +30,7 @@ class Session():
     def __init__(self, config):
         self.msrl = MSRL(config)
 
-    def run(self, class_type=None, is_train=True, episode=0, params=None):
+    def run(self, class_type=None, is_train=True, episode=0, params=None, callbacks=None):
         """
         Execute the reinforcement learning algorithm.
 
@@ -39,6 +39,7 @@ class Session():
             is_train (boolean): Run the algorithm in train mode or eval mode. Default: True
             episode (int): The number of episode of the training. Default: 0.
             params (dict): The algorithm specific training parameters. Default: None.
+            callbacks (list[Callback]): The callback list. Default: None.
         """
 
         if class_type:
@@ -46,9 +47,15 @@ class Session():
                 trainer = class_type(self.msrl)
             else:
                 trainer = class_type(self.msrl, params)
+            ckpt_path = None
+            if params and 'ckpt_path' in params:
+                ckpt_path = params['ckpt_path']
             if is_train:
-                trainer.train(episode)
+                trainer.train(episode, callbacks, ckpt_path)
                 print('training end')
             else:
-                trainer.eval()
-                print('eval end')
+                if ckpt_path:
+                    trainer.load_and_eval(ckpt_path)
+                    print('eval end')
+                else:
+                    print('Please provide a ckpt_path for eval.')
