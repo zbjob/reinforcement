@@ -48,7 +48,8 @@ class GymEnvironment(Environment):
         self.params = params
         self._name = params['name']
         self._env = gym.make(self._name)
-
+        if 'seed' in params:
+            self._env.seed(params['seed'])
         self._observation_space = self._space_adapter(self._env.observation_space)
         self._action_space = self._space_adapter(self._env.action_space)
         self._reward_space = Space((1,), np.float32)

@@ -1,0 +1,54 @@
+# Copyright 2021 Huawei Technologies Co., Ltd
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+# http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+# ============================================================================
+"""A2C Trainer"""
+import collections
+import statistics
+import tqdm
+
+from mindspore_rl.agent.trainer import Trainer
+import mindspore.nn as nn
+from mindspore.ops import operations as ops
+
+class A2CTrainer(Trainer):
+    '''A2CTrainer'''
+    def __init__(self, msrl):
+        nn.Cell.__init__(self, auto_prefix=False)
+        self.reduce_sum = ops.ReduceSum()
+        super(A2CTrainer, self).__init__(msrl)
+
+    def train(self, episode):
+        '''Train A2C'''
+        running_reward = 0
+        episode_reward: collections.deque = collections.deque(maxlen=100)
+        with tqdm.trange(episode) as t:
+            for i in t:
+                loss, reward = self.train_one_episode()
+                episode_reward.append(reward.asnumpy().tolist())
+                running_reward = statistics.mean(episode_reward)
+                t.set_description(f'Episode {i}')
+                t.set_postfix(episode_reward=reward.asnumpy(), loss=loss.asnumpy(), running_reward=running_reward)
+                if running_reward > 195 and i >= 100:
+                    print(f'\nSolved at episode {i}: average reward: {running_reward:.2f}.')
+                    break
+                if i == episode -1:
+                    print(f'\nFailed to solved this problem after running {episode} episodes.')
+
+    def train_one_episode(self):
+        '''Train one episode'''
+        state, _ = self.msrl.agent_reset_collect()
+        rewards, states, actions = self.msrl.agent_act(state)
+        a2c_loss = self.msrl.agent_learn([rewards, states, actions])
+        episode_reward = self.reduce_sum(rewards)
+        return a2c_loss, episode_reward
