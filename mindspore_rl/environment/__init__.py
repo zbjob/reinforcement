@@ -23,7 +23,8 @@ from mindspore_rl.environment.environment import Environment
 from mindspore_rl.environment.tag_environment import TagEnvironment
 from mindspore_rl.environment.ms_environment import ms_register, MsEnvironment
 from mindspore_rl.environment.space import Space
+from mindspore_rl.environment.env_process import EnvironmentProcess
 
-__all__ = ["GymEnvironment", "GymMultiEnvironment", "Environment", "Space", "MsEnvironment"]
+__all__ = ["GymEnvironment", "GymMultiEnvironment", "Environment", "Space", "MsEnvironment", "EnvironmentProcess"]
 
 ms_register('Tag', TagEnvironment)
