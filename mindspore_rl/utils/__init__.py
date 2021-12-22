@@ -18,5 +18,7 @@ Network component used to implement polices.
 """
 
 from mindspore_rl.utils.discounted_return import DiscountedReturn
+from mindspore_rl.utils.callback import CallbackParam
+from mindspore_rl.utils.callback import CallbackManager
 
-__all__ = ["DiscountedReturn"]
+__all__ = ["DiscountedReturn", "CallbackParam", "CallbackManager"]

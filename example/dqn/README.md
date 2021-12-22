@@ -16,7 +16,7 @@ The game solved in DQN is [**CartPole-v0**](https://gym.openai.com/envs/CartPole
 
 Before running DQN, you should first install [MindSpore](https://www.mindspore.cn/install) and MindSpore-Reinforcement. Besides, you should also install following dependencies. Please follow the instruction on the official website.
 
-- MindSpore >= 1.5.0
+- MindSpore >= 1.6.0
 
 - numpy >= 1.17.0
 - matplotlib >=3.1.3
@@ -30,38 +30,26 @@ For comprehensive performance considerations on CPU, it is recommended to set `O
 
 ```shell
 > cd example/dqn/scripts
-> bash run_standalone_train.sh [CKPT_PATH] [DEVICE_TARGET](optional)
+> bash run_standalone_train.sh [EPISODE] [DEVICE_TARGET](optional)
 ```
 
-You will obtain outputs which is similar with the things below in `log.txt`.
+You will obtain outputs which is similar with the things below in `dqn_train_log.txt`.
 
 ```shell
+Episode 0： loss is 0.223, rewards is 10.0.
+Episode 1： loss is 0.186, rewards is 38.0..
+Episode 2： loss is 0.152, rewards is 23.0.
+Episode 3： loss is 0.118, rewards is 9.0.
+Episode 4： loss is 0.1, rewards is 10.0.
+Episode 5： loss is 0.146, rewards is 12.0.
+Episode 6： loss is 0.062, rewards is 10.0.
+Episode 7： loss is 0.144, rewards is 10.0.
+Episode 8： loss is 0.086, rewards is 9.0.
+Episode 9： loss is 0.125, rewards is 9.0.
+Episode 10： loss is 0.143, rewards is 9.0.
 -----------------------------------------
-Evaluation result in episode 0 is 9.300
+Evaluate for episode 10 total rewards is 9.300
 -----------------------------------------
-Episode 0, steps: 10.0, reward: 10.0
-Episode 1, steps: 48.0, reward: 38.0
-Episode 2, steps: 71.0, reward: 23.0
-Episode 3, steps: 80.0, reward: 9.0
-Episode 4, steps: 90.0, reward: 10.0
-Episode 5, steps: 102.0, reward: 12.0
-Episode 6, steps: 112.0, reward: 10.0
-Episode 7, steps: 122.0, reward: 10.0
-Episode 8, steps: 131.0, reward: 9.0
-Episode 9, steps: 140.0, reward: 9.0
------------------------------------------
-Evaluation result in episode 10 is 9.300
------------------------------------------
-Episode 10, steps: 149.0, reward: 9.0
-Episode 11, steps: 158.0, reward: 9.0
-Episode 12, steps: 168.0, reward: 10.0
-Episode 13, steps: 176.0, reward: 8.0
-Episode 14, steps: 188.0, reward: 12.0
-Episode 15, steps: 196.0, reward: 8.0
-Episode 16, steps: 205.0, reward: 9.0
-Episode 17, steps: 214.0, reward: 9.0
-Episode 18, steps: 225.0, reward: 11.0
-Episode 19, steps: 235.0, reward: 10.0
 ```
 
 ### Eval
@@ -71,11 +59,12 @@ Episode 19, steps: 235.0, reward: 10.0
 > bash run_standalone_eval.sh [CKPT_FILE_PATH] [DEVICE_TARGET](optional)
 ```
 
-You will obtain outputs which is similar with the things below in `log.txt`.
+You will obtain outputs which is similar with the things below in `dqn_eval_log.txt`.
 
 ```shell
+Load file /path/ckpt/policy_net/policy_net_600.ckpt
 -----------------------------------------
-Evaluation result is 199.300, checkpoint file is /path/ckpt/ckptpoint_600.ckpt
+Evaluate result is 199.300, checkpoint file in /path/ckpt/policy_net/policy_net_600.ckpt
 -----------------------------------------
 ```
 

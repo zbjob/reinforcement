@@ -6,9 +6,9 @@
 
 ## 使用的游戏
 
-AC使用了OpenAI开发的一个强化学习环境库叫做[Gym](https://github.com/openai/gym)，来作为算法的游戏环境。
+A2C使用了OpenAI开发的一个强化学习环境库叫做[Gym](https://github.com/openai/gym)，来作为算法的游戏环境。
 
-在AC中，解决了倒立摆（[**CartPole-v0**](https://gym.openai.com/envs/CartPole-v0/)）游戏。“一根杆子通过一个关节连接在一个小车上，这个小车可以沿着没有摩擦的轨道上左右移动。系统会对这个小车施加+1或者-1的力。这个游戏的目标是防止这根杆子从车上倒下。“[1](https://gym.openai.com/envs/CartPole-v0/)
+在A2C中，解决了倒立摆（[**CartPole-v0**](https://gym.openai.com/envs/CartPole-v0/)）游戏。“一根杆子通过一个关节连接在一个小车上，这个小车可以沿着没有摩擦的轨道上左右移动。系统会对这个小车施加+1或者-1的力。这个游戏的目标是防止这根杆子从车上倒下。“[1](https://gym.openai.com/envs/CartPole-v0/)
 
 ## 如何运行A2C
 

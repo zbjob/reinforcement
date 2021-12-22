@@ -15,8 +15,6 @@
 """
 PPO eval example.
 """
-
-import os
 import argparse
 from src.ppo_trainer import PPOTrainer
 from src import config
@@ -26,15 +24,15 @@ from mindspore import context
 parser = argparse.ArgumentParser(description='MindSpore Reinforcement PPO')
 parser.add_argument('--device_target', type=str, default='Auto', choices=['Ascend', 'CPU', 'GPU', 'Auto'],
                     help='Choose a device to run the ppo example(Default: Auto).')
-parser.add_argument('--ckpt_path', type=str, default='./ckpt', help='The ckpt file in eval.')
+parser.add_argument('--ckpt_path', type=str, default=None, help='The ckpt file in eval.')
 args = parser.parse_args()
 
 def ppo_eval():
     if args.device_target != 'Auto':
         context.set_context(device_target=args.device_target)
     context.set_context(mode=context.GRAPH_MODE, max_call_depth=100000)
-    config.trainer_params.update({'ckpt_path': os.path.realpath(args.ckpt_path)})
-    ppo_session = Session(config.ppo_algorithm_config)
+    config.trainer_params.update({'ckpt_path': args.ckpt_path})
+    ppo_session = Session(config.algorithm_config)
     ppo_session.run(class_type=PPOTrainer, is_train=False, params=config.trainer_params)
 
 if __name__ == "__main__":

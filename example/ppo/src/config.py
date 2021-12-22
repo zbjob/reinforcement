@@ -45,10 +45,8 @@ learner_params = {
 trainer_params = {
     'duration': 1000,
     'batch_size': 1,
-    'eval_interval': 20,
+    'ckpt_path': './ckpt',
     'num_eval_episode': 30,
-    'keep_checkpoint_max': 5,
-    'metrics': False
 }
 
 algorithm_config = {

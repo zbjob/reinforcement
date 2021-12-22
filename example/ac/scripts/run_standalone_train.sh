@@ -17,14 +17,14 @@
 script_self=$(readlink -f "$0")
 self_path=$(dirname "${script_self}")
 if [ $# == 1 ]; then
-  CKPT=$1
+  EPISODE=$1
   DEVICE="Auto"
 elif [ $# == 2 ]; then
-  CKPT=$1
+  EPISODE=$1
   DEVICE=$2
 else
-  echo "Usage: bash run_standalone_train.sh [CKPT_PATH] [DEVICE_TARGET](optional)."
-  echo "Example: bash run_standalone_train.sh ./ckpt"
+  echo "Usage: bash run_standalone_train.sh [episode] [DEVICE_TARGET](optional)."
+  echo "Example: bash run_standalone_train.sh 1000"
 fi
 export OMP_NUM_THREADS=10
-python -s ${self_path}/../train.py --device_target=$DEVICE --ckpt_path=$CKPT > ac_train_log.txt 2>&1 &
+python -s ${self_path}/../train.py --device_target=$DEVICE --episode=$EPISODE > ac_train_log.txt 2>&1 &

@@ -89,7 +89,7 @@ class Actor(nn.Cell):
 
     def evaluate(self, state):
         """
-        The interface of the act evaluation function.
+        The interface of the act evaluate function.
         User will need to overload this function according to
         the algorithm. But argument of this function should be
         the state output from the environment.

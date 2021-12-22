@@ -28,11 +28,11 @@ class A2CTrainer(Trainer):
         self.reduce_sum = ops.ReduceSum()
         super(A2CTrainer, self).__init__(msrl)
 
-    def train(self, episode):
+    def train(self, episodes, callbacks=None, ckpt_path=None):
         '''Train A2C'''
         running_reward = 0
         episode_reward: collections.deque = collections.deque(maxlen=100)
-        with tqdm.trange(episode) as t:
+        with tqdm.trange(episodes) as t:
             for i in t:
                 loss, reward = self.train_one_episode()
                 episode_reward.append(reward.asnumpy().tolist())
@@ -42,8 +42,8 @@ class A2CTrainer(Trainer):
                 if running_reward > 195 and i >= 100:
                     print(f'\nSolved at episode {i}: average reward: {running_reward:.2f}.')
                     break
-                if i == episode -1:
-                    print(f'\nFailed to solved this problem after running {episode} episodes.')
+                if i == episodes -1:
+                    print(f'\nFailed to solved this problem after running {episodes} episodes.')
 
     def train_one_episode(self):
         '''Train one episode'''
@@ -52,3 +52,11 @@ class A2CTrainer(Trainer):
         a2c_loss = self.msrl.agent_learn([rewards, states, actions])
         episode_reward = self.reduce_sum(rewards)
         return a2c_loss, episode_reward
+
+    def evaluate(self):
+        '''Default evaluate'''
+        return
+
+    def trainable_variables(self):
+        '''Default trainable variables'''
+        return

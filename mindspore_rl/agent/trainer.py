@@ -16,11 +16,11 @@
 """
 Implementation of trainer base class.
 """
-
 import os
-import mindspore.nn as nn
-from mindspore.train.serialization import save_checkpoint
 
+from mindspore_rl.utils.callback import CallbackParam, CallbackManager
+import mindspore.nn as nn
+from mindspore.train.serialization import load_checkpoint, load_param_into_net
 
 class Trainer(nn.Cell):
     r"""
@@ -37,46 +37,133 @@ class Trainer(nn.Cell):
 
     def __init__(self, msrl):
         self.msrl = msrl
+        self.vars = {}
 
-    def train(self, episode):
+    def train(self, episodes, callbacks=None, ckpt_path=None):
         """
         The interface of the train function. User will implement
         this function.
 
         Args:
-            episode(int): the number of training episode.
+            episodes(int): the number of training episodes.
+            callbacks(Optional[list[Callback]]): List of callback objects. Default: None
+            ckpt_path(Optional[string]): The checkpoint file to init or restore net. Default: None.
         """
 
-        raise NotImplementedError("Method should be overridden by subclass.")
+        cb_params = CallbackParam()
+        cb_params.episodes_num = episodes
 
-    def save_ckpt(self, path, model, episode, max_ckpt_nums=5):
+        # 1 Using `CallbackManager` to traverse each callback.
+        with CallbackManager(callbacks) as callback_list:
+
+            # 2 Init or restore the variables if the checkpoint files exist.
+            self._init_or_restore(ckpt_path)
+            cb_params.cur_episode = 0
+            if self.vars:
+                cb_params.vars = self.vars
+
+            callback_list.begin(cb_params)
+
+            # 3 Get `evaluate` function if meet the conditions.
+            if 'eval_rate' in cb_params and cb_params.eval_rate > 0:
+                cb_params.evaluate = self.evaluate
+
+            for i in range(episodes):
+                callback_list.episode_begin(cb_params)
+
+                # 4 Get the result of `train_one_episode` func, and deal with three situation:
+                #   a) Default using: Three objects in tuple, each stand for `loss`, `rewards` and `steps`.
+                #   b) User defined: Four objects in tuple, the first three is same as default using, the last
+                #       one `others` can be tuple or single one as user defined.
+                #   c) Other situation: Runtime error.
+                ans = self.train_one_episode()
+                loss, rewards, steps, others = [], [], [], []
+                if len(ans) == 3:
+                    loss, rewards, steps = ans
+                elif len(ans) == 4:
+                    loss, rewards, steps, others = ans
+                else:
+                    raise RuntimeError("The output number of function `train_one_episode` must be 3 or 4, \
+                        and represent for `loss, rewards, steps, [optional]others.` in order")
+
+                cb_params.loss = loss
+                cb_params.total_rewards = rewards
+                cb_params.steps = steps
+                cb_params.others = others
+                callback_list.episode_end(cb_params)
+                cb_params.cur_episode = i + 1
+            callback_list.end(cb_params)
+
+    def train_one_episode(self):
         """
-        Save the checkpoint file for all the model weights. And keep the latest `max_ckpt_nums` checkpoint files.
+        The interface of train one episode function in train.
+        And the output of this function must be constricted as `loss, rewards, steps, [optional]others` in order.
+        """
+        raise NotImplementedError("Method train_one_episode should be overridden by subclass.\
+            and the output must be constricted as `loss, rewards, steps, [optional]others` in order")
+
+    def evaluate(self):
+        """
+        The interface of the evaluate function for evaluate in train.
+        """
+        raise NotImplementedError("Method evaluate should be overridden by subclass.")
+
+    def _load_ckpt(self, ckpt_path=None, name=None, net=None):
+        """load checkpoint"""
+
+        # 1 Deal with the input file or input path.
+        if os.path.exists(ckpt_path) and os.path.isfile(ckpt_path):
+            ckpt_file = ckpt_path
+        else:
+            dir_path = ckpt_path + '/' + name
+            # 2 If ckpt file does not exist, just return. Otherwise, get the newest one.
+            if not os.path.exists(dir_path):
+                return
+            files = os.listdir(dir_path)
+            if files == []:
+                return
+            ckpt_files = []
+            for filename in files:
+                if os.path.splitext(filename)[-1] == '.ckpt' and (name in filename):
+                    ckpt_files.append(dir_path + '/' + filename)
+            ckpt_file = sorted(ckpt_files, key=os.path.getmtime)[-1]
+
+        # 3 Load the checkpoint.
+        if os.path.exists(ckpt_file):
+            print("Load file ", ckpt_file)
+            param_dict = load_checkpoint(ckpt_file)
+            not_load = load_param_into_net(net, param_dict)
+            if not_load:
+                raise RuntimeError("Load params into net failed!")
+        else:
+            print("Warning: missing ckpt file for ", name)
+
+    def _init_or_restore(self, ckpt_path=None):
+        '''Init or restore the variables.'''
+        if ckpt_path:
+            self.vars = self.trainable_variables()
+            for key, val in self.vars.items():
+                self._load_ckpt(ckpt_path, key, val)
+
+
+    def trainable_variables(self):
+        """
+        The variables for saving to checkpoint.
+        """
+        raise NotImplementedError("Method trainable_variables should be overridden by subclass.")
+
+    def load_and_eval(self, ckpt_path=None):
+        """
+        The interface of the eval function for offline. A checkpoint must be provided.
 
         Args:
-            path (str): The checkpoint path.
-            model (Union[Cell, list]): The cell object or data list to be saved.
-            episode (int): The episode number of this checkpoint.
-            max_ckpt_nums (int): Numbers of how many checkpoint files to be kept. Default:5.
+            ckpt_path (string): The checkpoint file to restore net.
         """
-        if not os.path.exists(path):
-            os.makedirs(path)
-        ckpt_name = path + '/checkpoint_' + str(episode) + '.ckpt'
-        save_checkpoint(model, ckpt_name)
-        files = os.listdir(path)
-        ckpt_list = []
-        nums = 0
-        for filename in files:
-            if os.path.splitext(filename)[-1] == '.ckpt':
-                nums += 1
-                ckpt_list.append(path + "/" + filename)
-            if nums > max_ckpt_nums:
-                ckpt_files = sorted(ckpt_list, key=os.path.getmtime)
-                os.remove(ckpt_files[0])
-
-
-    def eval(self):
-        """
-        The interface of the eval function.
-        """
-        print("Method should be overridden by subclass.")
+        if ckpt_path is None:
+            raise RuntimeError("Please provide a ckpt_path.")
+        self._init_or_restore(ckpt_path)
+        reward = self.evaluate()
+        reward = reward.asnumpy()
+        print("-----------------------------------------")
+        print(f"Evaluate result is {reward:.3f}, checkpoint file in {ckpt_path}")
+        print("-----------------------------------------")

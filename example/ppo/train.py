@@ -17,30 +17,29 @@ PPO training example.
 """
 
 #pylint: disable=C0413
-import os
 import argparse
 from src import config
 from src.ppo_trainer import PPOTrainer
 from mindspore import context
 from mindspore_rl.core import Session
+from mindspore_rl.utils.callback import CheckpointCallback, LossCallback, EvaluateCallback
 
 parser = argparse.ArgumentParser(description='MindSpore Reinforcement PPO')
 parser.add_argument('--episode', type=int, default=650, help='total episode numbers.')
 parser.add_argument('--device_target', type=str, default='Auto', choices=['Ascend', 'CPU', 'GPU', 'Auto'],
                     help='Choose a device to run the ppo example(Default: Auto).')
-parser.add_argument('--save_ckpt', type=int, default=0, choices=[0, 1], help='Whether to save the checkpoint file.')
-parser.add_argument('--ckpt_path', type=str, default='./ckpt', help='Path to save ckpt file in train.\
-                    default:./ckpt')
 options, _ = parser.parse_known_args()
 
 def train(episode=options.episode):
     if options.device_target != 'Auto':
         context.set_context(device_target=options.device_target)
     context.set_context(mode=context.GRAPH_MODE, max_call_depth=100000)
-    config.trainer_params.update({'save_ckpt': options.save_ckpt})
-    config.trainer_params.update({'ckpt_path': os.path.realpath(options.ckpt_path)})
     ppo_session = Session(config.algorithm_config)
-    ppo_session.run(class_type=PPOTrainer, episode=episode, params=config.trainer_params)
+    loss_cb = LossCallback()
+    ckpt_cb = CheckpointCallback(50, config.trainer_params['ckpt_path'])
+    eval_cb = EvaluateCallback(30)
+    cbs = [loss_cb, ckpt_cb, eval_cb]
+    ppo_session.run(class_type=PPOTrainer, episode=episode, params=config.trainer_params, callbacks=cbs)
 
 if __name__ == "__main__":
     train()

@@ -14,7 +14,7 @@ The game solved in AC from Gym is [**CartPole-v0**](https://gym.openai.com/envs/
 
 Before running AC, you should first install [MindSpore](https://www.mindspore.cn/install) and MindSpore-Reinforcement. Besides, you should also install following dependencies. Please follow the instruction on the official website.
 
-- MindSpore >= 1.5.0
+- MindSpore >= 1.6.0
 
 - numpy >= 1.17.0
 - matplotlib >=3.1.3
@@ -28,25 +28,25 @@ For comprehensive performance considerations on CPU, it is recommended to set `O
 
 ```shell
 > cd example/ac/scripts
-> bash run_standalone_train.sh [CKPT_PATH] [DEVICE_TARGET](optional)
+> bash run_standalone_train.sh [EPISODE] [DEVICE_TARGET](optional)
 ```
 
 You will obtain outputs which is similar with the things below in `log.txt`.
 
 ```shell
+Episode 0, loss is 386.797, rewards is 20.0
+Episode 1, loss is 386.477, rewards is 25.0
+Episode 2, loss is 385.673, rewards is 11.0
+Episode 3, loss is 386.896, rewards is 17.0
+Episode 4, loss is 385.612, rewards is 28.0
+Episode 5, loss is 386.764, rewards is 43.0
+Episode 6, loss is 386.637, rewards is 32.0
+Episode 7, loss is 388.327, rewards is 12.0
+Episode 8, loss is 385.753, rewards is 39.0
+Episode 9, loss is 386.731, rewards is 17.0
 ------------------------------------
-Evaluation result in episode 0 is 9.600
+Evaluate for episode 10 total rewards is 9.600
 ------------------------------------
-Episode 0, steps: 20.0, reward: 20.0
-Episode 1, steps: 45.0, reward: 25.0
-Episode 2, steps: 56.0, reward: 11.0
-Episode 3, steps: 73.0, reward: 17.0
-Episode 4, steps: 101.0, reward: 28.0
-Episode 5, steps: 144.0, reward: 43.0
-Episode 6, steps: 176.0, reward: 32.0
-Episode 7, steps: 188.0, reward: 12.0
-Episode 8, steps: 227.0, reward: 39.0
-Episode 9, steps: 244.0, reward: 17.0
 ```
 
 ### Eval
@@ -60,7 +60,7 @@ You will obtain outputs which is similar with the things below in `log.txt`.
 
 ```shell
 -----------------------------------------
-Evaluation result is 170.300, checkpoint file is /path/ckpt/ckptpoint_950.ckpt
+Evaluate result is 170.300, checkpoint file in /path/ckpt/actor_net/actor_net_950.ckpt
 -----------------------------------------
 ```
 

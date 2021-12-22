@@ -13,13 +13,10 @@
 # limitations under the License.
 # ============================================================================
 """AC Trainer"""
-import matplotlib.pyplot as plt
-
 from mindspore_rl.agent.trainer import Trainer
 import mindspore
 import mindspore.nn as nn
 import mindspore.numpy as msnp
-from mindspore.train.serialization import load_checkpoint, load_param_into_net
 from mindspore.common.api import ms_function
 from mindspore import Tensor
 from mindspore.ops import operations as P
@@ -29,92 +26,43 @@ class ACTrainer(Trainer):
     '''ACTrainer'''
     def __init__(self, msrl, params):
         nn.Cell.__init__(self, auto_prefix=False)
-        self.evaluation_interval = params['evaluation_interval']
-        self.num_evaluation_episode = params['num_evaluation_episode']
-        self.save_ckpt_path = params['ckpt_path']
-        self.keep_checkpoint_max = params['keep_checkpoint_max']
-        self.metrics = params['metrics']
-        self._total_reward = Parameter(Tensor(0, mindspore.float32), name='reward', requires_grad=False)
-        self.zero = Parameter(Tensor(0, mindspore.float32))
-        self.one = Parameter(Tensor(1, mindspore.float32))
-        self.done_r = Parameter(Tensor([-20.0], mindspore.float32))
+        self.num_evaluate_episode = params['num_evaluate_episode']
+        self.zero = Parameter(Tensor(0, mindspore.float32), name='zero')
+        self.done_r = Parameter(Tensor([-20.0], mindspore.float32), name='done_r')
         self.zero_value = Tensor(0, mindspore.float32)
-        self.assign = P.Assign()
         self.squeeze = P.Squeeze()
-        self.less = P.Less()
-        self.rewards_for_save = []
-        self.all_ep_r = []
-        self.all_steps = []
         super(ACTrainer, self).__init__(msrl)
 
-    def train(self, episode):
-        '''Train AC'''
-        steps = 0
-        for i in range(episode):
-            if i % self.evaluation_interval == 0:
-                reward = self.evaluation()
-                # save ckpt file
-                self.save_ckpt(self.save_ckpt_path, self.msrl.actors.actor_net, i, self.keep_checkpoint_max)
-                print("-----------------------------------------")
-                print(f'Evaluation result in episode {i} is {(reward.asnumpy()):.3f}')
-                print("-----------------------------------------")
-                if self.metrics:
-                    self.all_steps.append(steps)
-                    self.all_ep_r.append(reward.asnumpy())
-            total_reward, episode_steps = self.train_one_episode()
-            steps += episode_steps.asnumpy()
-            r = total_reward.asnumpy().tolist()
-            if self.metrics:
-                if i == 0:
-                    running_reward = r
-                else:
-                    running_reward = r * 0.05 + running_reward * 0.95
-                self.rewards_for_save.append(running_reward)
-            print(f'Episode {i}, steps: {steps}, reward: {r:.3f}')
-        reward = self.evaluation()
-        print("-----------------------------------------")
-        print(f'Evaluation result in episode {episode} is {(reward.asnumpy()):.3f}')
-        print("-----------------------------------------")
-        if self.metrics:
-            self.all_ep_r.append(reward.asnumpy())
-            self.all_steps.append(steps)
-            self.plot()
-
-    def eval(self):
-        param_dict = load_checkpoint(self.save_ckpt_path)
-        not_load = load_param_into_net(self.msrl.actors.actor_net, param_dict)
-        if not_load:
-            raise ValueError("Load params into net failed!")
-        reward = self.evaluation()
-        reward = reward.asnumpy()
-        print("-----------------------------------------")
-        print(f"Evaluation result is {reward:.3f}, checkpoint file is {self.save_ckpt_path}")
-        print("-----------------------------------------")
+    def trainable_variables(self):
+        '''Trainable variables for saving.'''
+        trainable_variables = {"actor_net": self.msrl.actors.actor_net}
+        return trainable_variables
 
     @ms_function
     def train_one_episode(self):
         '''Train one episode'''
         state, _ = self.msrl.agent_reset_collect()
-        self.assign(self._total_reward, self.zero)
+        total_reward = self.zero
         steps = self.zero
+        loss = self.zero_value
         while True:
             done, r, state_, a = self.msrl.agent_act(state)
             r = self.squeeze(r)
-            self._total_reward += r
+            total_reward += r
             if done:
                 r = self.done_r
-            self.msrl.agent_learn([state, r, state_, a])
-            steps += 1
+            loss = self.msrl.agent_learn([state, r, state_, a])
             state = state_
+            steps += 1
             if done:
                 break
-        return self._total_reward, steps
+        return loss, total_reward, steps
 
     @ms_function
-    def evaluation(self):
-        '''evaluation'''
+    def evaluate(self):
+        '''evaluate'''
         total_reward = self.zero_value
-        for _ in msnp.arange(self.num_evaluation_episode):
+        for _ in msnp.arange(self.num_evaluate_episode):
             episode_reward = self.zero_value
             state, done = self.msrl.agent_reset_eval()
             while not done:
@@ -122,11 +70,5 @@ class ACTrainer(Trainer):
                 r = self.squeeze(r)
                 episode_reward += r
             total_reward += episode_reward
-        avg_reward = total_reward / self.num_evaluation_episode
+        avg_reward = total_reward / self.num_evaluate_episode
         return avg_reward
-
-    def plot(self):
-        plt.plot(self.all_steps, self.all_ep_r)
-        plt.xlabel('eposide')
-        plt.ylabel('reward')
-        plt.savefig('ac_rewards.png')

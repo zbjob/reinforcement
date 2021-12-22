@@ -13,14 +13,11 @@
 # limitations under the License.
 # ============================================================================
 """DQN Trainer"""
-import matplotlib.pyplot as plt
-
 import mindspore as ms
 import mindspore.nn as nn
 import mindspore.numpy as msnp
-from mindspore.train.serialization import load_checkpoint, load_param_into_net
 from mindspore.common.api import ms_function
-from mindspore import Tensor
+from mindspore import Tensor, Parameter
 from mindspore.ops import operations as P
 from mindspore_rl.agent.trainer import Trainer
 
@@ -31,74 +28,20 @@ class DQNTrainer(Trainer):
     def __init__(self, msrl, params):
         nn.Cell.__init__(self, auto_prefix=False)
         self.zero = Tensor(0, ms.float32)
-        self.assign = P.Assign()
         self.squeeze = P.Squeeze()
         self.less = P.Less()
         self.zero_value = Tensor(0, ms.float32)
         self.fill_value = Tensor(1000, ms.float32)
+        self.inited = Parameter(Tensor(False, ms.bool_), name='init_flag')
         self.mod = P.Mod()
-        self.all_ep_r = []
-        self.all_steps = []
-        self.evaluation_interval = params['evaluation_interval']
-        self.num_evaluation_episode = params['num_evaluation_episode']
-        self.is_save_ckpt = params['save_ckpt']
-        if self.is_save_ckpt:
-            self.save_ckpt_path = params['ckpt_path']
-        self.keep_checkpoint_max = params['keep_checkpoint_max']
-        self.metrics = params['metrics']
+        self.num_evaluate_episode = params['num_evaluate_episode']
         self.update_period = Tensor(5, ms.float32)
         super(DQNTrainer, self).__init__(msrl)
 
-    def train(self, episode):
-        """Train DQN"""
-        self.init_training()
-        steps = 0
-        for i in range(episode):
-            if i % self.evaluation_interval == 0:
-                reward = self.evaluation()
-                reward = reward.asnumpy()
-                # save ckpt file
-                if self.is_save_ckpt:
-                    self.save_ckpt(self.save_ckpt_path, self.msrl.actors.policy_network, i, self.keep_checkpoint_max)
-                print("-----------------------------------------")
-                print(f"Evaluation result in episode {i} is {reward:.3f}")
-                print("-----------------------------------------")
-                if self.metrics:
-                    self.all_steps.append(steps)
-                    self.all_ep_r.append(reward)
-
-            reward, episode_steps = self.train_one_episode(self.update_period)
-            steps += episode_steps.asnumpy()
-            print(f"Episode {i}, steps: {steps}, reward: {reward.asnumpy():.3f}")
-        reward = self.evaluation()
-        reward = reward.asnumpy()
-        print("-----------------------------------------")
-        print(f"Evaluation result in episode {i} is {reward:.3f}")
-        print("-----------------------------------------")
-        if self.metrics:
-            self.all_ep_r.append(reward)
-            self.all_steps.append(steps)
-            self.plot()
-
-    def plot(self):
-        plt.plot(self.all_steps, self.all_ep_r)
-        plt.xlabel('step')
-        plt.ylabel('reward')
-        plt.savefig('dqn_rewards.png')
-
-    def eval(self):
-        params_dict = load_checkpoint(self.save_ckpt_path)
-        not_load = load_param_into_net(self.msrl.actors.policy_network, params_dict)
-        if not_load:
-            raise ValueError("Load params into net failed!")
-        reward = self.evaluation()
-        reward = reward.asnumpy()
-        print("-----------------------------------------")
-        if self.is_save_ckpt:
-            print(f"Evaluation result is {reward:.3f}, checkpoint file is {self.save_ckpt_path}")
-        else:
-            print(f"Evaluation result is {reward:.3f}")
-        print("-----------------------------------------")
+    def trainable_variables(self):
+        """Trainable variables for saving."""
+        trainable_variables = {"policy_net": self.msrl.actors.policy_network}
+        return trainable_variables
 
     @ms_function
     def init_training(self):
@@ -115,28 +58,32 @@ class DQNTrainer(Trainer):
         return done
 
     @ms_function
-    def train_one_episode(self, update_period=5):
+    def train_one_episode(self):
         """Train one episode"""
+        if not self.inited:
+            self.init_training()
+            self.inited = True
         state, done = self.msrl.agent_reset_collect()
         total_reward = self.zero
         steps = self.zero
+        loss = self.zero
         while not done:
             done, r, new_state, action, my_reward = self.msrl.agent_act(state)
             self.msrl.replay_buffer_insert([state, action, my_reward, new_state])
             state = new_state
             r = self.squeeze(r)
-            self.msrl.agent_learn(self.msrl.replay_buffer_sample())
+            loss = self.msrl.agent_learn(self.msrl.replay_buffer_sample())
             total_reward += r
             steps += 1
-            if not self.mod(steps, update_period):
+            if not self.mod(steps, self.update_period):
                 self.msrl.agent_update()
-        return total_reward, steps
+        return loss, total_reward, steps
 
     @ms_function
-    def evaluation(self):
-        """Policy evaluation"""
+    def evaluate(self):
+        """Policy evaluate"""
         total_reward = self.zero_value
-        for _ in msnp.arange(self.num_evaluation_episode):
+        for _ in msnp.arange(self.num_evaluate_episode):
             episode_reward = self.zero_value
             state, done = self.msrl.agent_reset_eval()
             while not done:
@@ -144,5 +91,5 @@ class DQNTrainer(Trainer):
                 r = self.squeeze(r)
                 episode_reward += r
             total_reward += episode_reward
-        avg_reward = total_reward / self.num_evaluation_episode
+        avg_reward = total_reward / self.num_evaluate_episode
         return avg_reward

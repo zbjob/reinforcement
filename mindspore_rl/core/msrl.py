@@ -132,14 +132,14 @@ class MSRL(nn.Cell):
     def __create_environments(self, config):
         """
         Create the environments object from the configuration file, and return the instance
-        of environment and evaluation environment.
+        of environment and evaluate environment.
 
         Args:
             config (dict): algorithm configuration file.
 
         Returns:
             - env (object), created environment object.
-            - eval_env (object), created evaluation environment object.
+            - eval_env (object), created evaluate environment object.
         """
 
         if 'number' in config['collect_environment']:
