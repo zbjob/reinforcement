@@ -27,16 +27,21 @@ import numpy as np
 seed = 42
 np.random.seed(seed)
 
+
 class A2CPolicyAndNetwork():
     '''A2CPolicyAndNetwork'''
     class ActorCriticNet(nn.Cell):
         '''ActorCriticNet'''
+
         def __init__(self, input_size, hidden_size, output_size):
             super().__init__()
-            self.common = nn.Dense(input_size, hidden_size, weight_init='XavierUniform')
-            self.actor = nn.Dense(hidden_size, output_size, weight_init='XavierUniform')
+            self.common = nn.Dense(
+                input_size, hidden_size, weight_init='XavierUniform')
+            self.actor = nn.Dense(hidden_size, output_size,
+                                  weight_init='XavierUniform')
             self.critic = nn.Dense(hidden_size, 1, weight_init='XavierUniform')
             self.relu = nn.LeakyReLU()
+
         def construct(self, x):
             x = self.common(x)
             x = self.relu(x)
@@ -44,6 +49,7 @@ class A2CPolicyAndNetwork():
 
     class Loss(nn.Cell):
         '''Actor-Critic loss'''
+
         def __init__(self, a2c_net):
             super().__init__(auto_prefix=False)
             self.a2c_net = a2c_net
@@ -78,14 +84,18 @@ class A2CPolicyAndNetwork():
     def __init__(self, params):
         self.a2c_net = self.ActorCriticNet(params['state_space_dim'], params['hidden_size'],
                                            params['action_space_dim'])
-        optimizer = nn.Adam(self.a2c_net.trainable_params(), learning_rate=params['lr'])
+        optimizer = nn.Adam(self.a2c_net.trainable_params(),
+                            learning_rate=params['lr'])
         loss_net = self.Loss(self.a2c_net)
         self.a2c_net_train = nn.TrainOneStepCell(loss_net, optimizer)
         self.a2c_net_train.set_train(mode=True)
 
 #pylint: disable=W0223
+
+
 class A2CActor(Actor):
     '''A2C Actor'''
+
     def __init__(self, params=None):
         super(A2CActor, self).__init__()
         self._params_config = params
@@ -102,35 +112,41 @@ class A2CActor(Actor):
         self.states = nn.TensorArray(mindspore.float32, (4,))
         self.actions = nn.TensorArray(mindspore.int32, (1,))
         self.rewards = nn.TensorArray(mindspore.float32, (1,))
+        self.print = P.Print()
 
-
-    def act(self, state):
+    def act(self, phase, params):
         '''Store returns into TensorArrays from env'''
-        t = self.zero
-        while t < self.loop_size:
-            self.states.write(t, state)
-            ts0 = self.expand_dims(state, 0)
-            action_logits, _ = self.a2c_net(ts0)
-            action_probs_t = self.softmax(action_logits)
-            action = self.reshape(self.c_dist.sample((1,), probs=action_probs_t), (1,))
-            action = self.cast(action, mindspore.int32)
-            self.actions.write(t, action)
-            new_state, reward, done = self._environment.step(action)
-            self.rewards.write(t, reward)
-            state = new_state
-            if done == self.done:
-                break
-            t += 1
-        rewards = self.rewards.stack()
-        states = self.states.stack()
-        actions = self.actions.stack()
-        self.rewards.clear()
-        self.states.clear()
-        self.actions.clear()
-        return rewards, states, actions
+        if phase == 2:
+            t = self.zero
+            while t < self.loop_size:
+                self.states.write(t, params)
+                ts0 = self.expand_dims(params, 0)
+                action_logits, _ = self.a2c_net(ts0)
+                action_probs_t = self.softmax(action_logits)
+                action = self.reshape(self.c_dist.sample(
+                    (1,), probs=action_probs_t), (1,))
+                action = self.cast(action, mindspore.int32)
+                self.actions.write(t, action)
+                new_state, reward, done = self._environment.step(action)
+                self.rewards.write(t, reward)
+                params = new_state
+                if done == self.done:
+                    break
+                t += 1
+            rewards = self.rewards.stack()
+            states = self.states.stack()
+            actions = self.actions.stack()
+            self.rewards.clear()
+            self.states.clear()
+            self.actions.clear()
+            return rewards, states, actions
+        self.print("Phase is incorrect")
+        return 0
+
 
 class A2CLearner(Learner):
     '''A2C Learner'''
+
     def __init__(self, params):
         super(A2CLearner, self).__init__()
         self._params_config = params
@@ -144,11 +160,11 @@ class A2CLearner(Learner):
         self.zero_float = Tensor(0.0, mindspore.float32)
         self.returns = nn.TensorArray(mindspore.float32, (1,))
 
-    def learn(self, samples):
+    def learn(self, experience):
         '''Calculate the loss and update'''
-        rewards = samples[0]
-        states = samples[1]
-        actions = samples[2]
+        rewards = experience[0]
+        states = experience[1]
+        actions = experience[2]
         n = self.shape(rewards)[0]
         iter_num = self.zero
         discounted_sum = self.zero_float
@@ -161,6 +177,7 @@ class A2CLearner(Learner):
         returns = self.returns.stack()
         self.returns.clear()
         adv_mean, adv_var = self.moments(returns)
-        normalized_returns = (returns - adv_mean) / (self.sqrt(adv_var) + self.epsilon)
+        normalized_returns = (returns - adv_mean) / \
+            (self.sqrt(adv_var) + self.epsilon)
         a2c_loss = self._a2c_net_train(states, actions, normalized_returns)
         return a2c_loss

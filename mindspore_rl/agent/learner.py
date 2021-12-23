@@ -43,17 +43,17 @@ class Learner(nn.Cell):
     def __init__(self):
         super(Learner, self).__init__(auto_prefix=False)
 
-    def learn(self, samples):
+    def learn(self, experience):
         """
         The interface for the learn function. The behavior of the `learn` function
         depend on the user's implementation. Usually, it takes the `samples` form
         replay buffer or other Tensors, and calculates the loss for updating the networks.
 
         Args:
-            samples(Tensor): Sampling from the buffer.
+            experience(tuple(Tensor)): Sampling from the buffer.
 
         Returns:
-            success, If the training success or not.
+            results (tuple(Tensor)): Result which outputs after updating weights
         """
 
         raise NotImplementedError("Method should be overridden by subclass.")

@@ -337,17 +337,11 @@ class MSRL(nn.Cell):
             policy_and_network = self.__create_policy_and_network(config)
             self.actors = self.__create_actor(config, policy_and_network)
             self.learner = self.__create_learner(config, policy_and_network)
+            self.agent_act = self.actors.act
+            self.agent_learn = self.learner.learn
         else:
             raise ValueError(
                 "Sorry, the current does not support multi-agent yet")
-
-        self.agent_act = self.actors.act
-        self.agent_act_init = self.actors.act_init
-        self.agent_evaluate = self.actors.evaluate
-        self.agent_update = self.actors.update
-        self.agent_reset_collect = self.actors.reset_collect_actor
-        self.agent_reset_eval = self.actors.reset_eval_actor
-        self.agent_learn = self.learner.learn
 
     def get_replay_buffer(self):
         """

@@ -23,10 +23,12 @@ import mindspore.ops as ops
 import mindspore.nn.probability.distribution as msd
 from mindspore.ops import operations as P
 
+
 class ACPolicyAndNetwork():
     '''ACPolicyAndNetwork'''
     class ActorNet(nn.Cell):
         '''ActorNet'''
+
         def __init__(self, input_size, hidden_size, output_size):
             super().__init__()
             self.common = nn.Dense(input_size, hidden_size, bias_init=0.1)
@@ -42,6 +44,7 @@ class ACPolicyAndNetwork():
 
     class CriticNet(nn.Cell):
         '''CriticNet'''
+
         def __init__(self, input_size, hidden_size, output_size=1):
             super().__init__()
             self.common = nn.Dense(input_size, hidden_size, bias_init=0.1)
@@ -55,6 +58,7 @@ class ACPolicyAndNetwork():
 
     class ActorNNLoss(nn.Cell):
         '''Actor loss'''
+
         def __init__(self, actor_net):
             super().__init__(auto_prefix=False)
             self.actor_net = actor_net
@@ -74,6 +78,7 @@ class ACPolicyAndNetwork():
 
     class CriticNNLoss(nn.Cell):
         '''Critic loss'''
+
         def __init__(self, critic_net, gamma):
             super().__init__(auto_prefix=False)
             self._critic_net = critic_net
@@ -96,7 +101,8 @@ class ACPolicyAndNetwork():
     def __init__(self, params):
         self.actor_net = self.ActorNet(params['state_space_dim'], params['hidden_size'],
                                        params['action_space_dim'])
-        self.critic_net = self.CriticNet(params['state_space_dim'], params['hidden_size'])
+        self.critic_net = self.CriticNet(
+            params['state_space_dim'], params['hidden_size'])
         optimizer_a = nn.Adam(self.actor_net.trainable_params(),
                               learning_rate=params['alr'])
         optimizer_c = nn.Adam(self.critic_net.trainable_params(),
@@ -104,13 +110,18 @@ class ACPolicyAndNetwork():
         actor_loss_net = self.ActorNNLoss(self.actor_net)
         self.actor_net_train = nn.TrainOneStepCell(actor_loss_net, optimizer_a)
         self.actor_net_train.set_train(mode=True)
-        critic_loss_net = self.CriticNNLoss(self.critic_net, gamma=params['gamma'])
-        self.critic_net_train = nn.TrainOneStepCell(critic_loss_net, optimizer_c)
+        critic_loss_net = self.CriticNNLoss(
+            self.critic_net, gamma=params['gamma'])
+        self.critic_net_train = nn.TrainOneStepCell(
+            critic_loss_net, optimizer_c)
         self.critic_net_train.set_train(mode=True)
 
 #pylint: disable=W0223
+
+
 class ACActor(Actor):
     '''AC Actor'''
+
     def __init__(self, params=None):
         super(ACActor, self).__init__()
         self._params_config = params
@@ -122,25 +133,34 @@ class ACActor(Actor):
         self.reshape = P.Reshape()
         self.cast = P.Cast()
         self.argmax = P.Argmax(output_type=mindspore.int32)
+        self.print = P.Print()
 
-    def act(self, state):
-        '''Sample action to act in env'''
-        ts0 = self.expand_dims(state, 0)
-        action_probs_t = self.actor_net(ts0)
-        action = self.reshape(self.c_dist.sample((1,), probs=action_probs_t), (1,))
-        new_state, reward, done = self._environment.step(self.cast(action, mindspore.int32))
-        return done, reward, new_state, action
+    def act(self, phase, params):
+        if phase == 2:
+            # Sample action to act in env
+            ts0 = self.expand_dims(params, 0)
+            action_probs_t = self.actor_net(ts0)
+            action = self.reshape(self.c_dist.sample(
+                (1,), probs=action_probs_t), (1,))
+            new_state, reward, done = self._environment.step(
+                self.cast(action, mindspore.int32))
+            return done, reward, new_state, action
+        if phase == 3:
+            # Evaluate the trained policy
+            ts0 = self.expand_dims(params, 0)
+            action_probs_t = self.actor_net(ts0)
+            action = self.reshape(self.argmax(action_probs_t), (1,))
+            new_state, reward, done = self._eval_env.step(
+                self.cast(action, mindspore.int32))
+            return done, reward, new_state
 
-    def evaluate(self, state):
-        """Evaluate the trained policy"""
-        ts0 = self.expand_dims(state, 0)
-        action_probs_t = self.actor_net(ts0)
-        action = self.reshape(self.argmax(action_probs_t), (1,))
-        new_state, reward, done = self._eval_env.step(self.cast(action, mindspore.int32))
-        return done, reward, new_state
+        self.print("Phase is incorrect")
+        return 0
+
 
 class ACLearner(Learner):
     '''AC Learner'''
+
     def __init__(self, params):
         super(ACLearner, self).__init__()
         self._params_config = params
@@ -156,12 +176,12 @@ class ACLearner(Learner):
         self.expand_dims = ops.ExpandDims()
         self.squeeze = P.Squeeze()
 
-    def learn(self, samples):
+    def learn(self, experience):
         '''Calculate the td_error'''
-        state = samples[0]
-        r = samples[1]
-        state_ = samples[2]
-        a = samples[3]
+        state = experience[0]
+        r = experience[1]
+        state_ = experience[2]
+        a = experience[3]
         v_ = self._critic_net(self.expand_dims(state_, 0))
         v = self._critic_net(self.expand_dims(state, 0))
         v_ = self.squeeze(v_)

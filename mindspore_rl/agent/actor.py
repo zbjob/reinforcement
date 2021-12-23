@@ -16,10 +16,7 @@
 Implementation of Actor base class.
 """
 
-import mindspore as ms
-from mindspore import Tensor
 import mindspore.nn as nn
-import numpy as np
 
 
 class Actor(nn.Cell):
@@ -49,105 +46,39 @@ class Actor(nn.Cell):
 
     def __init__(self):
         super(Actor, self).__init__(auto_prefix=False)
-        self._environment = None
-        self._eval_env = None
-        self.false = Tensor(np.array([False,]), ms.bool_)
 
-    def act(self, state):
+    def get_action(self, phase, params):
         """
         The interface of the act function.
         User will need to overload this function according to
         the algorithm. But argument of this function should be
-        the state output from the environment.
+        phase and params. This interface will not interact with
+        environment
 
         Args:
-            state (Tensor): the output state from the environment.
+            phase (enum): A enumerate value states for init, collect, eval or other user-defined stage.
+            params (tuple(Tensor)): A tuple of tensor as input, which is used to calculate action
 
         Returns:
-            - done (Tensor), whether the simulation is finish or not.
-            - reward (Tensor), simulation reward.
-            - state (Tensor), simulation state.
+            observation (tuple(Tensor)): A tuple of tensor as output, which states for experience
         """
 
         raise NotImplementedError("Method should be overridden by subclass.")
 
-    def act_init(self, state):
+    def act(self, phase, params):
         """
-        The interface of the act initialization function.
+        The interface of the act function.
         User will need to overload this function according to
         the algorithm. But argument of this function should be
-        the state output from the environment.
+        phase and params. This interface will interact with
+        environment
 
         Args:
-            state (Tensor): the output state from the environment.
+            phase (enum): A enumerate value states for init, collect, eval or other user-defined stage.
+            params (tuple(Tensor)): A tuple of tensor as input, which is used to calculate action
 
         Returns:
-            - done (Tensor), whether the simulation is finish or not.
-            - reward (Tensor), simulation reward.
-            - state (Tensor), simulation state.
-        """
-
-    def evaluate(self, state):
-        """
-        The interface of the act evaluate function.
-        User will need to overload this function according to
-        the algorithm. But argument of this function should be
-        the state output from the environment.
-
-        Args:
-            state (Tensor): the output state from the environment.
-
-        Returns:
-            - done (Tensor), whether the simulation is finish or not.
-            - reward (Tensor), simulation reward.
-            - state (Tensor), simulation state.
+            observation (tuple(Tensor)): A tuple of tensor as output, which states for experience
         """
 
         raise NotImplementedError("Method should be overridden by subclass.")
-
-    def update(self):
-        """
-        The interface of the update function.
-        User will need to overload this function according to the algorithm.
-        """
-
-    def env_setter(self, env):
-        """
-        Set the environment by the input `env` for the actor. The `env` is created by
-        class `GymEnvironment` or other environment class.
-
-        Args:
-            env (object): the input environment.
-
-        Returns:
-            environment.
-        """
-
-        self._environment = env
-        return self._environment
-
-    def reset_collect_actor(self):
-        """
-        Reset the collect actor, reset the collect actor's environment and
-        return the reset state and a false flag of `done`.
-
-        Returns:
-            - state (Tensor), the state of the actor after reset.
-            - Tensor, always false of `done`.
-        """
-
-        state = self._environment.reset()
-        return state, self.false
-
-    def reset_eval_actor(self):
-        """
-        Reset the eval actor, reset the eval actor's environment and
-        return the reset state and a false flag of `done`.
-
-        Return:
-            - state (Tensor), the state of the actor after reset.
-            - Tensor, always false of `done`.
-        """
-
-        state = self._eval_env.reset()
-        return state, self.false
