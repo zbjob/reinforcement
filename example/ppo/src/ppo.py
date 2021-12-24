@@ -38,16 +38,17 @@ class PPOPolicy():
         """PPOActorNet is the actor network of PPO algorithm. It takes a set of state as input
          and outputs miu, sigma of a normal distribution"""
         def __init__(self, input_size, hidden_size1, hidden_size2, output_size,
-                     sigma_init_std):
+                     sigma_init_std, compute_type=mindspore.float32):
             super(PPOPolicy.PPOActorNet, self).__init__()
+            self.compute_type = compute_type
             self.linear1_actor = nn.Dense(input_size,
                                           hidden_size1,
-                                          weight_init='XavierUniform')
+                                          weight_init='XavierUniform').to_float(compute_type)
             self.linear2_actor = nn.Dense(hidden_size1,
                                           hidden_size2,
-                                          weight_init='XavierUniform')
+                                          weight_init='XavierUniform').to_float(compute_type)
 
-            self.linear_miu_actor = nn.Dense(hidden_size2, output_size)
+            self.linear_miu_actor = nn.Dense(hidden_size2, output_size).to_float(compute_type)
             sigma_init_value = np.log(np.exp(sigma_init_std) - 1)
             self.bias_sigma_actor = Parameter(initializer(
                 sigma_init_value, [output_size]),
@@ -59,6 +60,7 @@ class PPOPolicy():
             self.bias_add = P.BiasAdd()
             self.reshape = P.Reshape()
             self.softplus_actor = ops.Softplus()
+            self.cast = ops.Cast()
 
         def construct(self, x):
             """calculate miu and sigma"""
@@ -67,32 +69,42 @@ class PPOPolicy():
             miu = self.tanh_actor(self.linear_miu_actor(x))
             miu_shape = miu.shape
             miu = self.reshape(miu, (-1, 6))
+
+            bias_sigma_actor = self.cast(self.bias_sigma_actor, self.compute_type)
             sigma = self.softplus_actor(
-                self.bias_add(self.zeros_like(miu), self.bias_sigma_actor))
+                self.bias_add(self.zeros_like(miu), bias_sigma_actor))
             miu = self.reshape(miu, miu_shape)
             sigma = self.reshape(sigma, miu_shape)
+            # Cast experiences to FP32 since replay buffer do not support fp16.
+            # Graph optimize will remove redundant cast operators.
+            miu = self.cast(miu, mindspore.float32)
+            sigma = self.cast(sigma, mindspore.float32)
             return miu, sigma
 
     class PPOCriticNet(nn.Cell):
         """PPOCriticNet is the critic network of PPO algorithm. It takes a set of states as input
         and outputs the value of input state"""
         def __init__(self, input_size, hidden_size1, hidden_size2,
-                     output_size):
+                     output_size, compute_type=mindspore.float32):
             super(PPOPolicy.PPOCriticNet, self).__init__()
             self.linear1_critic = nn.Dense(input_size,
                                            hidden_size1,
-                                           weight_init='XavierUniform')
+                                           weight_init='XavierUniform').to_float(compute_type)
             self.linear2_critic = nn.Dense(hidden_size1,
                                            hidden_size2,
-                                           weight_init='XavierUniform')
-            self.linear3_critic = nn.Dense(hidden_size2, output_size)
+                                           weight_init='XavierUniform').to_float(compute_type)
+            self.linear3_critic = nn.Dense(hidden_size2, output_size).to_float(compute_type)
             self.tanh_critic = nn.Tanh()
+            self.cast = ops.Cast()
 
         def construct(self, x):
             """predict value"""
             x = self.tanh_critic(self.linear1_critic(x))
             x = self.tanh_critic(self.linear2_critic(x))
             x = self.linear3_critic(x)
+            # Cast experiences to FP32 since replay buffer do not support fp16.
+            # Graph optimize will remove redundant cast operators.
+            x = self.cast(x, mindspore.float32)
             return x
 
     class PPOLossCell(nn.Cell):
@@ -147,10 +159,12 @@ class PPOPolicy():
                                           params['hidden_size1'],
                                           params['hidden_size2'],
                                           params['action_space_dim'],
-                                          params['sigma_init_std'])
+                                          params['sigma_init_std'],
+                                          params['compute_type'])
         self.critic_net = self.PPOCriticNet(params['state_space_dim'],
                                             params['hidden_size1'],
-                                            params['hidden_size2'], 1)
+                                            params['hidden_size2'], 1,
+                                            params['compute_type'])
         trainable_parameter = self.critic_net.trainable_params() + \
             self.actor_net.trainable_params()
         optimizer_ppo = nn.Adam(trainable_parameter,

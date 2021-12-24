@@ -21,6 +21,7 @@ import argparse
 from src import config
 from src.ppo_trainer import PPOTrainer
 from mindspore import context
+from mindspore import dtype as mstype
 from mindspore_rl.core import Session
 from mindspore_rl.utils.callback import CheckpointCallback, LossCallback, EvaluateCallback
 
@@ -28,11 +29,20 @@ parser = argparse.ArgumentParser(description='MindSpore Reinforcement PPO')
 parser.add_argument('--episode', type=int, default=650, help='total episode numbers.')
 parser.add_argument('--device_target', type=str, default='Auto', choices=['Ascend', 'CPU', 'GPU', 'Auto'],
                     help='Choose a device to run the ppo example(Default: Auto).')
+parser.add_argument('--precision_mode', type=str, default='fp32', choices=['fp32', 'fp16'],
+                    help='Precision mode')
 options, _ = parser.parse_known_args()
 
 def train(episode=options.episode):
+    '''PPO train entry.'''
     if options.device_target != 'Auto':
         context.set_context(device_target=options.device_target)
+
+    compute_type = mstype.float32 if options.precision_mode == 'fp32' else mstype.float16
+    config.algorithm_config['policy_and_network']['params']['compute_type'] = compute_type
+    if compute_type == mstype.float16 and options.device_target != 'Ascend':
+        raise ValueError("Fp16 mode is supported by Ascend backend.")
+
     context.set_context(mode=context.GRAPH_MODE, max_call_depth=100000)
     ppo_session = Session(config.algorithm_config)
     loss_cb = LossCallback()
