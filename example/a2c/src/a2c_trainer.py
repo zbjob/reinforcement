@@ -18,8 +18,10 @@ import statistics
 import tqdm
 
 from mindspore_rl.agent.trainer import Trainer
+from mindspore_rl.agent import trainer
 import mindspore.nn as nn
 from mindspore.ops import operations as ops
+
 
 class A2CTrainer(Trainer):
     '''A2CTrainer'''
@@ -47,8 +49,8 @@ class A2CTrainer(Trainer):
 
     def train_one_episode(self):
         '''Train one episode'''
-        state, _ = self.msrl.agent_reset_collect()
-        rewards, states, actions = self.msrl.agent_act(state)
+        state = self.msrl.collect_environment.reset()
+        rewards, states, actions = self.msrl.agent_act(trainer.COLLECT, state)
         a2c_loss = self.msrl.agent_learn([rewards, states, actions])
         episode_reward = self.reduce_sum(rewards)
         return a2c_loss, episode_reward

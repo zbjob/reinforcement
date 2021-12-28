@@ -37,6 +37,7 @@ class PPOPolicy():
     class PPOActorNet(nn.Cell):
         """PPOActorNet is the actor network of PPO algorithm. It takes a set of state as input
          and outputs miu, sigma of a normal distribution"""
+
         def __init__(self, input_size, hidden_size1, hidden_size2, output_size,
                      sigma_init_std, compute_type=mindspore.float32):
             super(PPOPolicy.PPOActorNet, self).__init__()
@@ -84,6 +85,7 @@ class PPOPolicy():
     class PPOCriticNet(nn.Cell):
         """PPOCriticNet is the critic network of PPO algorithm. It takes a set of states as input
         and outputs the value of input state"""
+
         def __init__(self, input_size, hidden_size1, hidden_size2,
                      output_size, compute_type=mindspore.float32):
             super(PPOPolicy.PPOCriticNet, self).__init__()
@@ -109,6 +111,7 @@ class PPOPolicy():
 
     class PPOLossCell(nn.Cell):
         """PPOLossCell calculates the loss of PPO algorithm"""
+
         def __init__(self, actor_net, critic_net, epsilon, critic_coef):
             super(PPOPolicy.PPOLossCell, self).__init__(auto_prefix=False)
             self.actor_net = actor_net
@@ -180,6 +183,7 @@ class PPOPolicy():
 class PPOActor(Actor):
     """This is an actor class of PPO algorithm, which is used to interact with environment, and
     generate/insert experience (data) """
+
     def __init__(self, params=None):
         super(PPOActor, self).__init__()
         self._params_config = params
@@ -188,23 +192,30 @@ class PPOActor(Actor):
         self._buffer = params['replay_buffer']
         self.actor_net = params['actor_net']
         self.norm_dist = msd.Normal()
+        self.print = P.Print()
 
-    def act(self, state):
+    def act(self, phase, params):
         """collect experience and insert to replay buffer (used during training)"""
-        miu, sigma = self.actor_net(state)
-        action = self.norm_dist.sample((), miu, sigma)
-        new_state, reward, _ = self._environment.step(action)
-        return reward, new_state, action, miu, sigma
+        if phase == 2:
+            miu, sigma = self.actor_net(params)
+            action = self.norm_dist.sample((), miu, sigma)
+            new_state, reward, _ = self._environment.step(action)
+            return reward, new_state, action, miu, sigma
+        if phase == 3:
+            action, _ = self.actor_net(params)
+            new_state, reward, _ = self._eval_env.step(action)
+            return reward, new_state
+        self.print("Phase is incorrect")
+        return 0
 
-    def evaluate(self, state):
-        """collect experience (used during evaluate)"""
-        action, _ = self.actor_net(state)
-        new_state, reward, _ = self._eval_env.step(action)
-        return reward, new_state
+    def get_action(self, phase, params):
+        """Default get_action function"""
+        return
 
 
 class PPOLearner(Learner):
     """This is the learner class of PPO algorithm, which is used to update the policy net"""
+
     def __init__(self, params):
         super(PPOLearner, self).__init__()
         self._params_config = params
@@ -229,11 +240,11 @@ class PPOLearner(Learner):
         self.zero = Tensor(0, mindspore.float32)
         self.zero_int = Tensor(0, mindspore.int32)
 
-    def learn(self, samples):
+    def learn(self, experience):
         """prepare for the value (advantage, discounted reward), which is used to calculate
         the loss"""
         state_list, action_list, reward_list, next_state_list, \
-                    miu_list, sigma_list = samples
+            miu_list, sigma_list = experience
         last_state = next_state_list[:, -1]
         rewards = self.squeeze(reward_list)
 

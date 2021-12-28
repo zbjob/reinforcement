@@ -24,7 +24,7 @@ class Session():
     Args:
         config (dict): the algorithm configuration or the deployment configuration of the algorithm.
             For more details of configuration of algorithm, please have a look at
-            https://www.mindspore.cn/reinforcement/docs/zh-CN/master/index.html
+            https://www.mindspore.cn/reinforcement/docs/zh-CN/master/custom_config_info.html
     """
 
     def __init__(self, config):

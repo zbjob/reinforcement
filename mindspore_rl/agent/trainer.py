@@ -22,6 +22,12 @@ from mindspore_rl.utils.callback import CallbackParam, CallbackManager
 import mindspore.nn as nn
 from mindspore.train.serialization import load_checkpoint, load_param_into_net
 
+
+INIT = 1
+COLLECT = 2
+EVAL = 3
+
+
 class Trainer(nn.Cell):
     r"""
     The trainer base class.

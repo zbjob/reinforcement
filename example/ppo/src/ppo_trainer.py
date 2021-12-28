@@ -19,9 +19,12 @@ from mindspore.common.api import ms_function
 from mindspore import Tensor
 from mindspore.ops import operations as P
 from mindspore_rl.agent.trainer import Trainer
+from mindspore_rl.agent import trainer
+
 
 class PPOTrainer(Trainer):
     """This is the trainer class of PPO algorithm. It arranges the PPO algorithm"""
+
     def __init__(self, msrl, params=None):
         nn.Cell.__init__(self, auto_prefix=False)
         self.zero = Tensor(0, mindspore.float32)
@@ -46,17 +49,20 @@ class PPOTrainer(Trainer):
         training_loss = self.zero
         training_reward = self.zero
         j = self.zero
-        state, _ = self.msrl.agent_reset_collect()
+        state = self.msrl.collect_environment.reset()
 
         while self.less(j, self.duration):
-            reward, new_state, action, miu, sigma = self.msrl.agent_act(state)
-            self.msrl.replay_buffer_insert([state, action, reward, new_state, miu, sigma])
+            reward, new_state, action, miu, sigma = self.msrl.agent_act(
+                trainer.COLLECT, state)
+            self.msrl.replay_buffer_insert(
+                [state, action, reward, new_state, miu, sigma])
             state = new_state
             reward = self.reduce_mean(reward)
             training_reward += reward
             j += 1
 
-        replay_buffer_elements = self.msrl.get_replay_buffer_elements(transpose=True, shape=(1, 0, 2))
+        replay_buffer_elements = self.msrl.get_replay_buffer_elements(
+            transpose=True, shape=(1, 0, 2))
         state_list = replay_buffer_elements[0]
         action_list = replay_buffer_elements[1]
         reward_list = replay_buffer_elements[2]
@@ -77,10 +83,10 @@ class PPOTrainer(Trainer):
         num_eval = self.zero
         while num_eval < self.num_eval_episode:
             eval_reward = self.zero
-            state, _ = self.msrl.agent_reset_eval()
+            state = self.msrl.eval_environment.reset()
             j = self.zero
             while self.less(j, self.duration):
-                reward, state = self.msrl.agent_evaluate(state)
+                reward, state = self.msrl.agent_act(trainer.EVAL, state)
                 reward = self.reduce_mean(reward)
                 eval_reward += reward
                 j += 1

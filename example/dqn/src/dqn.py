@@ -37,13 +37,16 @@ def _parameter_update(policy_param, target_param):
     output = assign(target_param, new_param)
     return output
 
+
 class DQNPolicy():
     """DQN Policy"""
 
     class PolicyNetWithLossCell(nn.Cell):
         """DQN policy network with loss cell"""
+
         def __init__(self, backbone, loss_fn):
-            super(DQNPolicy.PolicyNetWithLossCell, self).__init__(auto_prefix=False)
+            super(DQNPolicy.PolicyNetWithLossCell,
+                  self).__init__(auto_prefix=False)
             self._backbone = backbone
             self._loss_fn = loss_fn
             self.gather = P.GatherD()
@@ -114,33 +117,33 @@ class DQNActor(Actor):
         self.reward = Tensor([1,], ms.float32)
         self.penalty = Tensor([-1,], ms.float32)
 
-    def act_init(self, state):
-        """Fill the replay buffer"""
-        action = self.init_policy()
-        new_state, reward, done = self._environment.step(action)
-        action = self.reshape(action, (1,))
-        my_reward = self.select(done, self.penalty, self.reward)
-        return done, reward, new_state, action, my_reward
+    def act(self, phase, params):
+        if phase == 1:
+            # Fill the replay buffer
+            action = self.init_policy()
+            new_state, reward, done = self._environment.step(action)
+            action = self.reshape(action, (1,))
+            my_reward = self.select(done, self.penalty, self.reward)
+            return done, reward, new_state, action, my_reward
+        if phase == 2:
+            # Experience collection
+            self.step += 1
+            ts0 = self.expand_dims(params, 0)
+            step_tensor = self.ones((1, 1), ms.float32) * self.step
 
-    def act(self, state):
-        """Experience collection"""
-        self.step += 1
-
-        ts0 = self.expand_dims(state, 0)
-        step_tensor = self.ones((1, 1), ms.float32) * self.step
-
-        action = self.collect_policy(ts0, step_tensor)
-        new_state, reward, done = self._environment.step(action)
-        action = self.reshape(action, (1,))
-        my_reward = self.select(done, self.penalty, self.reward)
-        return done, reward, new_state, action, my_reward
-
-    def evaluate(self, state):
-        """Evaluate the trained policy"""
-        ts0 = self.expand_dims(state, 0)
-        action = self.evaluate_policy(ts0)
-        new_state, reward, done = self._eval_env.step(action)
-        return done, reward, new_state
+            action = self.collect_policy(ts0, step_tensor)
+            new_state, reward, done = self._environment.step(action)
+            action = self.reshape(action, (1,))
+            my_reward = self.select(done, self.penalty, self.reward)
+            return done, reward, new_state, action, my_reward
+        if phase == 3:
+            # Evaluate the trained policy
+            ts0 = self.expand_dims(params, 0)
+            action = self.evaluate_policy(ts0)
+            new_state, reward, done = self._eval_env.step(action)
+            return done, reward, new_state
+        self.print("Phase is incorrect")
+        return 0
 
     def update(self):
         """Update the network parameters"""
@@ -149,6 +152,10 @@ class DQNActor(Actor):
             self.policy_param,
             self.target_param)
         return assign_result
+
+    def get_action(self, phase, params):
+        """Default get_action function"""
+        return
 
 
 class DQNLearner(Learner):
@@ -166,9 +173,9 @@ class DQNLearner(Learner):
         self.ones_like = P.OnesLike()
         self.select = P.Select()
 
-    def learn(self, samples):
+    def learn(self, experience):
         """Model update"""
-        s0, a0, r1, s1 = samples
+        s0, a0, r1, s1 = experience
         next_state_values = self.target_network(s1)
         next_state_values = next_state_values.max(axis=1)
         r1 = self.reshape(r1, (-1,))

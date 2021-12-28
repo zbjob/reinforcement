@@ -33,10 +33,9 @@ class Agent(nn.Cell):
         >>> from mindspore_rl.agent.learner import Learner
         >>> from mindspore_rl.agent.actor import Actor
         >>> from mindspore_rl.agent.agent import Agent
-        >>> actor_num = 1
         >>> actors = Actor()
         >>> learner = Learner()
-        >>> agent = Agent(actor_num, actors, learner)
+        >>> agent = Agent(actors, learner)
         >>> print(agent)
         Agent<
         (_actors): Actor<>
@@ -44,91 +43,53 @@ class Agent(nn.Cell):
         >
     """
 
-    def __init__(self, num_actor, actors, learner):
+    def __init__(self, actors, learner):
         super(Agent, self).__init__(auto_prefix=False)
         self._actors = actors
-        self._num_actor = num_actor
         self._learner = learner
 
-    def init(self):
+    def get_action(self, phase, params):
         """
-        Initialize the agent, reset all the actors in agent.
-        """
-
-        self.reset_all()
-
-    def reset_all(self):
-        """
-        Reset the all the actors in agent, and return the reset `state`
-        and the flag `done`.
-
-        Returns:
-            - state (Tensor), the state of the reset environment in actor.
-            - done (Tensor), a false flag of `done`.
-        """
-
-        state, done = self._actors.reset()
-        return state, done
-
-    def act(self):
-        """
-        The act function interface.
-        """
-
-        raise NotImplementedError("Method should be overridden by subclass.")
-
-    def learn(self, samples):
-        """
-        The learn function interface.
+        The get_action function will take an enumerate value and observation or other data which is needed during
+        calculating the action. It will return a set of output which contains actions of experience. In this
+        function, agent will not interact with environment.
 
         Args:
-            samples (Tensor): the sample from replay buffer.
+            phase (enum): A enumerate value states for init, collect or eval stage.
+            params (tuple(Tensor)): A tuple of tensor as input, which is used to calculate action
+
+        Returns:
+            observation (tuple(Tensor)): A tuple of tensor as output, which states for experience
         """
 
         raise NotImplementedError("Method should be overridden by subclass.")
 
-    def update(self):
+    def act(self, phase, params):
         """
-        The update function interface.
-        """
-
-        raise NotImplementedError("Method should be overridden by subclass.")
-
-    def env_setter(self, env):
-        """
-        Set the agent environment for actors in agent.
+        The act function will take an enumerate value and observation or other data which is needed during
+        calculating the action. It will return a set of output which contains new observation, or other
+        experience. In this function, agent will interact with environment.
 
         Args:
-            env (object): the input environment.
-        """
-        self._actors.env_setter(env)
-
-    @property
-    def actors(self):
-        """
-        Get the instance of actors in the agent.
+            phase (enum): A enumerate value states for init, collect or eval stage.
+            params (tuple(Tensor)): A tuple of tensor as input, which is used to calculate action
 
         Returns:
-            actors (object), actors object created by class `Actor`.
+            observation (tuple(Tensor)): A tuple of tensor as output, which states for experience
         """
-        return self._actors
 
-    @property
-    def num_actor(self):
-        """
-        Get the number of the actors of the agent.
+        raise NotImplementedError("Method should be overridden by subclass.")
 
-        Returns:
-            num_actor (int), actor numbers.
+    def learn(self, experience):
         """
-        return self._num_actor
+        The learn function will take a set of experience as input to calculate the loss and update
+        the weights.
 
-    @property
-    def learner(self):
-        """
-        Get the instance of learner in the agent.
+        Args:
+            experience (tuple(Tensor)): A tuple of tensor states for experience
 
         Returns:
-            learner (object), learner object created by class `Learner`.
+            results (tuple(Tensor)): Result which outputs after updating weights
         """
-        return self._learner
+
+        raise NotImplementedError("Method should be overridden by subclass.")

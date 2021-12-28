@@ -14,23 +14,28 @@
 # ============================================================================
 """AC Trainer"""
 from mindspore_rl.agent.trainer import Trainer
+from mindspore_rl.agent import trainer
 import mindspore
 import mindspore.nn as nn
-import mindspore.numpy as msnp
 from mindspore.common.api import ms_function
 from mindspore import Tensor
 from mindspore.ops import operations as P
 from mindspore.common.parameter import Parameter
 
+
 class ACTrainer(Trainer):
     '''ACTrainer'''
+
     def __init__(self, msrl, params):
         nn.Cell.__init__(self, auto_prefix=False)
         self.num_evaluate_episode = params['num_evaluate_episode']
         self.zero = Parameter(Tensor(0, mindspore.float32), name='zero')
-        self.done_r = Parameter(Tensor([-20.0], mindspore.float32), name='done_r')
+        self.done_r = Parameter(
+            Tensor([-20.0], mindspore.float32), name='done_r')
         self.zero_value = Tensor(0, mindspore.float32)
         self.squeeze = P.Squeeze()
+        self.false = Tensor(False, mindspore.bool_)
+        self.less = P.Less()
         super(ACTrainer, self).__init__(msrl)
 
     def trainable_variables(self):
@@ -41,12 +46,13 @@ class ACTrainer(Trainer):
     @ms_function
     def train_one_episode(self):
         '''Train one episode'''
-        state, _ = self.msrl.agent_reset_collect()
+        state = self.msrl.collect_environment.reset()
+        done = self.false
         total_reward = self.zero
         steps = self.zero
         loss = self.zero_value
         while True:
-            done, r, state_, a = self.msrl.agent_act(state)
+            done, r, state_, a = self.msrl.agent_act(trainer.COLLECT, state)
             r = self.squeeze(r)
             total_reward += r
             if done:
@@ -62,13 +68,16 @@ class ACTrainer(Trainer):
     def evaluate(self):
         '''evaluate'''
         total_reward = self.zero_value
-        for _ in msnp.arange(self.num_evaluate_episode):
+        eval_iter = self.zero_value
+        while self.less(eval_iter, self.num_evaluate_episode):
             episode_reward = self.zero_value
-            state, done = self.msrl.agent_reset_eval()
+            state = self.msrl.eval_environment.reset()
+            done = self.false
             while not done:
-                done, r, state = self.msrl.agent_evaluate(state)
+                done, r, state = self.msrl.agent_act(trainer.EVAL, state)
                 r = self.squeeze(r)
                 episode_reward += r
             total_reward += episode_reward
+            eval_iter += 1
         avg_reward = total_reward / self.num_evaluate_episode
         return avg_reward
