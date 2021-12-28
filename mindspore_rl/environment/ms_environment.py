@@ -47,8 +47,6 @@ class MsEnvironment(Environment):
             |                    +------------------------------+------------------+----------------------------+
             |                    |  predator_num                |   10             |  number of predators       |
             |                    +------------------------------+------------------+----------------------------+
-            |                    |  prey_num                    |   3              |  number of prey            |
-            |                    +------------------------------+------------------+----------------------------+
             |                    |  max_timestep                |   100            |  max timestep per episode  |
             |                    +------------------------------+------------------+----------------------------+
             |                    |  map_length                  |   100            |  length of map             |
@@ -65,7 +63,7 @@ class MsEnvironment(Environment):
             +--------------------+------------------------------+------------------+----------------------------+
 
     Examples:
-        >>> config = {'name': 'Tag', 'predator_num': 4, 'prey_num': 1}
+        >>> config = {'name': 'Tag', 'predator_num': 4}
         >>> env = MsEnvironment(config)
         >>> observation = env.reset()
         >>> action = Tensor(env.action_space.sample())
@@ -89,7 +87,7 @@ class MsEnvironment(Environment):
             Tensor, the initial observation.
 
         Examples:
-            >>> env = MsEnvironment('Tag', predator_num=4, prey_num=1)
+            >>> env = MsEnvironment('Tag', predator_num=4)
             >>> observation = env.reset()
         """
         return self.env.reset()
@@ -109,7 +107,7 @@ class MsEnvironment(Environment):
             - **done** (Tensor) - Whether the episode has ended.
 
         Examples:
-            >>> env = MsEnvironment('Tag', predator_num=4, prey_num=1)
+            >>> env = MsEnvironment('Tag', predator_num=4)
             >>> observation = env.reset()
             >>> action = Tensor(env.action_space.sample())
             >>> ret = env.step(action)
