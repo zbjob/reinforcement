@@ -30,14 +30,14 @@ class TagEnvironment(Environment):
         self._config = {"seed": 42,
                         "environment_num": 2,
                         "predator_num": 10,
-                        "prey_num": 3,
                         "max_timestep": 100,
                         "map_length": 100,
                         "map_width": 100,
                         "wall_hit_penalty": 0.1,
                         "catch_reward": 10.0,
                         "caught_penalty": 5.0,
-                        "step_cost": 0.01}
+                        "step_cost": 0.01,
+                        "partially_observation": False}
 
         # Update default config
         for key in kwargs:
@@ -49,14 +49,14 @@ class TagEnvironment(Environment):
         handle = EnvCreate('Tag', **self.config)().asnumpy().item(0)
 
         environment_num = self._config['environment_num']
-        agent_num = self._config['predator_num'] + self._config['prey_num']
+        agent_num = self._config['predator_num'] + 1
 
         # Action space.
         batch_shape = (environment_num, agent_num)
         self._action_space = Space((), np.int32, low=0, high=5, batch_shape=batch_shape)
 
         # Observation space.
-        obs_per_agent = (4 * agent_num + 1,)
+        obs_per_agent = (6,) if self._config['partially_observation'] else (4 * agent_num + 1,)
         self._observation_space = Space(obs_per_agent, np.float32, low=0, high=1, batch_shape=batch_shape)
 
         # Reward space.
