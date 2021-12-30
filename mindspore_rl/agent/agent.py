@@ -25,7 +25,6 @@ class Agent(nn.Cell):
     The base class for the Agent.
 
     Args:
-        num_actor(int): The actor numbers in this agent.
         actors(object): The actor instance.
         learner(object): The learner instance.
 
