@@ -31,8 +31,11 @@ parser.add_argument('--device_target', type=str, default='Auto', choices=['Ascen
 options, _ = parser.parse_known_args()
 
 def train(episode=options.episode):
+    """start to train ac algorithm"""
     if options.device_target != 'Auto':
         context.set_context(device_target=options.device_target)
+    if options.device_target == 'CPU':
+        context.set_context(enable_graph_kernel=True)
     context.set_context(mode=context.GRAPH_MODE)
     ac_session = Session(config.algorithm_config)
     loss_cb = LossCallback()
