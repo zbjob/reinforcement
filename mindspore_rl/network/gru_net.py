@@ -123,6 +123,17 @@ class GruNet(nn.Cell):
     def construct(self, x_in, h_in):
         """
         The forward calculation of gru net
+
+        Args:
+            x_in (Tensor): Tensor of data type mindspore.float32 and shape (seq_len, batch_size, `input_size`)
+                            or (batch_size, seq_len, `input_size`).
+            h_in (Tensor): Tensor of data type mindspore.float32 and shape (num_directions * `num_layers`,
+                            batch_size, `hidden_size`). The data type of `h_in` must be the same as `x_in`.
+
+        Returns:
+            - **x_out** (Tensor) - Tensor of shape (seq_len, batch_size, num_directions * `hidden_size`) or
+              (batch_size, seq_len, num_directions * `hidden_size`).
+            - **h_out** (Tensor) - Tensor of shape (num_directions * `num_layers`, batch_size, `hidden_size`).
         """
         x_out = None
         h_out = None
