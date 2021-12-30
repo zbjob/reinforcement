@@ -26,7 +26,45 @@ from mindspore.ops.operations import _rl_inner_ops as rl_ops
 
 class GruNet(nn.Cell):
     """
-    A basic fully connected neural network.
+    Stacked GRU (Gated Recurrent Unit) layers.
+
+    Apply GRU layer to the input.
+
+    For detailed information, please refer to :class:`mindspore.nn.GRU`.
+
+    Args:
+        input_size (int): Number of features of input.
+        hidden_size (int):  Number of features of hidden layer.
+        weight_init (str or initializer): Initialize method. Default: normal.
+        num_layers (int): Number of layers of stacked GRU. Default: 1.
+        has_bias (bool): Whether the cell has bias `b_ih` and `b_hh`. Default: True.
+        batch_first (bool): Specifies whether the first dimension of input `x` is batch_size. Default: False.
+        dropout (float): If not 0.0, append `Dropout` layer on the outputs of each
+            GRU layer except the last layer. Default 0.0. The range of dropout is [0.0, 1.0).
+        bidirectional (bool): Specifies whether it is a bidirectional GRU,
+            num_directions=2 if bidirectional=True otherwise 1. Default: False.
+
+    Inputs:
+        - **x_in** (Tensor) - Tensor of data type mindspore.float32 and
+          shape (seq_len, batch_size, `input_size`) or (batch_size, seq_len, `input_size`).
+        - **h_in** (Tensor) - Tensor of data type mindspore.float32 and
+          shape (num_directions * `num_layers`, batch_size, `hidden_size`). The data type of `h_in` must be the same as
+          `x_in`.
+
+    Outputs:
+        Tuple, a tuple contains (`x_out`, `h_out`).
+
+        - **x_out** (Tensor) - Tensor of shape (seq_len, batch_size, num_directions * `hidden_size`) or
+          (batch_size, seq_len, num_directions * `hidden_size`).
+        - **h_out** (Tensor) - Tensor of shape (num_directions * `num_layers`, batch_size, `hidden_size`).
+
+    Examples:
+        >>> net = GruNet(10, 16, 2, has_bias=True, bidirectional=False)
+        >>> x_in = Tensor(np.ones([3, 5, 10]).astype(np.float32))
+        >>> h_in = Tensor(np.ones([1, 5, 16]).astype(np.float32))
+        >>> x_out, h_out = net(x_in, h_in)
+        >>> print(x_out.shape)
+        (3, 5, 16)
     """
 
     def __init__(self,
@@ -38,6 +76,7 @@ class GruNet(nn.Cell):
                  batch_first=False,
                  dropout=0.0,
                  bidirectional=False):
+
         super().__init__()
         validator.check_positive_int(hidden_size, "hidden_size", self.cls_name)
         validator.check_positive_int(input_size, "input_size", self.cls_name)
@@ -77,6 +116,7 @@ class GruNet(nn.Cell):
                               hidden_size=hidden_size,
                               num_layers=num_layers,
                               has_bias=has_bias,
+                              batch_first=batch_first,
                               bidirectional=bidirectional,
                               dropout=float(dropout))
 
