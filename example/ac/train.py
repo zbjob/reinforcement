@@ -34,7 +34,7 @@ def train(episode=options.episode):
     """start to train ac algorithm"""
     if options.device_target != 'Auto':
         context.set_context(device_target=options.device_target)
-    if options.device_target == 'CPU':
+    if context.get_context('device_target') in ['CPU']:
         context.set_context(enable_graph_kernel=True)
     context.set_context(mode=context.GRAPH_MODE)
     ac_session = Session(config.algorithm_config)

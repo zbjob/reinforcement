@@ -37,7 +37,7 @@ def train(episode=options.episode):
     '''PPO train entry.'''
     if options.device_target != 'Auto':
         context.set_context(device_target=options.device_target)
-    if options.device_target == 'CPU':
+    if context.get_context('device_target') in ['CPU']:
         context.set_context(enable_graph_kernel=True)
 
     compute_type = mstype.float32 if options.precision_mode == 'fp32' else mstype.float16
