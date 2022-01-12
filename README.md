@@ -39,11 +39,12 @@ MindSpore Reinforcement depends on the MindSpore training and inference framewor
 If you use the pip command, please download the whl package from [MindSpore Reinforcement](https://www.mindspore.cn/versions/en) page and install it.
 
 ```shell
-pip install  https://ms-release.obs.cn-north-4.myhuaweicloud.com/1.5.0/Reinforcement/any/mindspore_rl-{version}-py3-none-any.whl --trusted-host ms-release.obs.cn-north-4.myhuaweicloud.com -i https://pypi.tuna.tsinghua.edu.cn/simple
+pip install  https://ms-release.obs.cn-north-4.myhuaweicloud.com/{MindSpore_version}/Reinforcement/any/mindspore_rl-{Reinforcement_version}-py3-none-any.whl --trusted-host ms-release.obs.cn-north-4.myhuaweicloud.com -i https://pypi.tuna.tsinghua.edu.cn/simple
 ```
 
 > - Installing whl package will download MindSpore Reinforcement dependencies automatically (detail of dependencies is shown in requirement.txt),  other dependencies should install manually.
-> - `{version}` stands for the version of MindSpore Reinforcement. For example, if you would like to download version 0.1.0, you should fill 0.1.0 in `{version}`.
+> - `{MindSpore_version}` stands for the version of MindSpore. For the version matching relationship between MindSpore and Reinforcement, please refer to [page](https://www.mindspore.cn/versions).
+> - `{Reinforcement_version}` stands for the version of Reinforcement. For example, if you would like to download version 0.1.0, you should fill 1.5.0 in `{MindSpore_version}` and fill 0.1.0 in `{Reinforcement_version}`.
 
 ### Installing from source code
 
@@ -51,7 +52,7 @@ Download [source code](https://gitee.com/mindspore/reinforcement), then enter th
 
 ```shell
 bash build.sh
-pip install output/mindspore_rl-0.1.0-py3-none-any.whl
+pip install output/mindspore_rl-{Reinforcement_version}-py3-none-any.whl
 ```
 
 `build.sh` is the compiling script in `reinforcement` directory.

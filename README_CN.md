@@ -39,11 +39,12 @@ MindSpore Reinforcement依赖MindSpore训练推理框架，安装完[MindSpore](
 使用pip命令安装，请从[MindSpore-RL下载页面](https://www.mindspore.cn/versions)下载并安装whl包。
 
 ```shell
-pip install https://ms-release.obs.cn-north-4.myhuaweicloud.com/1.5.0/Reinforcement/any/mindspore_rl-{version}-py3-none-any.whl --trusted-host ms-release.obs.cn-north-4.myhuaweicloud.com -i https://pypi.tuna.tsinghua.edu.cn/simple
+pip install https://ms-release.obs.cn-north-4.myhuaweicloud.com/{MindSpore_version}/Reinforcement/any/mindspore_rl-{Reinforcement_version}-py3-none-any.whl --trusted-host ms-release.obs.cn-north-4.myhuaweicloud.com -i https://pypi.tuna.tsinghua.edu.cn/simple
 ```
 
 > - 在联网状态下，安装whl包时会自动下载MindSpore Reinforcement安装包的依赖项（依赖项详情参见requirement.txt），其余情况需自行安装。
-> - `{version}`表示MindSpore Reinforcement版本号，例如下载0.1.0版本MindSpore Reinforcement时，`{version}`应写为0.1.0。
+> - `{MindSpore_version}`表示MindSpore版本号，MindSpore和Reinforcement版本配套关系参见[页面](https://www.mindspore.cn/versions)。
+> - `{Reinforcement_version}`表示Reinforcement版本号。例如下载0.1.0版本Reinforcement时，`{MindSpore_version}应写为1.5.0，{Reinforcement_version}`应写为0.1.0。
 
 ### 源码编译安装
 
@@ -51,10 +52,10 @@ pip install https://ms-release.obs.cn-north-4.myhuaweicloud.com/1.5.0/Reinforcem
 
 ```shell
 bash build.sh
-pip install output/mindspore_rl-0.1.0-py3-none-any.whl
+pip install output/mindspore_rl-{Reinforcement_version}-py3-none-any.whl
 ```
 
-其中，`build.sh`为`reinforcement`目录下的编译脚本文件。
+其中，`build.sh`为`reinforcement`目录下的编译脚本文件。`{version}`表示MindSpore Reinforcement版本号。
 
 ### 验证是否成功安装
 
