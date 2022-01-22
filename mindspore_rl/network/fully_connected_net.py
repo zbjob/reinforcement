@@ -61,3 +61,78 @@ class FullyConnectedNet(nn.Cell):
         x = self.relu(self.linear1(x))
         x = self.linear2(x)
         return x
+
+
+class FullyConnectedLayers(nn.Cell):
+    r"""
+    This is a fully connected layers module. User can input abitrary number of fc_layers_params, then
+    this module can create corresponding number of fully connect layers.
+
+    Args:
+        fc_layers_params (List[int]): A list of int states for the input and output size of fully
+            connected layer. For example, if the input list is [10, 20, 3], then the module will
+            create two fully connected layers whose input and output size are (10, 20) and (20, 3)
+            respectively. The length of fc_layers_params should be larger than 3.
+        dropout_layer_params (List[float]): A list of float states for the dropout rate. If the input
+            list if [0.5, 0.3], then two dropout layers will be created after each fully connected
+            layer. The length of dropout_layer_params should be one less than fc_layers_params.
+            dropout_layer_params is a optional value. Default: None.
+        activation_fn (Union[str, Cell, Primitive): An instance of activation function. Default: nn.ReLu().
+        weight_init (Union[Tensor, str, Initializer, numbers.Number]): The trainable weight_init parameter.
+            The dtype is same as `x`. The values of str refer to the function `initializer`. Default: 'normal'.
+        bias_init (Union[Tensor, str, Initializer, numbers.Number]): The trainable bias_init parameter. The
+            dtype is same as `x`. The values of str refer to the function `initializer`. Default: 'zeros'.
+
+    Inputs:
+        - **x** (Tensor) - Tensor of shape :math:`(*, fc\_layers\_params[0])`.
+
+    Outputs:
+        Tensor of shape :math:`(*, fc\_layers\_params[-1])`.
+
+    Examples:
+        >>> input = Tensor(np.ones([2, 4]).astype(np.float32))
+        >>> net = FullyConnectedLayers(fc_layers_params=[4, 10, 2])
+        >>> output = net(input)
+        >>> print(output.shape)
+        (2, 2)
+    """
+    def __init__(self,
+                 fc_layer_params,
+                 dropout_layer_params=None,
+                 activation_fn=nn.ReLU(),
+                 weight_init='normal',
+                 bias_init='zeros'):
+        super().__init__()
+        layers = []
+        if len(fc_layer_params) < 3:
+            raise ValueError("The length of fc_layer_params must be largert than 2, \
+                             but the length of fc_layer_params is %d." % len(fc_layer_params))
+        if dropout_layer_params:
+            if len(dropout_layer_params) != (len(fc_layer_params) - 1):
+                raise ValueError("The length of dropout_layer_params must be one less than fc_layer_params, \
+                                 but got %d and %d." % (len(fc_layer_params), len(dropout_layer_params)))
+            for i in range(len(fc_layer_params) - 1):
+                layers.append(nn.Dense(fc_layer_params[i],
+                                       fc_layer_params[i+1],
+                                       weight_init=weight_init,
+                                       bias_init=bias_init,
+                                       activation=activation_fn))
+                layers.append(nn.Dropout(keep_prob=dropout_layer_params[i]))
+        else:
+            for i in range(len(fc_layer_params) - 1):
+                layers.append(nn.Dense(fc_layer_params[i],
+                                       fc_layer_params[i+1],
+                                       weight_init=weight_init,
+                                       bias_init=bias_init,
+                                       activation=activation_fn))
+        self.fc_layers = nn.SequentialCell(layers)
+
+    def construct(self, x):
+        r"""
+        Args:
+            x (Tensor): Tensor of shape :math:`(*, fc\_layers\_params[0])`.
+
+        Returns:
+            Tensor of shape :math:`(*, fc\_layers\_params[-1])`.
+        """
+        return self.fc_layers(x)

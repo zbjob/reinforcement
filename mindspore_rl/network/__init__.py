@@ -17,7 +17,7 @@
 Network component used to implement polices.
 """
 
-from mindspore_rl.network.fully_connected_net import FullyConnectedNet
+from mindspore_rl.network.fully_connected_net import FullyConnectedNet, FullyConnectedLayers
 from mindspore_rl.network.gru_net import GruNet
 
-__all__ = ["FullyConnectedNet", "GruNet"]
+__all__ = ["FullyConnectedNet", "FullyConnectedLayers", "GruNet"]
