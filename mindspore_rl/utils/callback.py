@@ -154,8 +154,10 @@ class LossCallback(Callback):
             for loss in losses:
                 if _is_tensor(loss):
                     losses_out.append(round(float(np.mean(loss.asnumpy())), 3))
-        if _is_tensor(losses):
+        elif _is_tensor(losses):
             losses_out.append(round(float(np.mean(losses.asnumpy())), 3))
+        else:
+            raise ValueError("Episode {}: losses should be tensor or tensor of list/tuple.".format(params.cur_episode))
 
         # 3 Check loss value and stop if it is NAN or INF.
         for loss in losses_out:

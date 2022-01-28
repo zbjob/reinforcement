@@ -93,6 +93,11 @@ class Space:
             num *= i.item(0)
         return num
 
+    @property
+    def boundary(self):
+        '''The space boundary.'''
+        return self._low, self._high
+
     def _range(self, low, high):
         '''Return the space range.'''
 

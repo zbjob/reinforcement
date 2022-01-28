@@ -143,7 +143,7 @@ class GymEnvironment(Environment):
         """
 
         s0 = self._env.reset()
-        # In same gym version, the obvervation space is announced to be float32, but get float64 from reset and step.
+        # In some gym version, the obvervation space is announced to be float32, but get float64 from reset and step.
         s0 = s0.astype(self.observation_space.np_dtype)
         return s0
 
@@ -164,7 +164,7 @@ class GymEnvironment(Environment):
         """
 
         s, r, done, _ = self._env.step(action)
-        # In same gym version, the obvervation space is announced to be float32, but get float64 from reset and step.
+        # In some gym version, the obvervation space is announced to be float32, but get float64 from reset and step.
         s = s.astype(self.observation_space.np_dtype)
         r = np.array([r]).astype(np.float32)
         done = np.array([done])
@@ -174,6 +174,8 @@ class GymEnvironment(Environment):
         shape = gym_space.shape
         # The dtype get from gym.space is np.int64, but step() accept np.int32 actually.
         dtype = np.int32 if gym_space.dtype.type == np.int64 else gym_space.dtype.type
+        # The float64 is not supported, cast to float32
+        dtype = np.float32 if dtype == np.float64 else dtype
         if isinstance(gym_space, spaces.Discrete):
             return Space(shape, dtype, low=0, high=gym_space.n)
 
