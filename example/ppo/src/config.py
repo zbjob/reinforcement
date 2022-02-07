@@ -71,14 +71,17 @@ algorithm_config = {
     },
     'collect_environment': {
         'number': 30,
+        'num_proc': 5,
         'type': GymEnvironment,
         'params': env_params
     },
     'eval_environment': {
+        'number': 1,
         'type': GymEnvironment,
         'params': eval_env_params
     },
     'replay_buffer': {
+        'number': 1,
         'type': ReplayBuffer,
         'capacity': 1000,
         'data_shape': [(30, 17), (30, 6), (30, 1), (30, 17), (30, 6), (30, 6)],

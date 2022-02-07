@@ -18,13 +18,13 @@ Component used to implement custom environments.
 """
 
 from mindspore_rl.environment.gym_environment import GymEnvironment
-from mindspore_rl.environment.gym_multi_environment import GymMultiEnvironment
 from mindspore_rl.environment.environment import Environment
 from mindspore_rl.environment.tag_environment import TagEnvironment
 from mindspore_rl.environment.ms_environment import ms_register, MsEnvironment
 from mindspore_rl.environment.space import Space
 from mindspore_rl.environment.env_process import EnvironmentProcess
+from mindspore_rl.environment.multi_environment_wrapper import MultiEnvironmentWrapper
 
-__all__ = ["GymEnvironment", "GymMultiEnvironment", "Environment", "Space", "MsEnvironment", "EnvironmentProcess"]
+__all__ = ["GymEnvironment", "MultiEnvironmentWrapper", "Environment", "Space", "MsEnvironment", "EnvironmentProcess"]
 
 ms_register('Tag', TagEnvironment)

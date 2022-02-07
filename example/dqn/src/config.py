@@ -61,14 +61,17 @@ algorithm_config = {
         'params': policy_params
     },
     'collect_environment': {
+        'number': 1,
         'type': GymEnvironment,
         'params': env_params
     },
     'eval_environment': {
+        'number': 1,
         'type': GymEnvironment,
         'params': eval_env_params
     },
-    'replay_buffer': {'type': ReplayBuffer,
+    'replay_buffer': {'number': 1,
+                      'type': ReplayBuffer,
                       'capacity': 100000,
                       'data_shape': [(4,), (1,), (1,), (4,)],
                       'data_type': [ms.float32, ms.int32, ms.float32, ms.float32],
