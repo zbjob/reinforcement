@@ -37,7 +37,7 @@ def train(episode=options.episode):
     '''DDPG train entry.'''
     if options.device_target != 'Auto':
         context.set_context(device_target=options.device_target)
-    if context.get_context('device_target') in ['CPU', 'GPU']:
+    if context.get_context('device_target') in ['CPU']:
         context.set_context(enable_graph_kernel=True)
 
     compute_type = mstype.float32 if options.precision_mode == 'fp32' else mstype.float16
@@ -49,7 +49,7 @@ def train(episode=options.episode):
     ddpg_session = Session(config.algorithm_config)
     loss_cb = LossCallback()
     ckpt_cb = CheckpointCallback(50, config.trainer_params['ckpt_path'])
-    eval_cb = EvaluateCallback(1)
+    eval_cb = EvaluateCallback(10)
     time_cb = TimeCallback()
     cbs = [loss_cb, ckpt_cb, eval_cb, time_cb]
     ddpg_session.run(class_type=DDPGTrainer, episode=episode, params=config.trainer_params, callbacks=cbs)
