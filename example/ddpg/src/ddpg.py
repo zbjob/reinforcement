@@ -53,13 +53,13 @@ class DDPGPolicy():
         """DDPGActorNet is the actor network of DDPG algorithm. It takes a set of state as input
          and outputs miu, sigma of a normal distribution"""
 
-        def __init__(self, input_size, hidden_size1, hidden_size2, output_size):
+        def __init__(self, input_size, hidden_size1, hidden_size2, output_size, compute_type=mindspore.float32):
             super(DDPGPolicy.DDPGActorNet, self).__init__()
             weight_init = VarianceScaling(scale=1./3, mode='fan_in', distribution='uniform')
-            self.dense1 = nn.Dense(input_size, hidden_size1, weight_init=weight_init)
-            self.dense2 = nn.Dense(hidden_size1, hidden_size2, weight_init=weight_init)
+            self.dense1 = nn.Dense(input_size, hidden_size1, weight_init=weight_init).to_float(compute_type)
+            self.dense2 = nn.Dense(hidden_size1, hidden_size2, weight_init=weight_init).to_float(compute_type)
             last_weight_init = Uniform(scale=0.003)
-            self.dense3 = nn.Dense(hidden_size2, output_size, weight_init=last_weight_init)
+            self.dense3 = nn.Dense(hidden_size2, output_size, weight_init=last_weight_init).to_float(compute_type)
             self.tanh = P.Tanh()
             self.relu = P.ReLU()
 
@@ -79,19 +79,24 @@ class DDPGPolicy():
         """DDPGCriticNet is the critic network of DDPG algorithm. It takes a set of states as input
         and outputs the value of input state"""
 
-        def __init__(self, obs_size, action_size, hidden_size1, hidden_size2, output_size):
+        def __init__(self, obs_size, action_size, hidden_size1, hidden_size2, output_size,
+                     compute_type=mindspore.float32):
             super(DDPGPolicy.DDPGCriticNet, self).__init__()
             weight_init = VarianceScaling(scale=1./3, mode='fan_in', distribution='uniform')
-            self.dense1 = nn.Dense(obs_size, hidden_size1, weight_init=weight_init)
-            self.dense2 = nn.Dense(hidden_size1 + action_size, hidden_size2, weight_init=weight_init)
+            self.dense1 = nn.Dense(obs_size, hidden_size1, weight_init=weight_init).to_float(compute_type)
+            self.dense2 = nn.Dense(hidden_size1 + action_size,
+                                   hidden_size2,
+                                   weight_init=weight_init).to_float(compute_type)
             last_weight_init = Uniform(scale=0.003)
-            self.dense3 = nn.Dense(hidden_size2, output_size, weight_init=last_weight_init)
+            self.dense3 = nn.Dense(hidden_size2, output_size, weight_init=last_weight_init).to_float(compute_type)
             self.concat = P.Concat(axis=-1)
             self.relu = P.ReLU()
+            self.cast = P.Cast()
 
         def construct(self, observation, action):
             """predict value"""
             x = self.relu(self.dense1(observation))
+            action = self.cast(action, x.dtype)
             x = self.concat((x, action))
             x = self.relu(self.dense2(x))
             x = self.dense3(x)
@@ -106,12 +111,14 @@ class DDPGPolicy():
         self.actor_net = self.DDPGActorNet(params['state_space_dim'],
                                            params['hidden_size1'],
                                            params['hidden_size2'],
-                                           params['action_space_dim'])
+                                           params['action_space_dim'],
+                                           params['compute_type'])
         self.critic_net = self.DDPGCriticNet(params['state_space_dim'],
                                              params['action_space_dim'],
                                              params['hidden_size1'],
                                              params['hidden_size2'],
-                                             1)
+                                             1,
+                                             params['compute_type'])
 
 
 class DDPGActor(Actor):

@@ -82,10 +82,12 @@ algorithm_config = {
         'params': env_params
     },
     'eval_environment': {
+        'number': 1,
         'type': GymEnvironment,
         'params': eval_env_params
     },
     'replay_buffer': {
+        'number': 1,
         'type': ReplayBuffer,
         'capacity': 100000,
         # obs, actions, rewards, next_obs, done
