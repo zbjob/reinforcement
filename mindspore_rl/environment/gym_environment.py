@@ -70,6 +70,8 @@ class GymEnvironment(Environment):
         step_output_shape = (self._observation_space.shape, self._reward_space.shape, self._done_space.shape)
         self._step_op = P.PyFunc(
             self._step, step_input_type, step_input_shape, step_output_type, step_output_shape)
+        self.action_dtype = self._action_space.ms_dtype
+        self.cast = P.Cast()
 
     def reset(self):
         """
@@ -96,6 +98,8 @@ class GymEnvironment(Environment):
             - done (mindspore.bool\_), whether the simulation finishes or not.
         """
 
+        # Add cast ops for mixed precision case. Redundant cast ops will be eliminated automatically.
+        action = self.cast(action, self.action_dtype)
         return self._step_op(action)
 
     @property
