@@ -21,7 +21,7 @@ import inspect
 import mindspore.nn as nn
 from mindspore.ops import operations as P
 
-from mindspore_rl.environment import GymMultiEnvironment
+from mindspore_rl.environment.multi_environment_wrapper import MultiEnvironmentWrapper
 
 
 class MSRL(nn.Cell):
@@ -142,20 +142,38 @@ class MSRL(nn.Cell):
             - eval_env (object), created evaluate environment object.
         """
 
-        if 'number' in config['collect_environment']:
-            self.env_num = config['collect_environment']['number']
+        collect_env_config = config['collect_environment']
+        collect_proc_num = collect_env_config.get('num_proc')
+        eval_env_config = config['eval_environment']
+        eval_proc_num = eval_env_config.get('num_proc')
+        compulsory_item = ['number', 'type']
+        self._compulsory_items_check(collect_env_config, compulsory_item, 'collect_environment')
+        self._compulsory_items_check(eval_env_config, compulsory_item, 'eval_environment')
 
-        if self.env_num > 1:
-            config['collect_environment']['type'] = GymMultiEnvironment
-            config['collect_environment']['params']['env_nums'] = self.env_num
-            config['eval_environment']['type'] = GymMultiEnvironment
-            config['eval_environment']['params']['env_nums'] = 1
+        num_collect_env = collect_env_config['number']
+        num_eval_env = eval_env_config['number']
+        if num_collect_env > 1:
+            collect_env_list = []
+            eval_env_list = []
+            for i in range(num_collect_env):
+                collect_env_list.append(self._create_instance(config['collect_environment'], i))
+            for j in range(num_eval_env):
+                eval_env_list.append(self._create_instance(config['eval_environment'], j))
+            collect_env = MultiEnvironmentWrapper(collect_env_list, collect_proc_num)
+            eval_env = MultiEnvironmentWrapper(eval_env_list, eval_proc_num)
 
-        env = self._create_instance(config['collect_environment'])
+        else:
+            collect_env = self._create_instance(config['collect_environment'], 0)
+            if num_eval_env > 1:
+                eval_env_list = []
+                for j in range(num_eval_env):
+                    eval_env_list.append(self._create_instance(config['eval_environment'], j))
+                collect_env = MultiEnvironmentWrapper([collect_env], collect_proc_num)
+                eval_env = MultiEnvironmentWrapper(eval_env_list, eval_proc_num)
+            else:
+                eval_env = self._create_instance(config['eval_environment'], 0)
 
-        if 'eval_environment' in config:
-            eval_env = self._create_instance(config['eval_environment'])
-        return env, eval_env
+        return collect_env, eval_env
 
     def __params_generate(self, config, obj, target, attribute):
         """
@@ -186,11 +204,11 @@ class MSRL(nn.Cell):
             replay_buffer (object), created replay buffer object.
         """
         replay_buffer_config = config['replay_buffer']
-        compulsory_item = ['type', 'capacity', 'data_shape', 'data_type']
+        compulsory_item = ['type', 'capacity', 'data_shape', 'data_type', 'number']
         self._compulsory_items_check(replay_buffer_config, compulsory_item,
                                      'replay_buffer')
 
-        num_replay_buffer = replay_buffer_config.get('number')
+        num_replay_buffer = replay_buffer_config['number']
         replay_buffer_type = replay_buffer_config['type']
         capacity = replay_buffer_config['capacity']
         buffer_data_shapes = replay_buffer_config['data_shape']
@@ -200,7 +218,7 @@ class MSRL(nn.Cell):
         if not sample_size:
             sample_size = 32
 
-        if (not num_replay_buffer) or num_replay_buffer == 1:
+        if num_replay_buffer == 1:
             buffer = replay_buffer_type(sample_size, capacity,
                                         buffer_data_shapes, buffer_data_type)
         else:

@@ -16,6 +16,7 @@
 Implementation of the session class.
 """
 from mindspore_rl.core import MSRL
+from mindspore_rl.environment.multi_environment_wrapper import MultiEnvironmentWrapper
 
 class Session():
     """
@@ -59,3 +60,13 @@ class Session():
                     print('eval end')
                 else:
                     print('Please provide a ckpt_path for eval.')
+
+        if isinstance(self.msrl.collect_environment, MultiEnvironmentWrapper):
+            if self.msrl.collect_environment.num_proc:
+                for collect_env in self.msrl.collect_environment.mpe_env_procs:
+                    collect_env.terminate()
+
+        if isinstance(self.msrl.eval_environment, MultiEnvironmentWrapper):
+            if self.msrl.eval_environment.num_proc:
+                for eval_env in self.msrl.eval_environment.mpe_env_procs:
+                    eval_env.terminate()

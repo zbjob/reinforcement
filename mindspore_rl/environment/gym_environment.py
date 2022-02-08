@@ -43,13 +43,13 @@ class GymEnvironment(Environment):
         GymEnvironment<>
     """
 
-    def __init__(self, params):
+    def __init__(self, params, env_id):
         super(GymEnvironment, self).__init__()
         self.params = params
         self._name = params['name']
         self._env = gym.make(self._name)
         if 'seed' in params:
-            self._env.seed(params['seed'])
+            self._env.seed(params['seed'] + env_id * 1000)
         self._observation_space = self._space_adapter(self._env.observation_space)
         self._action_space = self._space_adapter(self._env.action_space)
         self._reward_space = Space((1,), np.float32)
@@ -171,11 +171,18 @@ class GymEnvironment(Environment):
         return s, r, done
 
     def _space_adapter(self, gym_space):
+        """Transfer gym dtype to the dtype that is suitable for MindSpore"""
         shape = gym_space.shape
+        gym_type = gym_space.dtype.type
         # The dtype get from gym.space is np.int64, but step() accept np.int32 actually.
-        dtype = np.int32 if gym_space.dtype.type == np.int64 else gym_space.dtype.type
+        if  gym_type == np.int64:
+            dtype = np.int32
         # The float64 is not supported, cast to float32
-        dtype = np.float32 if dtype == np.float64 else dtype
+        elif gym_type == np.float64:
+            dtype = np.float32
+        else:
+            dtype = gym_type
+
         if isinstance(gym_space, spaces.Discrete):
             return Space(shape, dtype, low=0, high=gym_space.n)
 

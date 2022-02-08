@@ -58,10 +58,12 @@ algorithm_config = {
         'params': policy_params
     },
     'collect_environment': {
+        'number': 1,
         'type': GymEnvironment,
         'params': env_params
     },
     'eval_environment': {
+        'number': 1,
         'type': GymEnvironment,
         'params': env_params
     },
