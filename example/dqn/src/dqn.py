@@ -116,6 +116,7 @@ class DQNActor(Actor):
             self.target_network.get_parameters())
         self.reward = Tensor([1,], ms.float32)
         self.penalty = Tensor([-1,], ms.float32)
+        self.print = P.Print()
 
     def act(self, phase, params):
         if phase == 1:
