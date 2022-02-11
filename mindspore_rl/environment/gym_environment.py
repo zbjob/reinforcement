@@ -32,13 +32,14 @@ class GymEnvironment(Environment):
     Args:
         params (dict): A dictionary contains all the parameters which are used to create the
             instance of GymEnvironment, such as name of environment.
+        env_id (int): A integer which is used to set the seed of this environment.
 
     Supported Platforms:
         ``Ascend`` ``GPU`` ``CPU``
 
     Examples:
         >>> env_params = {'name': 'CartPole-v0'}
-        >>> environment = GymEnvironment(env_params)
+        >>> environment = GymEnvironment(env_params, 0)
         >>> print(environment)
         GymEnvironment<>
     """
