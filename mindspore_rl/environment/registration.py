@@ -24,10 +24,11 @@ class Registry:
         - **domain** (str): Environment domain.
 
     Examples:
+        >>> from mindspore_rl.environment.tag_environment import TagEnvironment
         >>> register = Registry('MindSpore')
         >>> register.register('Tag', TagEnvironment)
-        >>> Print(register)
-        ['Tag']
+        >>> print(register)
+        Domain MindSpore, registered environment dict_keys(['Tag'])
     """
 
     def __init__(self, domain):
