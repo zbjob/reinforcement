@@ -44,7 +44,7 @@ class GymEnvironment(Environment):
         GymEnvironment<>
     """
 
-    def __init__(self, params, env_id):
+    def __init__(self, params, env_id=0):
         super(GymEnvironment, self).__init__()
         self.params = params
         self._name = params['name']

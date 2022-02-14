@@ -34,6 +34,7 @@ class EnvironmentProcess(Process):
         - **initial_states** (Queue): The queue used to pass initial states to the caller process.
 
     Examples:
+        >>> from multiprocessing import Queue
         >>> actions = Queue()
         >>> observations = Queue()
         >>> initial_states = Queue()
@@ -41,8 +42,7 @@ class EnvironmentProcess(Process):
         >>> env_num = 2
         >>> env_params = {'name': 'CartPole-v0'}
         >>> multi_env = [GymEnvironment(env_params), GymEnvironment(env_params)]
-        >>> env_proc = GymEnvironmentProcess(proc_no, env_num, multi_env, \
-                actions, observations, initial_states)
+        >>> env_proc = EnvironmentProcess(proc_no, env_num, multi_env, actions, observations, initial_states)
         >>> env_proc.start()
     """
 
