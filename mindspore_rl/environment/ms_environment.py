@@ -62,14 +62,17 @@ class MsEnvironment(Environment):
             |                    |  step_cost                   |   0.01           |  step cost                 |
             +--------------------+------------------------------+------------------+----------------------------+
 
+    Supported Platforms:
+        "GPU"
+
     Examples:
         >>> config = {'name': 'Tag', 'predator_num': 4}
         >>> env = MsEnvironment(config)
         >>> observation = env.reset()
         >>> action = Tensor(env.action_space.sample())
-        >>> ret = env.step(action)
-        >>> print(len(ret))
-        3
+        >>> observation, reward, done = env.step(action)
+        >>> print(observation.shape)
+        (2, 5, 21)
     """
 
     def __init__(self, kwargs=None):
@@ -86,9 +89,15 @@ class MsEnvironment(Environment):
         Returns:
             Tensor, the initial observation.
 
+        Supported Platforms:
+            "GPU"
+
         Examples:
-            >>> env = MsEnvironment('Tag', predator_num=4)
+            >>> config = {'name': 'Tag', 'predator_num': 4}
+            >>> env = MsEnvironment(config)
             >>> observation = env.reset()
+            >>> print(observation.shape)
+            (2, 5, 21)
         """
         return self.env.reset()
 
@@ -106,12 +115,17 @@ class MsEnvironment(Environment):
             - **reward** (Tensor) - Amount of reward returned by the environment.
             - **done** (Tensor) - Whether the episode has ended.
 
+        Supported Platforms:
+            "GPU"
+
         Examples:
-            >>> env = MsEnvironment('Tag', predator_num=4)
+            >>> config = {'name': 'Tag', 'predator_num': 4}
+            >>> env = MsEnvironment(config)
             >>> observation = env.reset()
             >>> action = Tensor(env.action_space.sample())
-            >>> ret = env.step(action)
-            >>> print(len(ret))
+            >>> observation, reward, done = env.step(action)
+            >>> print(observation.shape)
+            (2, 5, 21)
         """
         return self.env.step(action)
 
