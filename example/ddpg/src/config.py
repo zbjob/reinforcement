@@ -62,8 +62,6 @@ algorithm_config = {
         'params': actor_params,
         'policies': [],
         'networks': ['actor_net'],
-        'environment': True,
-        'eval_environment': True,
 
     },
     'learner': {

@@ -17,10 +17,8 @@ Implementation of MSRL class.
 """
 
 import inspect
-
 import mindspore.nn as nn
 from mindspore.ops import operations as P
-
 from mindspore_rl.environment.multi_environment_wrapper import MultiEnvironmentWrapper
 
 
@@ -34,13 +32,12 @@ class MSRL(nn.Cell):
 
     .. code-block::
 
-        agent_act_init
-        agent_act_collect
-        agent_act_eval
         agent_act
-        agent_reset
         sample_buffer
         agent_learn
+        replay_buffer_sample
+        replay_buffer_insert
+        replay_buffer_reset
 
     Args:
         config(dict): provides the algorithm configuration.
@@ -51,7 +48,9 @@ class MSRL(nn.Cell):
               - key: 'learner',            value: the learner configuration (dict).
               - key: 'policy_and_network', value: the policy and networks used by
                 actors and learners (dict).
-              - key: 'env',                value: the environment configuration (dict).
+              - key: 'collect_environment',     value: the collect environment configuration (dict).
+              - key: 'eval_environment',        value: the eval environment configuration (dict).
+              - key: 'replay_buffer',           value: the replay buffer configuration (dict).
 
             - Second level: the configuration of each algorithm component.
 
@@ -64,34 +63,27 @@ class MSRL(nn.Cell):
                 actor/learner (list).
               - key: 'networks',    value: the list of networks used by the
                 actor/learner (list).
-              - key: 'environment', value: True if the component needs to interact
-                with the environment, False otherwise (Bool).
-              - key: 'buffer',      value: the buffer configuration (dict).
+              - key: 'pass_environment', value: True user needs to pass the environment
+                instance into actor, False otherwise (Bool).
     """
 
     def __init__(self, config):
         super(MSRL, self).__init__()
         self.actors = []
         self.learner = None
-        self.trainer = None
-        self.policies = {}
-        self.network = {}
         self.envs = []
-        self.agent = None
+        self.agent = []
         self.buffers = []
-        self.env_num = 1
         self.collect_environment = None
         self.eval_environment = None
 
         # apis
-        self.agent_act_init = None
         self.agent_act = None
-        self.agent_evaluate = None
-        self.update_buffer = None
-        self.agent_reset = None
-        self.sample_buffer = None
         self.agent_learn = None
-        self.buffer_full = None
+        self.replay_buffer_sample = None
+        self.replay_buffer_insert = None
+        self.replay_buffer_full = None
+        self.replay_buffer_reset = None
 
         compulsory_items = [
             'eval_environment', 'collect_environment', 'policy_and_network',
@@ -129,7 +121,7 @@ class MSRL(nn.Cell):
             obj = class_type(params, actor_id)
         return obj
 
-    def __create_environments(self, config):
+    def __create_environments(self, config, num_agent=1):
         """
         Create the environments object from the configuration file, and return the instance
         of environment and evaluate environment.
@@ -146,32 +138,49 @@ class MSRL(nn.Cell):
         collect_proc_num = collect_env_config.get('num_proc')
         eval_env_config = config['eval_environment']
         eval_proc_num = eval_env_config.get('num_proc')
-        compulsory_item = ['number', 'type']
+        compulsory_item = ['type']
         self._compulsory_items_check(collect_env_config, compulsory_item, 'collect_environment')
         self._compulsory_items_check(eval_env_config, compulsory_item, 'eval_environment')
 
-        num_collect_env = collect_env_config['number']
-        num_eval_env = eval_env_config['number']
-        if num_collect_env > 1:
-            collect_env_list = []
-            eval_env_list = []
-            for i in range(num_collect_env):
-                collect_env_list.append(self._create_instance(config['collect_environment'], i))
-            for j in range(num_eval_env):
-                eval_env_list.append(self._create_instance(config['eval_environment'], j))
-            collect_env = MultiEnvironmentWrapper(collect_env_list, collect_proc_num)
-            eval_env = MultiEnvironmentWrapper(eval_env_list, eval_proc_num)
+        num_collect_env = collect_env_config.get('number')
+        num_eval_env = eval_env_config.get('number')
 
-        else:
+        if not config['collect_environment'].get('params'):
+            config['collect_environment']['params'] = {}
+        if not config['eval_environment'].get('params'):
+            config['eval_environment']['params'] = {}
+
+        config['collect_environment']['params']['num_agent'] = num_agent
+        config['eval_environment']['params']['num_agent'] = num_agent
+
+        if (num_collect_env is None) and (num_eval_env is None):
             collect_env = self._create_instance(config['collect_environment'], 0)
-            if num_eval_env > 1:
+            eval_env = self._create_instance(config['eval_environment'], 0)
+
+        elif (num_collect_env is None) or (num_eval_env is None):
+            raise ValueError("You must give both number of collect_environment and number of \
+                              eval_environment or none of them")
+        else:
+            if num_collect_env > 1:
+                collect_env_list = []
                 eval_env_list = []
+                for i in range(num_collect_env):
+                    collect_env_list.append(self._create_instance(config['collect_environment'], i))
                 for j in range(num_eval_env):
                     eval_env_list.append(self._create_instance(config['eval_environment'], j))
-                collect_env = MultiEnvironmentWrapper([collect_env], collect_proc_num)
+                collect_env = MultiEnvironmentWrapper(collect_env_list, collect_proc_num)
                 eval_env = MultiEnvironmentWrapper(eval_env_list, eval_proc_num)
+
             else:
-                eval_env = self._create_instance(config['eval_environment'], 0)
+                collect_env = self._create_instance(config['collect_environment'], 0)
+                if num_eval_env > 1:
+                    eval_env_list = []
+                    for j in range(num_eval_env):
+                        eval_env_list.append(self._create_instance(config['eval_environment'], j))
+                    collect_env = MultiEnvironmentWrapper([collect_env], collect_proc_num)
+                    eval_env = MultiEnvironmentWrapper(eval_env_list, eval_proc_num)
+                else:
+                    eval_env = self._create_instance(config['eval_environment'], 0)
 
         return collect_env, eval_env
 
@@ -192,7 +201,7 @@ class MSRL(nn.Cell):
             if attr[0] in config[target][attribute]:
                 config[target]['params'][attr[0]] = attr[1]
 
-    def __create_replay_buffer(self, config):
+    def __create_replay_buffer(self, replay_buffer_config):
         """
         Create the replay buffer object from the configuration file, and return the instance
         of replay buffer.
@@ -203,7 +212,6 @@ class MSRL(nn.Cell):
         Returns:
             replay_buffer (object), created replay buffer object.
         """
-        replay_buffer_config = config['replay_buffer']
         compulsory_item = ['type', 'capacity', 'data_shape', 'data_type', 'number']
         self._compulsory_items_check(replay_buffer_config, compulsory_item,
                                      'replay_buffer')
@@ -216,7 +224,7 @@ class MSRL(nn.Cell):
 
         sample_size = replay_buffer_config.get('sample_size')
         if not sample_size:
-            sample_size = 32
+            sample_size = 1
 
         if num_replay_buffer == 1:
             buffer = replay_buffer_type(sample_size, capacity,
@@ -224,8 +232,9 @@ class MSRL(nn.Cell):
         else:
             buffer = [
                 replay_buffer_type(sample_size, capacity, buffer_data_shapes,
-                                   buffer_data_type) for _ in num_replay_buffer
+                                   buffer_data_type) for _ in range(num_replay_buffer)
             ]
+            buffer = nn.CellList(buffer)
         return buffer
 
     def __create_policy_and_network(self, config):
@@ -252,6 +261,7 @@ class MSRL(nn.Cell):
             if not params.get('action_space_dim'):
                 config['policy_and_network']['params'][
                     'action_space_dim'] = self.collect_environment.action_space.num_values
+            config['policy_and_network']['params']['environment_config'] = self.collect_environment.config
 
         policy_and_network = self._create_instance(policy_and_network_config)
         return policy_and_network
@@ -259,7 +269,6 @@ class MSRL(nn.Cell):
     def __create_actor(self, config, policy_and_network):
         """
         Create an instance of actor or a list of instances of actor
-
         Args:
             config (dict): A dictionary of configuration
             policy_and_network (object): The instance of policy_and_network
@@ -274,11 +283,10 @@ class MSRL(nn.Cell):
         params = config['actor'].get('params')
         if not params:
             config['actor']['params'] = {}
-        if config['actor'].get('environment'):
-            config['actor']['params'][
-                'collect_environment'] = self.collect_environment
-            config['actor']['params'][
-                'eval_environment'] = self.eval_environment
+        config['actor']['params'][
+            'collect_environment'] = self.collect_environment
+        config['actor']['params'][
+            'eval_environment'] = self.eval_environment
 
         config['actor']['params']['replay_buffer'] = self.buffers
 
@@ -300,7 +308,6 @@ class MSRL(nn.Cell):
     def __create_learner(self, config, policy_and_network):
         """
         Create an instance of learner or a list of instances of learner
-
         Args:
             config (dict): A dictionary of configuration
             policy_and_network (object): The instance of policy_and_network
@@ -312,7 +319,7 @@ class MSRL(nn.Cell):
         self._compulsory_items_check(config['learner'], compulsory_items,
                                      'learner')
 
-        params = config['actor'].get('params')
+        params = config['learner'].get('params')
         if not params:
             config['learner']['params'] = {}
         if config['learner'].get('networks'):
@@ -336,25 +343,26 @@ class MSRL(nn.Cell):
         Args:
             config (dict): algorithm configuration file.
         """
-        # ---------------------- Environment ----------------------
-        self.collect_environment, self.eval_environment = self.__create_environments(
-            config)
-
         # ---------------------- ReplayBuffer ----------------------
         replay_buffer = config.get('replay_buffer')
         if replay_buffer:
-            self.buffers = self.__create_replay_buffer(config)
-            self.replay_buffer_sample = self.buffers.sample
-            self.replay_buffer_insert = self.buffers.insert
-            self.replay_buffer_full = self.buffers.full
-            self.replay_buffer_reset = self.buffers.reset
+            self.buffers = self.__create_replay_buffer(replay_buffer)
+            if replay_buffer.get('number') == 1:
+                self.replay_buffer_sample = self.buffers.sample
+                self.replay_buffer_insert = self.buffers.insert
+                self.replay_buffer_full = self.buffers.full
+                self.replay_buffer_reset = self.buffers.reset
 
         # ---------------------- Agent ----------------------
         agent_config = config.get('agent')
         if not agent_config:
+            # ---------------------- Environment ----------------------
+            self.collect_environment, self.eval_environment = self.__create_environments(config)
+            # ---------------------------------------------------------
             policy_and_network = self.__create_policy_and_network(config)
             self.actors = self.__create_actor(config, policy_and_network)
             self.learner = self.__create_learner(config, policy_and_network)
+
             self.agent_act = self.actors.act
             self.agent_learn = self.learner.learn
         else:
@@ -375,7 +383,6 @@ class MSRL(nn.Cell):
     def get_replay_buffer_elements(self, transpose=False, shape=None):
         """
         It will return all the elements in the replay buffer.
-
         Args:
             transpose (boolean): whether the output element needs to be transpose,
                 if transpose is true, shape will also need to be filled. Default: False

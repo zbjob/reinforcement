@@ -21,20 +21,19 @@ from mindspore_rl.environment import GymEnvironment
 from mindspore_rl.core.replay_buffer import ReplayBuffer
 from .dqn import DQNActor, DQNLearner, DQNPolicy
 
-learner_params = {'gamma': 0.99}
+learner_params = {'gamma': 0.99, 'lr': 0.001}
 trainer_params = {
     'num_evaluate_episode': 10,
     'ckpt_path': './ckpt',
 }
 
-env_params = {'name': 'CartPole-v0'}
+collect_env_params = {'name': 'CartPole-v0'}
 eval_env_params = {'name': 'CartPole-v0'}
 
 policy_params = {
     'epsi_high': 0.1,
     'epsi_low': 0.1,
     'decay': 200,
-    'lr': 0.001,
     'state_space_dim': 0,
     'action_space_dim': 0,
     'hidden_size': 100,
@@ -44,17 +43,13 @@ algorithm_config = {
     'actor': {
         'number': 1,
         'type': DQNActor,
-        'params': None,
         'policies': ['init_policy', 'collect_policy', 'evaluate_policy'],
-        'networks': ['policy_network', 'target_network'],
-        'environment': True,
-        'eval_environment': True,
     },
     'learner': {
         'number': 1,
         'type': DQNLearner,
         'params': learner_params,
-        'networks': ['target_network', 'policy_network_train']
+        'networks': ['policy_network', 'target_network']
     },
     'policy_and_network': {
         'type': DQNPolicy,
@@ -63,7 +58,7 @@ algorithm_config = {
     'collect_environment': {
         'number': 1,
         'type': GymEnvironment,
-        'params': env_params
+        'params': collect_env_params
     },
     'eval_environment': {
         'number': 1,

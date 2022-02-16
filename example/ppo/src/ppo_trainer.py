@@ -40,7 +40,7 @@ class PPOTrainer(Trainer):
 
     def trainable_variables(self):
         """Trainable variables for saving."""
-        trainable_variables = {"actor_net": self.msrl.actors.actor_net}
+        trainable_variables = {"actor_net": self.msrl.learner.actor_net}
         return trainable_variables
 
     @ms_function
