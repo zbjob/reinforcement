@@ -13,13 +13,11 @@
 # limitations under the License.
 # ============================================================================
 """DDPG"""
-import copy
 import mindspore
 import mindspore.nn as nn
 from mindspore.ops import operations as P
 from mindspore.ops import composite as C
 from mindspore.common.initializer import VarianceScaling, Uniform
-from mindspore.common.api import cells_compile_cache
 from mindspore import Tensor
 
 from mindspore_rl.agent.actor import Actor
@@ -70,11 +68,6 @@ class DDPGPolicy():
             x = self.tanh(self.dense3(x))
             return x
 
-        def clone(self):
-            new_obj = copy.deepcopy(self)
-            cells_compile_cache[id(new_obj)] = new_obj.compile_cache
-            return new_obj
-
     class DDPGCriticNet(nn.Cell):
         """DDPGCriticNet is the critic network of DDPG algorithm. It takes a set of states as input
         and outputs the value of input state"""
@@ -102,24 +95,31 @@ class DDPGPolicy():
             x = self.dense3(x)
             return x
 
-        def clone(self):
-            new_obj = copy.deepcopy(self)
-            cells_compile_cache[id(new_obj)] = new_obj.compile_cache
-            return new_obj
-
     def __init__(self, params):
+        # nn.Cell do not support clone or deepcopy. Create target network manually.
         self.actor_net = self.DDPGActorNet(params['state_space_dim'],
                                            params['hidden_size1'],
                                            params['hidden_size2'],
                                            params['action_space_dim'],
                                            params['compute_type'])
+        self.target_actor_net = self.DDPGActorNet(params['state_space_dim'],
+                                                  params['hidden_size1'],
+                                                  params['hidden_size2'],
+                                                  params['action_space_dim'],
+                                                  params['compute_type'])
+
         self.critic_net = self.DDPGCriticNet(params['state_space_dim'],
                                              params['action_space_dim'],
                                              params['hidden_size1'],
                                              params['hidden_size2'],
                                              1,
                                              params['compute_type'])
-
+        self.target_critic_net = self.DDPGCriticNet(params['state_space_dim'],
+                                                    params['action_space_dim'],
+                                                    params['hidden_size1'],
+                                                    params['hidden_size2'],
+                                                    1,
+                                                    params['compute_type'])
 
 class DDPGActor(Actor):
     """This is an actor class of DDPG algorithm, which is used to interact with environment, and
@@ -204,8 +204,8 @@ class DDPGLearner(Learner):
         actor_optimizer = nn.Adam(self.actor_net.trainable_params(), learning_rate=params['actor_lr'])
 
         # loss network
-        self.target_actor_net = self.actor_net.clone()
-        self.target_critic_net = self.critic_net.clone()
+        self.target_actor_net = params['target_actor_net']
+        self.target_critic_net = params['target_critic_net']
         critic_loss_cell = self.CriticLossCell(gamma, self.target_actor_net, self.target_critic_net, self.critic_net)
         critic_loss_cell = self.CriticLossCell(gamma, self.target_actor_net, self.target_critic_net, self.critic_net)
         actor_loss_cell = self.ActorLossCell(self.actor_net, self.critic_net)

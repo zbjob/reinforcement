@@ -16,7 +16,6 @@
 DDPG config.
 """
 
-import mindspore
 from mindspore_rl.environment import GymEnvironment
 from mindspore_rl.core.replay_buffer import ReplayBuffer
 from .ddpg import DDPGActor, DDPGLearner, DDPGPolicy
@@ -70,7 +69,7 @@ algorithm_config = {
         'number': 1,
         'type': DDPGLearner,
         'params': learner_params,
-        'networks': ['actor_net', 'critic_net', 'ddpg_net_train']
+        'networks': ['actor_net', 'target_actor_net', 'critic_net', 'target_critic_net', 'ddpg_net_train']
     },
     'policy_and_network': {
         'type': DDPGPolicy,
@@ -90,11 +89,6 @@ algorithm_config = {
         'number': 1,
         'type': ReplayBuffer,
         'capacity': 100000,
-        # obs, actions, rewards, next_obs, done
-        'data_shape': [(17,), (6,), (1,), (17,), (1,)],
-        'data_type': [
-            mindspore.float32, mindspore.float32, mindspore.float32, mindspore.float32, mindspore.bool_
-        ],
         'sample_size': 64
     }
 }
