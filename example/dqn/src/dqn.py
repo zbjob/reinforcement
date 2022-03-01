@@ -41,23 +41,6 @@ def _parameter_update(policy_param, target_param):
 class DQNPolicy():
     """DQN Policy"""
 
-    class PolicyNetWithLossCell(nn.Cell):
-        """DQN policy network with loss cell"""
-
-        def __init__(self, backbone, loss_fn):
-            super(DQNPolicy.PolicyNetWithLossCell,
-                  self).__init__(auto_prefix=False)
-            self._backbone = backbone
-            self._loss_fn = loss_fn
-            self.gather = P.GatherD()
-
-        def construct(self, x, a0, label):
-            """constructor for Loss Cell"""
-            out = self._backbone(x)
-            out = self.gather(out, 1, a0)
-            loss = self._loss_fn(out, label)
-            return loss
-
     def __init__(self, params):
         self.policy_network = FullyConnectedNet(
             params['state_space_dim'],
@@ -70,14 +53,6 @@ class DQNPolicy():
             params['action_space_dim'],
             params['compute_type'])
 
-        optimizer = nn.Adam(
-            self.policy_network.trainable_params(),
-            learning_rate=params['lr'])
-        loss_fn = nn.MSELoss()
-        loss_q_net = self.PolicyNetWithLossCell(self.policy_network, loss_fn)
-        self.policy_network_train = nn.TrainOneStepCell(loss_q_net, optimizer)
-        self.policy_network_train.set_train(mode=True)
-
         self.init_policy = RandomPolicy(params['action_space_dim'])
         self.collect_policy = EpsilonGreedyPolicy(self.policy_network, (1, 1), params['epsi_high'],
                                                   params['epsi_low'], params['decay'], params['action_space_dim'])
@@ -89,16 +64,12 @@ class DQNActor(Actor):
 
     def __init__(self, params):
         super(DQNActor, self).__init__()
-        self.policy_network = params['policy_network']
-        self.target_network = params['target_network']
         self.init_policy = params['init_policy']
         self.collect_policy = params['collect_policy']
         self.evaluate_policy = params['evaluate_policy']
         self._environment = params['collect_environment']
         self._eval_env = params['eval_environment']
         self.replay_buffer = params['replay_buffer']
-
-        self.id = 0
         self.step = Parameter(
             Tensor(
                 0,
@@ -110,12 +81,7 @@ class DQNActor(Actor):
         self.ones = P.Ones()
         self.abs = P.Abs()
         self.assign = P.Assign()
-        self.hyper_map = C.HyperMap()
         self.select = P.Select()
-        self.policy_param = ParameterTuple(
-            self.policy_network.get_parameters())
-        self.target_param = ParameterTuple(
-            self.target_network.get_parameters())
         self.reward = Tensor([1,], ms.float32)
         self.penalty = Tensor([-1,], ms.float32)
         self.print = P.Print()
@@ -148,14 +114,6 @@ class DQNActor(Actor):
         self.print("Phase is incorrect")
         return 0
 
-    def update(self):
-        """Update the network parameters"""
-        assign_result = self.hyper_map(
-            _update_opt,
-            self.policy_param,
-            self.target_param)
-        return assign_result
-
     def get_action(self, phase, params):
         """Default get_action function"""
         return
@@ -164,15 +122,44 @@ class DQNActor(Actor):
 class DQNLearner(Learner):
     """DQN Learner"""
 
+    class PolicyNetWithLossCell(nn.Cell):
+        """DQN policy network with loss cell"""
+
+        def __init__(self, backbone, loss_fn):
+            super(DQNLearner.PolicyNetWithLossCell,
+                  self).__init__(auto_prefix=False)
+            self._backbone = backbone
+            self._loss_fn = loss_fn
+            self.gather = P.GatherD()
+
+        def construct(self, x, a0, label):
+            """constructor for Loss Cell"""
+            out = self._backbone(x)
+            out = self.gather(out, 1, a0)
+            loss = self._loss_fn(out, label)
+            return loss
+
     def __init__(self, params=None):
         super(DQNLearner, self).__init__()
+        self.policy_network = params['policy_network']
         self.target_network = params['target_network']
-        self.policy_network_train = params['policy_network_train']
+        self.policy_param = ParameterTuple(
+            self.policy_network.get_parameters())
+        self.target_param = ParameterTuple(
+            self.target_network.get_parameters())
+
+        optimizer = nn.Adam(
+            self.policy_network.trainable_params(),
+            learning_rate=params['lr'])
+        loss_fn = nn.MSELoss()
+        loss_q_net = self.PolicyNetWithLossCell(self.policy_network, loss_fn)
+        self.policy_network_train = nn.TrainOneStepCell(loss_q_net, optimizer)
+        self.policy_network_train.set_train(mode=True)
 
         self.gamma = Tensor(params['gamma'], ms.float32)
         self.expand_dims = P.ExpandDims()
         self.reshape = P.Reshape()
-
+        self.hyper_map = C.HyperMap()
         self.ones_like = P.OnesLike()
         self.select = P.Select()
 
@@ -192,3 +179,11 @@ class DQNLearner(Learner):
 
         success = self.policy_network_train(s0, a0, y_true)
         return success
+
+    def update(self):
+        """Update the network parameters"""
+        assign_result = self.hyper_map(
+            _update_opt,
+            self.policy_param,
+            self.target_param)
+        return assign_result

@@ -30,17 +30,17 @@ class ACTrainer(Trainer):
         nn.Cell.__init__(self, auto_prefix=False)
         self.num_evaluate_episode = params['num_evaluate_episode']
         self.zero = Parameter(Tensor(0, mindspore.float32), name='zero')
-        self.done_r = Parameter(
-            Tensor([-20.0], mindspore.float32), name='done_r')
+        self.done_r = Parameter(Tensor([-20.0], mindspore.float32), name='done_r')
         self.zero_value = Tensor(0, mindspore.float32)
         self.squeeze = P.Squeeze()
         self.false = Tensor(False, mindspore.bool_)
         self.less = P.Less()
+        self.select = P.Select()
         super(ACTrainer, self).__init__(msrl)
 
     def trainable_variables(self):
         '''Trainable variables for saving.'''
-        trainable_variables = {"actor_net": self.msrl.actors.actor_net}
+        trainable_variables = {"actor_net": self.msrl.learner.actor_net}
         return trainable_variables
 
     @ms_function

@@ -21,12 +21,9 @@ from .ac import ACPolicyAndNetwork, ACLearner, ACActor
 
 env_params = {'name': 'CartPole-v0'}
 policy_params = {
-    'alr': 0.001,
-    'clr': 0.01,
     'state_space_dim': 4,
     'action_space_dim': 2,
     'hidden_size': 20,
-    'gamma': 0.9,
 }
 trainer_params = {
     'num_evaluate_episode': 10,
@@ -36,16 +33,14 @@ learner_params = {
     'gamma': 0.9,
     'state_space_dim': 4,
     'action_space_dim': 2,
+    'alr': 0.001,
+    'clr': 0.01,
 }
 algorithm_config = {
     'actor': {
         'number': 1,
         'type': ACActor,
-        'params': None,
-        'policies': [],
-        'networks': ['actor_net'],
-        'environment': True,
-        'eval_environment': True,
+        'policies': ['collect_policy', 'eval_policy'],
     },
     'learner': {
         'number': 1,

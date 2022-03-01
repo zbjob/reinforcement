@@ -39,8 +39,6 @@ algorithm_config = {
         'params': None,
         'policies': [],
         'networks': ['a2c_net'],
-        'environment': True,
-        'eval_environment': True,
     },
     'learner': {
         'number': 1,

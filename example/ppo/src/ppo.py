@@ -109,13 +109,88 @@ class PPOPolicy():
             x = self.cast(x, mindspore.float32)
             return x
 
+
+    class CollectPolicy(nn.Cell):
+        """Collect Policy"""
+        def __init__(self, actor_net):
+            super(PPOPolicy.CollectPolicy, self).__init__()
+            self.actor_net = actor_net
+            self.norm_dist = msd.Normal()
+        def construct(self, params):
+            miu, sigma = self.actor_net(params)
+            action = self.norm_dist.sample((), miu, sigma)
+            return action, miu, sigma
+
+
+    class EvalPolicy(nn.Cell):
+        """Eval Policy"""
+        def __init__(self, actor_net):
+            super(PPOPolicy.EvalPolicy, self).__init__()
+            self.actor_net = actor_net
+        def construct(self, params):
+            miu, _ = self.actor_net(params)
+            return miu
+
+
+    def __init__(self, params):
+        self.actor_net = self.PPOActorNet(params['state_space_dim'],
+                                          params['hidden_size1'],
+                                          params['hidden_size2'],
+                                          params['action_space_dim'],
+                                          params['sigma_init_std'],
+                                          params['compute_type'])
+        self.critic_net = self.PPOCriticNet(params['state_space_dim'],
+                                            params['hidden_size1'],
+                                            params['hidden_size2'], 1,
+                                            params['compute_type'])
+
+        self.collect_policy = self.CollectPolicy(self.actor_net)
+        self.eval_policy = self.EvalPolicy(self.actor_net)
+
+
+class PPOActor(Actor):
+    """This is an actor class of PPO algorithm, which is used to interact with environment, and
+    generate/insert experience (data) """
+
+    def __init__(self, params=None):
+        super(PPOActor, self).__init__()
+        self._params_config = params
+        self._environment = params['collect_environment']
+        self._eval_env = params['eval_environment']
+        self._buffer = params['replay_buffer']
+        self.collect_policy = params['collect_policy']
+        self.eval_policy = params['eval_policy']
+        self.norm_dist = msd.Normal()
+        self.print = P.Print()
+
+    def act(self, phase, params):
+        """collect experience and insert to replay buffer (used during training)"""
+        if phase == 2:
+            action, miu, sigma = self.collect_policy(params)
+            new_state, reward, _ = self._environment.step(action)
+            return reward, new_state, action, miu, sigma
+        if phase == 3:
+            action = self.eval_policy(params)
+            new_state, reward, _ = self._eval_env.step(action)
+            return reward, new_state
+        self.print("Phase is incorrect")
+        return 0
+
+    def get_action(self, phase, params):
+        """Default get_action function"""
+        return
+
+
+class PPOLearner(Learner):
+    """This is the learner class of PPO algorithm, which is used to update the policy net"""
+
     class PPOLossCell(nn.Cell):
         """PPOLossCell calculates the loss of PPO algorithm"""
 
         def __init__(self, actor_net, critic_net, epsilon, critic_coef):
-            super(PPOPolicy.PPOLossCell, self).__init__(auto_prefix=False)
+            super(PPOLearner.PPOLossCell, self).__init__(auto_prefix=False)
             self.actor_net = actor_net
-            self._critic_net = critic_net
+            self.critic_net = critic_net
             self.epsilon = epsilon
             self.critic_coef = critic_coef
 
@@ -146,7 +221,7 @@ class PPOPolicy():
             actor_loss = self.reduce_mean(-self.minimum(surr, clip_surr))
 
             # Critic Loss
-            value_prediction = self._critic_net(states)
+            value_prediction = self.critic_net(states)
             value_prediction = self.squeeze(value_prediction)
             squared_advantage_critic = self.square(discounted_r -
                                                    value_prediction)
@@ -157,17 +232,15 @@ class PPOPolicy():
             total_loss = actor_loss + critic_loss
             return total_loss
 
+
     def __init__(self, params):
-        self.actor_net = self.PPOActorNet(params['state_space_dim'],
-                                          params['hidden_size1'],
-                                          params['hidden_size2'],
-                                          params['action_space_dim'],
-                                          params['sigma_init_std'],
-                                          params['compute_type'])
-        self.critic_net = self.PPOCriticNet(params['state_space_dim'],
-                                            params['hidden_size1'],
-                                            params['hidden_size2'], 1,
-                                            params['compute_type'])
+        super(PPOLearner, self).__init__()
+        self._params_config = params
+        self.gamma = Tensor(self._params_config['gamma'], mindspore.float32)
+        self.iter_times = params['iter_times']
+        self.actor_net = params['actor_net']
+        self.critic_net = params['critic_net']
+
         trainable_parameter = self.critic_net.trainable_params() + \
             self.actor_net.trainable_params()
         optimizer_ppo = nn.Adam(trainable_parameter,
@@ -176,53 +249,8 @@ class PPOPolicy():
             self.actor_net, self.critic_net,
             Tensor(params['epsilon'], mindspore.float32),
             Tensor(params['critic_coef'], mindspore.float32))
-        self.ppo_net_train = nn.TrainOneStepCell(ppo_loss_net, optimizer_ppo)
-        self.ppo_net_train.set_train(mode=True)
-
-
-class PPOActor(Actor):
-    """This is an actor class of PPO algorithm, which is used to interact with environment, and
-    generate/insert experience (data) """
-
-    def __init__(self, params=None):
-        super(PPOActor, self).__init__()
-        self._params_config = params
-        self._environment = params['collect_environment']
-        self._eval_env = params['eval_environment']
-        self._buffer = params['replay_buffer']
-        self.actor_net = params['actor_net']
-        self.norm_dist = msd.Normal()
-        self.print = P.Print()
-
-    def act(self, phase, params):
-        """collect experience and insert to replay buffer (used during training)"""
-        if phase == 2:
-            miu, sigma = self.actor_net(params)
-            action = self.norm_dist.sample((), miu, sigma)
-            new_state, reward, _ = self._environment.step(action)
-            return reward, new_state, action, miu, sigma
-        if phase == 3:
-            action, _ = self.actor_net(params)
-            new_state, reward, _ = self._eval_env.step(action)
-            return reward, new_state
-        self.print("Phase is incorrect")
-        return 0
-
-    def get_action(self, phase, params):
-        """Default get_action function"""
-        return
-
-
-class PPOLearner(Learner):
-    """This is the learner class of PPO algorithm, which is used to update the policy net"""
-
-    def __init__(self, params):
-        super(PPOLearner, self).__init__()
-        self._params_config = params
-        self.gamma = Tensor(self._params_config['gamma'], mindspore.float32)
-        self.iter_times = params['iter_times']
-        self._ppo_net_train = params['ppo_net_train']
-        self._critic_net = params['critic_net']
+        self._ppo_net_train = nn.TrainOneStepCell(ppo_loss_net, optimizer_ppo)
+        self._ppo_net_train.set_train(mode=True)
 
         self.sub = P.Sub()
         self.mul = P.Mul()
@@ -248,7 +276,7 @@ class PPOLearner(Learner):
         last_state = next_state_list[:, -1]
         rewards = self.squeeze(reward_list)
 
-        last_value_prediction = self._critic_net(last_state)
+        last_value_prediction = self.critic_net(last_state)
         last_value_prediction = self.squeeze(last_value_prediction)
         last_value_prediction = self.zeros_like(last_value_prediction)
 
@@ -274,7 +302,7 @@ class PPOLearner(Learner):
                 gamma,
                 td_lambda=0.95):
             """Compute advantage"""
-            next_critic_value = self._critic_net(next_state_list)
+            next_critic_value = self.critic_net(next_state_list)
             delta = self.squeeze(reward_list + gamma * next_critic_value -
                                  critic_value)
             weighted_discount = gamma * td_lambda
@@ -290,7 +318,7 @@ class PPOLearner(Learner):
                 iter_num += 1
             return advantage
 
-        value_prediction = self._critic_net(state_list)
+        value_prediction = self.critic_net(state_list)
         advantage = gae(reward_list, next_state_list, value_prediction,
                         last_value_prediction, self.gamma)
 

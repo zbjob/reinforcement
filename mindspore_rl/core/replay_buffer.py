@@ -39,7 +39,7 @@ def _create_tensor(capacity, shapes, types):
     buffer = []
     for i in range(len(shapes)):
         buffer.append(Parameter(Tensor(np.zeros(((capacity,) + shapes[i])),
-                                       types[i]), name='buffer', requires_grad=False))
+                                       types[i]), name=('buffer_%d' % i), requires_grad=False))
     return buffer
 
 

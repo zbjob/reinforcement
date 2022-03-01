@@ -25,21 +25,21 @@ env_params = {'name': 'HalfCheetah-v2'}
 eval_env_params = {'name': 'HalfCheetah-v2'}
 
 policy_params = {
-    'epsilon': 0.2,
-    'lr': 1e-3,
     'state_space_dim': 0,
     'action_space_dim': 0,
     'hidden_size1': 200,
     'hidden_size2': 100,
     'sigma_init_std': 0.35,
-    'critic_coef': 0.5,
 }
 
 learner_params = {
     'gamma': 0.99,
     'state_space_dim': 0,
     'action_space_dim': 0,
-    'iter_times': 25
+    'iter_times': 25,
+    'epsilon': 0.2,
+    'lr': 1e-3,
+    'critic_coef': 0.5,
 }
 
 trainer_params = {
@@ -53,17 +53,13 @@ algorithm_config = {
     'actor': {
         'number': 1,
         'type': PPOActor,
-        'params': None,
-        'policies': [],
-        'networks': ['actor_net'],
-        'environment': True,
-        'eval_environment': True,
+        'policies': ['collect_policy', 'eval_policy'],
     },
     'learner': {
         'number': 1,
         'type': PPOLearner,
         'params': learner_params,
-        'networks': ['critic_net', 'ppo_net_train']
+        'networks': ['actor_net', 'critic_net']
     },
     'policy_and_network': {
         'type': PPOPolicy,

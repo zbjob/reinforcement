@@ -35,13 +35,14 @@ class DQNTrainer(Trainer):
         self.inited = Parameter(Tensor(False, ms.bool_), name='init_flag')
         self.mod = P.Mod()
         self.false = Tensor(False, ms.bool_)
+        self.true = Tensor(True, ms.bool_)
         self.num_evaluate_episode = params['num_evaluate_episode']
         self.update_period = Tensor(5, ms.float32)
         super(DQNTrainer, self).__init__(msrl)
 
     def trainable_variables(self):
         """Trainable variables for saving."""
-        trainable_variables = {"policy_net": self.msrl.actors.policy_network}
+        trainable_variables = {"policy_net": self.msrl.learner.policy_network}
         return trainable_variables
 
     @ms_function
@@ -67,7 +68,7 @@ class DQNTrainer(Trainer):
         """Train one episode"""
         if not self.inited:
             self.init_training()
-            self.inited = True
+            self.inited = self.true
         state = self.msrl.collect_environment.reset()
         done = self.false
         total_reward = self.zero
@@ -84,7 +85,7 @@ class DQNTrainer(Trainer):
             total_reward += r
             steps += 1
             if not self.mod(steps, self.update_period):
-                self.msrl.actors.update()
+                self.msrl.learner.update()
         return loss, total_reward, steps
 
     @ms_function
