@@ -21,6 +21,42 @@ Before running DDPG, you should first install [MindSpore](https://www.mindspore.
 - [gym](https://github.com/openai/gym) >= 0.18.3
 - [mujoco-py](https://github.com/openai/mujoco-py)<2.1,>=2.0
 
+### Install Mujoco on EulerOS
+
+The `Mujoco` binary package support ARM architecture since 2.1.1, while the latest `Mujoco-py` only comatible with 2.1.0 for now. So it is seggested that running the DDPG algorithm under the X86 architecture or using other environments like `Pendulum` under the ARM architecture.
+
+The `Mujoco` package depends on the `libOSMesa.so`. At present, the `libOSMesa.so` is not available on EulerOS source. Here is an installation method of `libOSMesa.so` on X86 architecture and EulerOS.
+
+Download the rpm package
+
+```shell
+> wget https://koji.xcp-ng.org/kojifiles/packages/mesa/17.2.3/8.20171019.el7/x86_64/mesa-libOSMesa-17.2.3-8.20171019.el7.x86_64.rpm
+> wget https://koji.xcp-ng.org/kojifiles/packages/mesa/17.2.3/8.20171019.el7/x86_64/mesa-libOSMesa-devel-17.2.3-8.20171019.el7.x86_64.rpm
+```
+
+Exact RPM package
+
+```shell
+> rpm2cpio mesa-libOSMesa-17.2.3-8.20171019.el7.x86_64.rpm | cpio -div
+> rpm2cpio mesa-libOSMesa-devel-17.2.3-8.20171019.el7.x86_64.rpm | cpio -div
+```
+
+Copy head file and library to system directory
+
+```shell
+> sudo cp usr/include/GL/osmesa.h /usr/include/GL/osmesa.h
+> sudo cp usr/lib64/libOSMesa.so /usr/lib64/libOSMesa.so
+> sudo cp usr/lib64/libOSMesa.so.8 /usr/lib64/libOSMesa.so.8
+```
+
+Change the permissions
+
+```shell
+> sudo chmod 644 /usr/include/GL/osmesa.h
+> sudo chmod 644 /usr/lib64/libOSMesa.so.8
+> sudo chmod 644 /usr/lib64/libOSMesa.so
+```
+
 After installation, you can directly use the following command to run the DDPG algorithm.
 
 For comprehensive performance considerations on CPU, it is recommended to set `OMP_NUM_THREADS` and configure a unified configuration to 1/4 of the number of physical cores, such as export `OMP_NUM_THREADS=32`(edit in `run_standalone_train.sh`).
