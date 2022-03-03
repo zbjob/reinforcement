@@ -21,7 +21,7 @@ from mindspore_rl.agent.trainer import Trainer
 from mindspore_rl.agent import trainer
 import mindspore.nn as nn
 from mindspore.ops import operations as ops
-
+from mindspore import ms_function
 
 class A2CTrainer(Trainer):
     '''A2CTrainer'''
@@ -46,14 +46,13 @@ class A2CTrainer(Trainer):
                     break
                 if i == episodes -1:
                     print(f'\nFailed to solved this problem after running {episodes} episodes.')
-
+    @ms_function
     def train_one_episode(self):
         '''Train one episode'''
         state = self.msrl.collect_environment.reset()
-        rewards, states, actions = self.msrl.agent_act(trainer.COLLECT, state)
-        a2c_loss = self.msrl.agent_learn([rewards, states, actions])
-        episode_reward = self.reduce_sum(rewards)
-        return a2c_loss, episode_reward
+        rewards, states, actions, masks, done_num = self.msrl.agent_act(trainer.COLLECT, state)
+        a2c_loss = self.msrl.agent_learn([rewards, states, actions, masks])
+        return a2c_loss, done_num
 
     def evaluate(self):
         '''Default evaluate'''
