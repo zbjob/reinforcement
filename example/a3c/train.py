@@ -1,4 +1,4 @@
-# Copyright 2021 Huawei Technologies Co., Ltd
+# Copyright 2022 Huawei Technologies Co., Ltd
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -12,37 +12,30 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # ============================================================================
-'''
-Test case for A2C training.
-'''
+"""
+A3C training example.
+"""
 
 #pylint: disable=C0413
-#pylint: disable=C0411
-#pylint: disable=W0611
-import os
-import sys
-ROOT_PATH = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-MODEL_PATH = os.path.join(ROOT_PATH, 'example')
-sys.path.insert(0, MODEL_PATH)
-
-import pytest
-from a2c.src import config
-from a2c.src.a2c_trainer import A2CTrainer
+import argparse
+from src import config
+from src.a3c_trainer import A3CTrainer
 from mindspore import context
 from mindspore_rl.core import Session
 
+parser = argparse.ArgumentParser(description='MindSpore Reinforcement A3C')
+parser.add_argument('--episode', type=int, default=10000, help='total episode numbers.')
+parser.add_argument('--device_target', type=str, default='Auto', choices=['CPU', 'GPU', 'Auto'],
+                    help='Choose a device to run the ac example(Default: Auto).')
+options, _ = parser.parse_known_args()
 
-@pytest.mark.level0
-@pytest.mark.platform_x86_gpu_training
-@pytest.mark.platform_x86_cpu
-@pytest.mark.env_onecard
-def test_train_a2c():
-    '''
-    Feature: Test A2C train.
-    Description: A2C net.
-    Expectation: success.
-    '''
+
+def train(episode=options.episode):
+    if options.device_target != 'Auto':
+        context.set_context(device_target=options.device_target)
     context.set_context(mode=context.GRAPH_MODE)
     ac_session = Session(config.algorithm_config)
-    ac_session.run(class_type=A2CTrainer, episode=5)
-    assert True
+    ac_session.run(class_type=A3CTrainer, episode=episode)
+
+if __name__ == "__main__":
+    train()

@@ -1,4 +1,4 @@
-# Copyright 2021 Huawei Technologies Co., Ltd
+# Copyright 2022 Huawei Technologies Co., Ltd
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -13,7 +13,7 @@
 # limitations under the License.
 # ============================================================================
 '''
-Test case for A2C training.
+Test case for A3C training.
 '''
 
 #pylint: disable=C0413
@@ -21,28 +21,28 @@ Test case for A2C training.
 #pylint: disable=W0611
 import os
 import sys
+import pytest
+from mindspore import context
+from mindspore_rl.core import Session
 ROOT_PATH = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 MODEL_PATH = os.path.join(ROOT_PATH, 'example')
 sys.path.insert(0, MODEL_PATH)
 
-import pytest
-from a2c.src import config
-from a2c.src.a2c_trainer import A2CTrainer
-from mindspore import context
-from mindspore_rl.core import Session
+from a3c.src import config
+from a3c.src.a3c_trainer import A3CTrainer
 
 
 @pytest.mark.level0
 @pytest.mark.platform_x86_gpu_training
 @pytest.mark.platform_x86_cpu
 @pytest.mark.env_onecard
-def test_train_a2c():
+def test_train_a3c():
     '''
-    Feature: Test A2C train.
-    Description: A2C net.
+    Feature: Test A3C train.
+    Description: A3C net.
     Expectation: success.
     '''
     context.set_context(mode=context.GRAPH_MODE)
     ac_session = Session(config.algorithm_config)
-    ac_session.run(class_type=A2CTrainer, episode=5)
+    ac_session.run(class_type=A3CTrainer, episode=5)
     assert True
