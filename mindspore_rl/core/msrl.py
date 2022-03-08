@@ -138,15 +138,23 @@ class MSRL(nn.Cell):
         eval_env_config = config['eval_environment']
         num_collect_env = collect_env_config.get('number')
         num_eval_env = eval_env_config.get('number')
-        if collect_env_config.get('num_parallel'):
-            collect_proc_num = collect_env_config.get('num_parallel')
+        collect_num_parallel = collect_env_config.get('num_parallel')
+        eval_num_parallel = eval_env_config.get('num_parallel')
+
+        if collect_num_parallel:
+            if collect_num_parallel < 1:
+                raise ValueError("num_parallel of collect_environment can not be non-positive")
+            collect_proc_num = collect_num_parallel
         else:
             collect_proc_num = num_collect_env
 
-        if eval_env_config.get('num_parallel'):
-            eval_proc_num = eval_env_config.get('num_parallel')
+        if eval_num_parallel:
+            if eval_num_parallel < 1:
+                raise ValueError("num_parallel of eval_environment can not be non-positive")
+            eval_proc_num = eval_num_parallel
         else:
             eval_proc_num = num_eval_env
+
         compulsory_item = ['type']
         self._compulsory_items_check(collect_env_config, compulsory_item, 'collect_environment')
         self._compulsory_items_check(eval_env_config, compulsory_item, 'eval_environment')
