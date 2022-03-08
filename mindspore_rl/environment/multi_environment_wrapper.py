@@ -72,7 +72,7 @@ class MultiEnvironmentWrapper(nn.Cell):
                                   [obs_type,],
                                   [obs_shape,])
 
-        if self.num_proc:
+        if self.num_proc != 1:
             self.mpe_env_procs = []
             self.action_queues = []
             self.exp_queues = []
@@ -169,6 +169,16 @@ class MultiEnvironmentWrapper(nn.Cell):
             A tuple which states for the space of done.
         """
         return self._envs[0].done_space
+
+    @property
+    def config(self):
+        """
+        Get the config of environment.
+
+        Returns:
+            A dictionary which contains environment's info
+        """
+        return self._envs[0].config
 
     def _reset(self):
         """

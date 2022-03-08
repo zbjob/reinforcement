@@ -67,7 +67,7 @@ algorithm_config = {
         'number': 1,
         'type': DDPGLearner,
         'params': learner_params,
-        'networks': ['actor_net', 'target_actor_net', 'critic_net', 'target_critic_net', 'ddpg_net_train']
+        'networks': ['actor_net', 'target_actor_net', 'critic_net', 'target_critic_net']
     },
     'policy_and_network': {
         'type': DDPGPolicy,

@@ -135,15 +135,21 @@ class MSRL(nn.Cell):
         """
 
         collect_env_config = config['collect_environment']
-        collect_proc_num = collect_env_config.get('num_proc')
         eval_env_config = config['eval_environment']
-        eval_proc_num = eval_env_config.get('num_proc')
+        num_collect_env = collect_env_config.get('number')
+        num_eval_env = eval_env_config.get('number')
+        if collect_env_config.get('num_parallel'):
+            collect_proc_num = collect_env_config.get('num_parallel')
+        else:
+            collect_proc_num = num_collect_env
+
+        if eval_env_config.get('num_parallel'):
+            eval_proc_num = eval_env_config.get('num_parallel')
+        else:
+            eval_proc_num = num_eval_env
         compulsory_item = ['type']
         self._compulsory_items_check(collect_env_config, compulsory_item, 'collect_environment')
         self._compulsory_items_check(eval_env_config, compulsory_item, 'eval_environment')
-
-        num_collect_env = collect_env_config.get('number')
-        num_eval_env = eval_env_config.get('number')
 
         if not config['collect_environment'].get('params'):
             config['collect_environment']['params'] = {}
@@ -197,9 +203,15 @@ class MSRL(nn.Cell):
 
         """
 
+        expected = config[target][attribute]
         for attr in inspect.getmembers(obj):
             if attr[0] in config[target][attribute]:
+                expected.remove(attr[0])
                 config[target]['params'][attr[0]] = attr[1]
+        if expected:
+            remained = ','.join(expected)
+            raise ValueError(f"{remained} in {attribute} of {target} can not be found in {obj}. Please choose \
+                             the same variable name in {obj}, and fill it in {attribute}.")
 
     def __create_replay_buffer(self, replay_buffer_config):
         """

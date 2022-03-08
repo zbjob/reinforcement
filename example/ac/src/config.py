@@ -46,7 +46,7 @@ algorithm_config = {
         'number': 1,
         'type': ACLearner,
         'params': learner_params,
-        'networks': ['actor_net_train', 'actor_net', 'critic_net_train', 'critic_net']
+        'networks': ['actor_net', 'critic_net']
     },
     'policy_and_network': {
         'type': ACPolicyAndNetwork,
