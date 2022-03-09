@@ -24,9 +24,11 @@ if [ ! -d "${BASEPATH}/output" ]; then
     exit 1
 fi
 
-for package in ${BASEPATH}/output/mindspore_rl*whl
+cd ${BASEPATH}/output || exit
+for package in mindspore_rl*whl
 do
     [[ -e "${package}" ]] || break
     sha256sum ${package} > ${package}.sha256
 done
+cd ${BASEPATH} || exit
 echo "---------------- Reinforcement: build end   ----------------"
