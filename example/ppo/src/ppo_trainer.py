@@ -21,7 +21,7 @@ from mindspore.ops import operations as P
 from mindspore_rl.agent.trainer import Trainer
 from mindspore_rl.agent import trainer
 
-
+#pylint: disable=W0212
 class PPOTrainer(Trainer):
     """This is the trainer class of PPO algorithm. It arranges the PPO algorithm"""
 
@@ -40,7 +40,9 @@ class PPOTrainer(Trainer):
 
     def trainable_variables(self):
         """Trainable variables for saving."""
-        trainable_variables = {"actor_net": self.msrl.learner.actor_net}
+        trainable_variables = {"actor_net": self.msrl.learner.actor_net,
+                               "critic_net": self.msrl.learner.critic_net,
+                               "ppo_optimizer": self.msrl.learner._ppo_net_train.optimizer}
         return trainable_variables
 
     @ms_function
