@@ -189,7 +189,7 @@ class MultiEnvironmentWrapper(nn.Cell):
         Returns:
             A list of numpy array which states for the initial state of each environment.
         """
-        if self.num_proc:
+        if self.num_proc != 1:
             s0 = []
             for i in range(self.num_proc):
                 self.action_queues[i].put('reset')
@@ -215,7 +215,7 @@ class MultiEnvironmentWrapper(nn.Cell):
             - done (List[boolean]), whether the simulations of each environment finishes or not
         """
         results = []
-        if self.num_proc:
+        if self.num_proc != 1:
             accum_env_num = 0
             for i in range(self.num_proc):
                 env_num = self.mpe_env_procs[i].env_num
