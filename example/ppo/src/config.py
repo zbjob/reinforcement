@@ -67,6 +67,7 @@ algorithm_config = {
     },
     'collect_environment': {
         'number': 30,
+        'num_parallel': 5,
         'type': GymEnvironment,
         'params': env_params
     },
