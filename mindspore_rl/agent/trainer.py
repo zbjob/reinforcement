@@ -18,7 +18,7 @@ Implementation of trainer base class.
 """
 import os
 
-from mindspore_rl.utils.callback import CallbackParam, CallbackManager
+from mindspore_rl.utils.callback import CallbackParam, CallbackManager, TimeCallback
 import mindspore.nn as nn
 from mindspore.train.serialization import load_checkpoint, load_param_into_net
 
@@ -59,6 +59,11 @@ class Trainer(nn.Cell):
         cb_params = CallbackParam()
         cb_params.episodes_num = episodes
 
+        # Move TimeCallback to the first to exclude the time of other callbacks.
+        for item in callbacks:
+            if isinstance(item, TimeCallback):
+                callbacks.remove(item)
+                callbacks.insert(0, item)
         # 1 Using `CallbackManager` to traverse each callback.
         with CallbackManager(callbacks) as callback_list:
 

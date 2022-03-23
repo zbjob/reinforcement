@@ -162,7 +162,7 @@ class LossCallback(Callback):
         # 3 Check loss value and stop if it is NAN or INF.
         for loss in losses_out:
             if isinstance(loss, float) and (np.isnan(loss) or np.isinf(loss)):
-                raise ValueError("Episode {}: Invalid loss, training stop.".format(params.cur_episode))
+                raise ValueError("Episode {}: Invalid loss {}, training stop.".format(params.cur_episode, loss))
 
         # 4 Pirnt the loss and rewards.
         print("Episode {}: loss is {}, rewards is {}".format(params.cur_episode, \
