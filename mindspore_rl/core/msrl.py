@@ -121,6 +121,23 @@ class MSRL(nn.Cell):
             obj = class_type(params, actor_id)
         return obj
 
+    def _create_batch_env(self, sub_config, env_num, proc_num):
+        """
+        Create the batch environments object from the sub_config, and return the instance of a batch env.
+
+        Args:
+            sub_config (dict): algorithm config of env.
+            env_num (int): number of environment to be created.
+            proc_num (int): the process for environment.
+
+        Returns:
+            - batch_env (object), the created batch-environment object.
+        """
+        env_list = []
+        for i in range(env_num):
+            env_list.append(self._create_instance(sub_config, i))
+        return MultiEnvironmentWrapper(env_list, proc_num)
+
     def __create_environments(self, config, num_agent=1):
         """
         Create the environments object from the configuration file, and return the instance
@@ -168,33 +185,24 @@ class MSRL(nn.Cell):
         config['eval_environment']['params']['num_agent'] = num_agent
 
         if (num_collect_env is None) and (num_eval_env is None):
-            collect_env = self._create_instance(config['collect_environment'], 0)
-            eval_env = self._create_instance(config['eval_environment'], 0)
+            collect_env = self._create_instance(config['collect_environment'], None)
+            eval_env = self._create_instance(config['eval_environment'], None)
 
         elif (num_collect_env is None) or (num_eval_env is None):
             raise ValueError("You must give both number of collect_environment and number of \
                               eval_environment or none of them")
         else:
             if num_collect_env > 1:
-                collect_env_list = []
-                eval_env_list = []
-                for i in range(num_collect_env):
-                    collect_env_list.append(self._create_instance(config['collect_environment'], i))
-                for j in range(num_eval_env):
-                    eval_env_list.append(self._create_instance(config['eval_environment'], j))
-                collect_env = MultiEnvironmentWrapper(collect_env_list, collect_proc_num)
-                eval_env = MultiEnvironmentWrapper(eval_env_list, eval_proc_num)
+                collect_env = self._create_batch_env(config['eval_environment'], num_collect_env, collect_proc_num)
+                eval_env = self._create_batch_env(config['eval_environment'], num_eval_env, eval_proc_num)
 
             else:
-                collect_env = self._create_instance(config['collect_environment'], 0)
+                collect_env = self._create_instance(config['collect_environment'], None)
                 if num_eval_env > 1:
-                    eval_env_list = []
-                    for j in range(num_eval_env):
-                        eval_env_list.append(self._create_instance(config['eval_environment'], j))
                     collect_env = MultiEnvironmentWrapper([collect_env], collect_proc_num)
-                    eval_env = MultiEnvironmentWrapper(eval_env_list, eval_proc_num)
+                    eval_env = self._create_batch_env(config['eval_environment'], num_eval_env, eval_proc_num)
                 else:
-                    eval_env = self._create_instance(config['eval_environment'], 0)
+                    eval_env = self._create_instance(config['eval_environment'], None)
 
         return collect_env, eval_env
 
@@ -274,25 +282,29 @@ class MSRL(nn.Cell):
                                      compulsory_items, 'policy_and_network')
 
         params = policy_and_network_config.get('params')
+        collect_env = self.collect_environment
+        if isinstance(collect_env, nn.CellList):
+            collect_env = collect_env[0]
         if params:
             if not params.get('state_space_dim'):
                 config['policy_and_network']['params'][
-                    'state_space_dim'] = self.collect_environment.observation_space.shape[-1]
+                    'state_space_dim'] = collect_env.observation_space.shape[-1]
             if not params.get('action_space_dim'):
                 config['policy_and_network']['params'][
-                    'action_space_dim'] = self.collect_environment.action_space.num_values
-            config['policy_and_network']['params']['environment_config'] = self.collect_environment.config
+                    'action_space_dim'] = collect_env.action_space.num_values
+            config['policy_and_network']['params']['environment_config'] = collect_env.config
 
         policy_and_network = self._create_instance(policy_and_network_config)
         return policy_and_network
 
-    def __create_actor(self, config, policy_and_network):
+    def __create_actor(self, config, policy_and_network, actor_id=None):
         """
         Create an instance of actor or a list of instances of actor
 
         Args:
             config (dict): A dictionary of configuration
             policy_and_network (object): The instance of policy_and_network
+            actor_id (int): The number of the actors. Default: None.
 
         Returns:
             actor (object or List(object)): An instance of actor a list of instances of actor
@@ -318,12 +330,7 @@ class MSRL(nn.Cell):
             self.__params_generate(config, policy_and_network, 'actor',
                                    'networks')
 
-        num_actors = config['actor']['number']
-        if num_actors == 1:
-            actor = self._create_instance(config['actor'])
-        else:
-            raise ValueError(
-                "Sorry, the current version only supports one actor !")
+        actor = self._create_instance(config['actor'], actor_id)
         return actor
 
     def __create_learner(self, config, policy_and_network):
@@ -378,15 +385,34 @@ class MSRL(nn.Cell):
         # ---------------------- Agent ----------------------
         agent_config = config.get('agent')
         if not agent_config:
+            self._compulsory_items_check(config['actor'], ['number'], 'actor')
+            num_actors = config['actor']['number']
+            # We consider eval_env is alwarys shared, so only create one instance whether in multi-actor or not.
+            share_env = True
+            if 'share_env' in config['actor']:
+                share_env = config['actor']['share_env']
             # ---------------------- Environment ----------------------
             self.collect_environment, self.eval_environment = self.__create_environments(config)
             # ---------------------------------------------------------
-            policy_and_network = self.__create_policy_and_network(config)
-            self.actors = self.__create_actor(config, policy_and_network)
-            self.learner = self.__create_learner(config, policy_and_network)
-
-            self.agent_act = self.actors.act
-            self.agent_learn = self.learner.learn
+            if num_actors == 1:
+                policy_and_network = self.__create_policy_and_network(config)
+                self.actors = self.__create_actor(config, policy_and_network)
+                self.learner = self.__create_learner(config, policy_and_network)
+                self.agent_act = self.actors.act
+                self.agent_learn = self.learner.learn
+            elif num_actors > 1:
+                self.actors = nn.CellList()
+                if not share_env:
+                    self.collect_environment = nn.CellList()
+                for i in range(num_actors):
+                    if not share_env:
+                        self.collect_environment.append(self.__create_environments(config)[0])
+                    policy_and_network = self.__create_policy_and_network(config)
+                    self.actors.append(self.__create_actor(config, policy_and_network, actor_id=i))
+                self.learner = self.__create_learner(config, policy_and_network)
+                self.agent_learn = self.learner.learn
+            else:
+                raise ValueError("The number of actors should >= 1, but get ", num_actors)
         else:
             raise ValueError(
                 "Sorry, the current does not support multi-agent yet")
