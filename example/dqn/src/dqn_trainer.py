@@ -32,10 +32,10 @@ class DQNTrainer(Trainer):
         self.less = P.Less()
         self.zero_value = Tensor(0, ms.float32)
         self.fill_value = Tensor(1000, ms.float32)
-        self.inited = Parameter(Tensor(False, ms.bool_), name='init_flag')
+        self.inited = Parameter(Tensor((False,), ms.bool_), name='init_flag')
         self.mod = P.Mod()
-        self.false = Tensor(False, ms.bool_)
-        self.true = Tensor(True, ms.bool_)
+        self.false = Tensor((False,), ms.bool_)
+        self.true = Tensor((True,), ms.bool_)
         self.num_evaluate_episode = params['num_evaluate_episode']
         self.update_period = Tensor(5, ms.float32)
         super(DQNTrainer, self).__init__(msrl)
