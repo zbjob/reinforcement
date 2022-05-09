@@ -33,6 +33,7 @@ class MSRL(nn.Cell):
     .. code-block::
 
         agent_act
+        agent_get_action
         sample_buffer
         agent_learn
         replay_buffer_sample
@@ -400,6 +401,7 @@ class MSRL(nn.Cell):
                 self.learner = self.__create_learner(config, policy_and_network)
                 self.agent_act = self.actors.act
                 self.agent_learn = self.learner.learn
+                self.agent_get_action = self.actors.get_action
             elif num_actors > 1:
                 self.actors = nn.CellList()
                 if not share_env:
