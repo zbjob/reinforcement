@@ -34,6 +34,20 @@ This initial release of MindSpore Reinforcement contains a stable API for implem
 
 MindSpore Reinforcement depends on the MindSpore training and inference framework. Therefore, please first install [MindSpore](https://www.mindspore.cn/install/en) following the instruction on the official website, then install MindSpore Reinforcement. You can install from `pip` or source code.
 
+### Version dependency
+
+Due the dependency between MindSpore Reinforcement and MindSpore, please follow the table below and install the corresponding MindSpore verision from [MindSpore download page](https://www.mindspore.cn/versions/en).
+
+```shell
+pip install https://ms-release.obs.cn-north-4.myhuaweicloud.com/{MindSpore-Version}/MindSpore/cpu/ubuntu_x86/mindspore-{MindSpore-Version}-cp37-cp37m-linux_x86_64.whl
+```
+
+| MindSpore Reinforcement Version |                            Branch                            | MindSpore version |
+| :-----------------------------: | :----------------------------------------------------------: | :---------------: |
+|              0.3.0              | [r0.3](https://gitee.com/mindspore/reinforcement/tree/r0.3/) |       1.7.0       |
+|              0.2.0              | [r0.2](https://gitee.com/mindspore/reinforcement/tree/r0.2/) |       1.6.0       |
+|              0.1.0              | [r0.1](https://gitee.com/mindspore/reinforcement/tree/r0.1/) |       1.5.0       |
+
 ### Installing from pip command
 
 If you use the pip command, please download the whl package from [MindSpore Reinforcement](https://www.mindspore.cn/versions/en) page and install it.

@@ -34,6 +34,20 @@ MindSpore Reinforcement初始版本包含了一个稳定的API， 用于实现�
 
 MindSpore Reinforcement依赖MindSpore训练推理框架，安装完[MindSpore](https://gitee.com/mindspore/mindspore#%E5%AE%89%E8%A3%85)，再安装MindSpore Reinforcement。可以采用pip安装或者源码编译安装两种方式。
 
+### MindSpore版本依赖关系
+
+由于MindSpore Reinforcement与MindSpore有依赖关系，请按照根据下表中所指示的对应关系，在[MindSpore下载页面](https://www.mindspore.cn/versions)下载并安装对应的whl包。
+
+```shell
+pip install https://ms-release.obs.cn-north-4.myhuaweicloud.com/{MindSpore-Version}/MindSpore/cpu/ubuntu_x86/mindspore-{MindSpore-Version}-cp37-cp37m-linux_x86_64.whl
+```
+
+| MindSpore Reinforcement |                             分支                             | MindSpore |
+| :---------------------: | :----------------------------------------------------------: | :-------: |
+|          0.3.0          | [r0.3](https://gitee.com/mindspore/reinforcement/tree/r0.3/) |   1.7.0   |
+|          0.2.0          | [r0.2](https://gitee.com/mindspore/reinforcement/tree/r0.2/) |   1.6.0   |
+|          0.1.0          | [r0.1](https://gitee.com/mindspore/reinforcement/tree/r0.1/) |   1.5.0   |
+
 ### pip安装
 
 使用pip命令安装，请从[MindSpore-RL下载页面](https://www.mindspore.cn/versions)下载并安装whl包。
