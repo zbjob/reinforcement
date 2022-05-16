@@ -48,14 +48,14 @@ class MSRL(nn.Cell):
               - key: 'actor',              value: the actor configuration (dict).
               - key: 'learner',            value: the learner configuration (dict).
               - key: 'policy_and_network', value: the policy and networks used by
-                actors and learners (dict).
+                actor and learner (dict).
               - key: 'collect_environment',     value: the collect environment configuration (dict).
               - key: 'eval_environment',        value: the eval environment configuration (dict).
               - key: 'replay_buffer',           value: the replay buffer configuration (dict).
 
             - Second level: the configuration of each algorithm component.
 
-              - key: 'number',      value: the number of actors/learner (int).
+              - key: 'number',      value: the number of actor/learner (int).
               - key: 'type',        value: the type of the
                 actor/learner/policy_and_network/environment (class name).
               - key: 'params',      value: the parameters of
@@ -215,8 +215,8 @@ class MSRL(nn.Cell):
         Args:
             config (dict): the algorithm configuration.
             obj (object): the object for analysis.
-            target (string): the name of the target class.
-            attribute (string): the name of the attribute to parse.
+            target (str): the name of the target class.
+            attribute (str): the name of the attribute to parse.
 
         """
 
@@ -435,7 +435,7 @@ class MSRL(nn.Cell):
         It will return all the elements in the replay buffer.
 
         Args:
-            transpose (boolean): whether the output element needs to be transpose,
+            transpose (bool): whether the output element needs to be transpose,
                 if transpose is true, shape will also need to be filled. Default: False
             shape (Tuple[int]): the shape used in transpose. Default: None
 

@@ -21,7 +21,7 @@ import mindspore.nn as nn
 
 class Actor(nn.Cell):
     r"""
-    Base class for all actors.
+    Base class for all actors. Actor is a class used to interact with the environment and generate data.
 
     Examples:
         >>> from mindspore_rl.agent.actor import Actor
@@ -49,7 +49,7 @@ class Actor(nn.Cell):
 
     def get_action(self, phase, params):
         """
-        The interface of the act function.
+        get_action is the method used to obtain the action.
         User will need to overload this function according to
         the algorithm. But argument of this function should be
         phase and params. This interface will not interact with
@@ -60,25 +60,23 @@ class Actor(nn.Cell):
             params (tuple(Tensor)): A tuple of tensor as input, which is used to calculate action
 
         Returns:
-            observation (tuple(Tensor)): A tuple of tensor as output, which states for experience
+            action (tuple(Tensor)): A tuple of tensor as output, containing actions and other data.
         """
 
         raise NotImplementedError("Method should be overridden by subclass.")
 
     def act(self, phase, params):
         """
-        The interface of the act function.
-        User will need to overload this function according to
-        the algorithm. But argument of this function should be
-        phase and params. This interface will interact with
-        environment
+        The act function will take an enumerate value and observation or other data which is needed during
+        calculating the action. It will return a set of output which contains new observation, or other
+        experience. In this function, agent will interact with environment.
 
         Args:
             phase (enum): A enumerate value states for init, collect, eval or other user-defined stage.
             params (tuple(Tensor)): A tuple of tensor as input, which is used to calculate action
 
         Returns:
-            observation (tuple(Tensor)): A tuple of tensor as output, which states for experience
+            observation (tuple(Tensor)): A tuple of tensor as output, which states for experience data.
         """
 
         raise NotImplementedError("Method should be overridden by subclass.")
