@@ -16,6 +16,7 @@
 
 from mindspore_rl.agent.learner import Learner
 from mindspore_rl.agent.actor import Actor
+from mindspore_rl.utils import DiscountedReturn
 import mindspore
 import mindspore.nn as nn
 from mindspore import Tensor
@@ -30,6 +31,7 @@ np.random.seed(seed)
 
 class A2CPolicyAndNetwork():
     '''A2CPolicyAndNetwork'''
+
     class ActorCriticNet(nn.Cell):
         '''ActorCriticNet'''
 
@@ -91,8 +93,6 @@ class A2CPolicyAndNetwork():
         self.a2c_net_train.set_train(mode=True)
 
 #pylint: disable=W0223
-
-
 class A2CActor(Actor):
     '''A2C Actor'''
 
@@ -101,23 +101,29 @@ class A2CActor(Actor):
         self._params_config = params
         self.a2c_net = params['a2c_net']
         self._environment = params['collect_environment']
+        loop_size = 200
+        self.loop_size = Tensor(loop_size, mindspore.int64)
         self.c_dist = msd.Categorical(dtype=mindspore.float32, seed=seed)
         self.expand_dims = P.ExpandDims()
         self.reshape = P.Reshape()
         self.cast = P.Cast()
         self.softmax = ops.Softmax()
         self.zero = Tensor(0, mindspore.int64)
-        self.loop_size = Tensor(1000, mindspore.int64)
         self.done = Tensor(True, mindspore.bool_)
-        self.states = nn.TensorArray(mindspore.float32, (4,))
-        self.actions = nn.TensorArray(mindspore.int32, (1,))
-        self.rewards = nn.TensorArray(mindspore.float32, (1,))
+        self.states = nn.TensorArray(mindspore.float32, (4,), dynamic_size=False, size=loop_size)
+        self.actions = nn.TensorArray(mindspore.int32, (1,), dynamic_size=False, size=loop_size)
+        self.rewards = nn.TensorArray(mindspore.float32, (1,), dynamic_size=False, size=loop_size)
+        self.masks = Tensor(np.zeros([loop_size, 1], dtype=np.bool_), mindspore.bool_)
+        self.mask_done = Tensor([1], mindspore.bool_)
         self.print = P.Print()
 
     def act(self, phase, params):
         '''Store returns into TensorArrays from env'''
         if phase == 2:
             t = self.zero
+            done_status = self.zero
+            done_num = self.zero
+            masks = self.masks
             while t < self.loop_size:
                 self.states.write(t, params)
                 ts0 = self.expand_dims(params, 0)
@@ -131,7 +137,11 @@ class A2CActor(Actor):
                 self.rewards.write(t, reward)
                 params = new_state
                 if done == self.done:
-                    break
+                    if done_status == self.zero:
+                        done_status += 1
+                        done_num = t
+                    masks[t] = self.mask_done
+                    self._environment.reset()
                 t += 1
             rewards = self.rewards.stack()
             states = self.states.stack()
@@ -139,7 +149,7 @@ class A2CActor(Actor):
             self.rewards.clear()
             self.states.clear()
             self.actions.clear()
-            return rewards, states, actions
+            return rewards, states, actions, masks, done_num
         self.print("Phase is incorrect")
         return 0
 
@@ -150,32 +160,22 @@ class A2CLearner(Learner):
     def __init__(self, params):
         super(A2CLearner, self).__init__()
         self._params_config = params
-        self.gamma = Tensor(self._params_config['gamma'], mindspore.float32)
         self._a2c_net_train = params['a2c_net_train']
         self.shape = ops.DynamicShape()
         self.moments = nn.Moments(keep_dims=False)
         self.sqrt = ops.Sqrt()
         self.zero = Tensor(0, mindspore.int64)
         self.epsilon = Tensor(1.1920929e-07, mindspore.float32)
-        self.zero_float = Tensor(0.0, mindspore.float32)
-        self.returns = nn.TensorArray(mindspore.float32, (1,))
+        self.zero_float = Tensor([0.0], mindspore.float32)
+        self.discount_return = DiscountedReturn(gamma=self._params_config['gamma'])
 
     def learn(self, experience):
         '''Calculate the loss and update'''
         rewards = experience[0]
         states = experience[1]
         actions = experience[2]
-        n = self.shape(rewards)[0]
-        iter_num = self.zero
-        discounted_sum = self.zero_float
-        while iter_num < n:
-            i = n - iter_num - 1
-            reward = rewards[i]
-            discounted_sum = reward + self.gamma * discounted_sum
-            self.returns.write(i, discounted_sum)
-            iter_num += 1
-        returns = self.returns.stack()
-        self.returns.clear()
+        masks = experience[3]
+        returns = self.discount_return(rewards, masks, self.zero_float)
         adv_mean, adv_var = self.moments(returns)
         normalized_returns = (returns - adv_mean) / \
             (self.sqrt(adv_var) + self.epsilon)

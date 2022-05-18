@@ -32,7 +32,8 @@ options, _ = parser.parse_known_args()
 def train(episode=options.episode):
     if options.device_target != 'Auto':
         context.set_context(device_target=options.device_target)
-    context.set_context(mode=context.PYNATIVE_MODE)
+    context.set_context(mode=context.GRAPH_MODE)
+    context.set_context(enable_graph_kernel=True)
     ac_session = Session(config.algorithm_config)
     ac_session.run(class_type=A2CTrainer, episode=episode)
 
