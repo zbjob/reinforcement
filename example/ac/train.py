@@ -1,4 +1,4 @@
-# Copyright 2021 Huawei Technologies Co., Ltd
+# Copyright 2021-2022 Huawei Technologies Co., Ltd
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -22,7 +22,7 @@ from src import config
 from src.ac_trainer import ACTrainer
 from mindspore import context
 from mindspore_rl.core import Session
-from mindspore_rl.utils.callback import CheckpointCallback, LossCallback, EvaluateCallback
+from mindspore_rl.utils.callback import LossCallback, EvaluateCallback
 
 parser = argparse.ArgumentParser(description='MindSpore Reinforcement AC')
 parser.add_argument('--episode', type=int, default=1000, help='total episode numbers.')
@@ -39,9 +39,8 @@ def train(episode=options.episode):
     context.set_context(mode=context.GRAPH_MODE)
     ac_session = Session(config.algorithm_config)
     loss_cb = LossCallback()
-    ckpt_cb = CheckpointCallback(50, config.trainer_params['ckpt_path'])
     eval_cb = EvaluateCallback(10)
-    cbs = [loss_cb, ckpt_cb, eval_cb]
+    cbs = [loss_cb, eval_cb]
     ac_session.run(class_type=ACTrainer, episode=episode, params=config.trainer_params, callbacks=cbs)
 
 

@@ -1,4 +1,4 @@
-# Copyright 2021 Huawei Technologies Co., Ltd
+# Copyright 2021-2022 Huawei Technologies Co., Ltd
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -22,7 +22,10 @@ import mindspore.nn.probability.distribution as msd
 from mindspore.ops import operations as P
 from mindspore_rl.agent.learner import Learner
 from mindspore_rl.agent.actor import Actor
+import numpy as np
 
+seed = 16
+np.random.seed(seed)
 
 class ACPolicyAndNetwork():
     '''ACPolicyAndNetwork'''
@@ -31,8 +34,8 @@ class ACPolicyAndNetwork():
 
         def __init__(self, input_size, hidden_size, output_size):
             super().__init__()
-            self.common = nn.Dense(input_size, hidden_size, bias_init=0.1)
-            self.actor = nn.Dense(hidden_size, output_size, bias_init=0.1)
+            self.common = nn.Dense(input_size, hidden_size, weight_init='XavierUniform')
+            self.actor = nn.Dense(hidden_size, output_size, weight_init='XavierUniform')
             self.relu = nn.LeakyReLU()
             self.softmax = P.Softmax()
 
@@ -47,8 +50,8 @@ class ACPolicyAndNetwork():
 
         def __init__(self, input_size, hidden_size, output_size=1):
             super().__init__()
-            self.common = nn.Dense(input_size, hidden_size, bias_init=0.1)
-            self.critic = nn.Dense(hidden_size, output_size, bias_init=0.1)
+            self.common = nn.Dense(input_size, hidden_size, weight_init='XavierUniform')
+            self.critic = nn.Dense(hidden_size, output_size, weight_init='XavierUniform')
             self.relu = nn.LeakyReLU()
 
         def construct(self, x):
@@ -63,7 +66,7 @@ class ACPolicyAndNetwork():
             super(ACPolicyAndNetwork.CollectPolicy, self).__init__()
             self.actor_net = actor_net
             self.reshape = P.Reshape()
-            self.c_dist = msd.Categorical(dtype=mindspore.float32)
+            self.c_dist = msd.Categorical(dtype=mindspore.float32, seed=seed)
 
         def construct(self, params):
             action_probs_t = self.actor_net(params)

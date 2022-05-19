@@ -1,4 +1,4 @@
-# Copyright 2021 Huawei Technologies Co., Ltd
+# Copyright 2021-2022 Huawei Technologies Co., Ltd
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -19,7 +19,7 @@ AC config.
 from mindspore_rl.environment import GymEnvironment
 from .ac import ACPolicyAndNetwork, ACLearner, ACActor
 
-env_params = {'name': 'CartPole-v0'}
+env_params = {'name': 'CartPole-v0', 'seed': 42}
 policy_params = {
     'state_space_dim': 4,
     'action_space_dim': 2,
