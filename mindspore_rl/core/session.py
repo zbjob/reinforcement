@@ -36,8 +36,8 @@ class Session():
         Execute the reinforcement learning algorithm.
 
         Args:
-            class_type (class type): The class type of the algorithm's trainer class. Default: None.
-            is_train (boolean): Run the algorithm in train mode or eval mode. Default: True
+            class_type (Trainer): The class type of the algorithm's trainer class. Default: None.
+            is_train (bool): Run the algorithm in train mode or eval mode. Default: True
             episode (int): The number of episode of the training. Default: 0.
             params (dict): The algorithm specific training parameters. Default: None.
             callbacks (list[Callback]): The callback list. Default: None.

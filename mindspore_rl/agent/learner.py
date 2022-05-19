@@ -21,7 +21,7 @@ import mindspore.nn as nn
 
 class Learner(nn.Cell):
     r"""
-    The base class of the learner.
+    The base class of the learner. Calculate and update the self generated network through the input experience.
 
     Examples:
         >>> from mindspore_rl.agent.learner import Learner

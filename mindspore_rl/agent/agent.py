@@ -22,11 +22,12 @@ import mindspore.nn as nn
 
 class Agent(nn.Cell):
     r"""
-    The base class for the Agent.
+    The base class for the Agent. As the definition of agent, it is composed of actor and leanrner.
+    It has basic act and learn functions for interaction with environment and update itself.
 
     Args:
-        actors(object): The actor instance.
-        learner(object): The learner instance.
+        actors(Actor): The actor instance.
+        learner(Learner): The learner instance.
 
     Examples:
         >>> from mindspore_rl.agent.learner import Learner
@@ -50,7 +51,7 @@ class Agent(nn.Cell):
     def get_action(self, phase, params):
         """
         The get_action function will take an enumerate value and observation or other data which is needed during
-        calculating the action. It will return a set of output which contains actions of experience. In this
+        calculating the action. It will return a set of outputs containing actions and other data. In this
         function, agent will not interact with environment.
 
         Args:
@@ -58,7 +59,7 @@ class Agent(nn.Cell):
             params (tuple(Tensor)): A tuple of tensor as input, which is used to calculate action
 
         Returns:
-            observation (tuple(Tensor)): A tuple of tensor as output, which states for experience
+            atcion (tuple(Tensor)): A tuple of tensor as output, containing actions and other data.
         """
 
         raise NotImplementedError("Method should be overridden by subclass.")

@@ -30,7 +30,7 @@ EVAL = 3
 
 class Trainer(nn.Cell):
     r"""
-    The trainer base class.
+    The trainer base class. It is a process class that provides the basic mode of training.
 
     Note:
         Reference to `dqn_trainer.py
@@ -38,7 +38,7 @@ class Trainer(nn.Cell):
         #defining-the-dqntrainer-class>`_.
 
     Args:
-        msrl(object): the function handler class.
+        msrl(MSRL): the function handler class.
     """
 
     def __init__(self, msrl):
@@ -47,13 +47,13 @@ class Trainer(nn.Cell):
 
     def train(self, episodes, callbacks=None, ckpt_path=None):
         """
-        The interface of the train function. User will implement
-        this function.
+        The train method provides a standard training process, including the whole loop and callbacks.
+        Users can inherit or overwrite as needed.
 
         Args:
             episodes(int): the number of training episodes.
             callbacks(Optional[list[Callback]]): List of callback objects. Default: None
-            ckpt_path(Optional[string]): The checkpoint file to init or restore net. Default: None.
+            ckpt_path(Optional[str]): The checkpoint file path to init or restore net. Default: None.
         """
 
         cb_params = CallbackParam()
