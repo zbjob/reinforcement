@@ -47,17 +47,17 @@ def _mindspore_version_check():
               "the instruction at https://www.mindspore.cn/install")
         raise
 
-    ms_msrl_version_match = {'0.1.0': '1.5.0',
-                             '0.2.0': '1.6.0',
-                             '0.3.0': '1.7.0',}
+    ms_msrl_version_match = {'0.1': '1.5',
+                             '0.2': '1.6',
+                             '0.3': '1.7',}
 
-    ms_version = ms.__version__
-    required_mindspore_verision = ms_msrl_version_match[__version__]
+    ms_version = ms.__version__[:3]
+    required_mindspore_verision = ms_msrl_version_match[__version__[:3]]
 
     if ms_version != required_mindspore_verision:
         logger.warning("Current version of MindSpore is not compatible with MindSpore Reinforcement. "
                        "Some functions might not work or even raise error. Please install MindSpore "
-                       "version == {}. For more details about dependency setting, please check "
+                       "version == {}.0 For more details about dependency setting, please check "
                        "the instructions at MindSpore official website https://www.mindspore.cn/install "
                        "or check the README.md at https://gitee.com/mindspore/reinforcement".format(required_mindspore_verision))
         warning_countdown = 3

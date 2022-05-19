@@ -26,12 +26,18 @@ from mindspore_rl.environment.space import Space
 
 class GymEnvironment(Environment):
     """
-    The GymEnvironment class provides the functions to interact with
-    different environments.
+    The GymEnvironment class is a wrapper that encapsulates the Gym(https://gym.openai.com/) to
+    provide the ability to interact with Gym environments in MindSpore Graph Mode.
 
     Args:
-        params (dict): A dictionary contains all the parameters which are used to create the
-            instance of GymEnvironment, such as name of environment.
+        params (dict): A dictionary contains all the parameters which are used in this class.
+            +------------------------------+----------------------------+
+            |  Configuration Parameters    |  Notices                   |
+            +==============================+============================+
+            |  name                        |  the name of game in Gym   |
+            +------------------------------+----------------------------+
+            |  seed                        |  seed used in Gym          |
+            +------------------------------+----------------------------+
         env_id (int): A integer which is used to set the seed of this environment.
 
     Supported Platforms:
@@ -51,7 +57,8 @@ class GymEnvironment(Environment):
         self._env = gym.make(self._name)
         if 'seed' in params:
             self._env.seed(params['seed'] + env_id * 1000)
-        self._observation_space = self._space_adapter(self._env.observation_space)
+        self._observation_space = self._space_adapter(
+            self._env.observation_space)
         self._action_space = self._space_adapter(self._env.action_space)
         self._reward_space = Space((1,), np.float32)
         self._done_space = Space((1,), np.bool_, low=0, high=2)
@@ -67,8 +74,10 @@ class GymEnvironment(Environment):
         # step op
         step_input_type = (self._action_space.ms_dtype,)
         step_input_shape = (self._action_space.shape,)
-        step_output_type = (self.observation_space.ms_dtype, self._reward_space.ms_dtype, self._done_space.ms_dtype)
-        step_output_shape = (self._observation_space.shape, self._reward_space.shape, self._done_space.shape)
+        step_output_type = (self.observation_space.ms_dtype,
+                            self._reward_space.ms_dtype, self._done_space.ms_dtype)
+        step_output_shape = (self._observation_space.shape,
+                             self._reward_space.shape, self._done_space.shape)
         self._step_op = P.PyFunc(
             self._step, step_input_type, step_input_shape, step_output_type, step_output_shape)
         self.action_dtype = self._action_space.ms_dtype
@@ -96,7 +105,7 @@ class GymEnvironment(Environment):
         Returns:
             - state (Tensor), the environment state after performing the action.
             - reward (Tensor), the reward after performing the action.
-            - done (mindspore.bool\_), whether the simulation finishes or not.
+            - done (Tensor), whether the simulation finishes or not.
         """
 
         # Add cast ops for mixed precision case. Redundant cast ops will be eliminated automatically.
@@ -109,7 +118,7 @@ class GymEnvironment(Environment):
         Get the state space of the environment.
 
         Returns:
-            A tuple which states for the space of state
+            The state space of environment.
         """
 
         return self._observation_space
@@ -120,21 +129,39 @@ class GymEnvironment(Environment):
         Get the action space of the environment.
 
         Returns:
-            A tuple which states for the space of action
+            The action space of environment.
         """
 
         return self._action_space
 
     @property
     def reward_space(self):
+        """
+        Get the reward space of the environment.
+
+        Returns:
+            The reward space of environment.
+        """
         return self._reward_space
 
     @property
     def done_space(self):
+        """
+        Get the done space of the environment.
+
+        Returns:
+            The done space of environment.
+        """
         return self._done_space
 
     @property
     def config(self):
+        """
+        Get the config of environment.
+
+        Returns:
+            A dictionary which contains environment's info.
+        """
         return {}
 
     def _reset(self):
@@ -160,7 +187,7 @@ class GymEnvironment(Environment):
 
         Args:
             action(int or float): The action which is calculated by policy net. It could be integer
-            or float, according to different environment
+            or float, according to different environment.
 
         Returns:
             - s1 (numpy.array), the environment state after performing the action.
@@ -180,7 +207,7 @@ class GymEnvironment(Environment):
         shape = gym_space.shape
         gym_type = gym_space.dtype.type
         # The dtype get from gym.space is np.int64, but step() accept np.int32 actually.
-        if  gym_type == np.int64:
+        if gym_type == np.int64:
             dtype = np.int32
         # The float64 is not supported, cast to float32
         elif gym_type == np.float64:

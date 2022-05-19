@@ -25,6 +25,26 @@ mindspore_rl.core
 .. automodule:: mindspore_rl.core
     :members:
 
+mindspore_rl.environment
+-------------------------
+
+.. include:: environment/mindspore_rl.environment.Environment.rst
+
+.. include:: environment/mindspore_rl.environment.EnvironmentProcess.rst
+
+.. include:: environment/mindspore_rl.environment.GymEnvironment.rst
+
+.. include:: environment/mindspore_rl.environment.MsEnvironment.rst
+
+.. include:: environment/mindspore_rl.environment.MultiEnvironmentWrapper.rst
+
+.. include:: environment/mindspore_rl.environment.StarCraft2Environment.rst
+
+.. include:: environment/mindspore_rl.environment.Space.rst
+
+.. automodule:: mindspore_rl.environment
+    :members:
+
 mindspore_rl.network
 -------------------------
 

@@ -26,12 +26,12 @@ class EnvironmentProcess(Process):
     An independent process responsible for creating and interacting with one or more environments.
 
     Args:
-        - **proc_no** (int): The process number assigned by the caller.
-        - **env_num** (int): The number of environments created by this process.
-        - **envs** (list): A list that contains instance of environment.
-        - **actions** (Queue): The queue used to pass actions to the environment process.
-        - **observations** (Queue): The queue used to pass observations to the caller process.
-        - **initial_states** (Queue): The queue used to pass initial states to the caller process.
+        proc_no (int): The process number assigned by the caller.
+        env_num (int): The number of input environments.
+        envs (list(Environment)): A list that contains instance of environment (subclass of Environment).
+        actions (Queue): The queue used to pass actions to the environment process.
+        observations (Queue): The queue used to pass observations to the caller process.
+        initial_states (Queue): The queue used to pass initial states to the caller process.
 
     Examples:
         >>> from multiprocessing import Queue
