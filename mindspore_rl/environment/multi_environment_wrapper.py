@@ -30,8 +30,8 @@ class MultiEnvironmentWrapper(nn.Cell):
     file, framework will automatically invoke this class to create a multi environment class.
 
     Args:
-        env_instance (list(Class)): A list that contains instance of environment.
-        num_proc (int): Number of processing uses during interacting with environment. Default: None
+        env_instance (list(Class)): A list that contains instance of environment (subclass of Environment).
+        num_proc (int): Number of processing uses during interacting with environment. Default: None.
 
     Supported Plantforms:
         ``Ascend`` ``GPU`` ``CPU``
@@ -79,7 +79,7 @@ class MultiEnvironmentWrapper(nn.Cell):
             self.init_state_queues = []
 
             if self._nums < self.num_proc:
-                raise ValueError("Environment number can not be smaller than process number")
+                raise ValueError("Environment number can not be smaller than process number.")
 
             avg_env_num_per_proc = int(self._nums / self.num_proc)
             for i in range(self.num_proc):
@@ -96,8 +96,8 @@ class MultiEnvironmentWrapper(nn.Cell):
                 else:
                     env_num = self._nums - assigned_env_num
 
-                env_proc = EnvironmentProcess(i, env_num, self._envs[env_num * i:env_num * (i+1)], \
-                                            action_q, exp_q, init_state_q)
+                env_proc = EnvironmentProcess(i, env_num, self._envs[env_num * i:env_num * (i+1)],
+                                              action_q, exp_q, init_state_q)
                 self.mpe_env_procs.append(env_proc)
                 env_proc.start()
 
@@ -121,9 +121,9 @@ class MultiEnvironmentWrapper(nn.Cell):
             action (Tensor): A tensor that contains the action information.
 
         Returns:
-            - state (Tensor), a list of environment state after performing the action.
-            - reward (Tensor), a list of reward after performing the action.
-            - done (Tensor), whether the simulations of each environment finishes or not
+            - state (list(Tensor)), a list of environment state after performing the action.
+            - reward (list(Tensor)), a list of reward after performing the action.
+            - done (list(Tensor)), whether the simulations of each environment finishes or not.
         """
 
         return self._step_op(action)
@@ -176,7 +176,7 @@ class MultiEnvironmentWrapper(nn.Cell):
         Get the config of environment.
 
         Returns:
-            A dictionary which contains environment's info
+            A dictionary which contains environment's info.
         """
         return self._envs[0].config
 
@@ -212,14 +212,14 @@ class MultiEnvironmentWrapper(nn.Cell):
         Returns:
             - s1 (List[numpy.array]), a list of environment state after performing the action.
             - r1 (List[numpy.array]), a list of reward after performing the action.
-            - done (List[boolean]), whether the simulations of each environment finishes or not
+            - done (List[boolean]), whether the simulations of each environment finishes or not.
         """
         results = []
         if self.num_proc != 1:
             accum_env_num = 0
             for i in range(self.num_proc):
                 env_num = self.mpe_env_procs[i].env_num
-                self.action_queues[i].put(actions[accum_env_num : accum_env_num+env_num,])
+                self.action_queues[i].put(actions[accum_env_num: accum_env_num+env_num,])
                 accum_env_num += env_num
             for j in range(self.num_proc):
                 exp = self.exp_queues[j].get()

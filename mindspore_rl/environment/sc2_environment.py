@@ -16,6 +16,7 @@
 The starcraft 2 environment.
 """
 
+#pylint: disable=C0111
 import importlib
 import numpy as np
 import mindspore as ms
@@ -36,8 +37,14 @@ class StarCraft2Environment(Environment):
     https://github.com/oxwhirl/smac.
 
     Args:
-        params (dict): A dictionary contains all the parameters which are used to create the
-            instance of GymEnvironment, such as name of environment.
+        params (dict): A dictionary contains all the parameters which are used in this class.
+            +------------------------------+--------------------------------------------------------+
+            |  Configuration Parameters    |  Notices                                               |
+            +==============================+========================================================+
+            |  sc2_args                    |  a dict which contains key value that is used to create|
+            |                              |  instance of SMAC, such as map_name. For more detail   |
+            |                              |  please have a look at its official github.            |
+            +------------------------------+--------------------------------------------------------+
         env_id (int): A integer which is used to set the seed of this environment.
 
     Supported Platforms:
@@ -48,6 +55,7 @@ class StarCraft2Environment(Environment):
         >>> environment = StarCraft2Environment(env_params, 0)
         >>> print(environment)
     """
+
     def __init__(self, params, env_id=0):
         super().__init__()
         sc2_args = params['sc2_args']
@@ -63,8 +71,10 @@ class StarCraft2Environment(Environment):
 
         self.step_info = {}
 
-        self._observation_space = Space((obs_dim,), np.float32, batch_shape=(self._num_agent,))
-        self._action_space = Space((1,), np.int32, low=0, high=action_dim, batch_shape=(self._num_agent,))
+        self._observation_space = Space(
+            (obs_dim,), np.float32, batch_shape=(self._num_agent,))
+        self._action_space = Space(
+            (1,), np.int32, low=0, high=action_dim, batch_shape=(self._num_agent,))
         self._reward_space = Space((1,), np.float32)
         self._done_space = Space((1,), np.bool_, low=0, high=2)
 
@@ -135,17 +145,20 @@ class StarCraft2Environment(Environment):
 
     def _step(self, action):
         reward, done, self.step_info = self._env.step(action)
-        new_state = np.array(self._env.get_obs(), self._observation_space.np_dtype)
+        new_state = np.array(self._env.get_obs(),
+                             self._observation_space.np_dtype)
         reward = np.array([reward], self._reward_space.np_dtype)
         done = np.array([done])
         global_obs = self._env.get_state()
-        avail_actions = np.array(self._env.get_avail_actions(), self._action_space.np_dtype)
+        avail_actions = np.array(
+            self._env.get_avail_actions(), self._action_space.np_dtype)
 
         return new_state, reward, done, global_obs, avail_actions
 
     def _reset(self):
         local_obs, global_obs = np.array(self._env.reset())
-        avail_actions = np.array(self._env.get_avail_actions(), self._action_space.np_dtype)
+        avail_actions = np.array(
+            self._env.get_avail_actions(), self._action_space.np_dtype)
         return local_obs, global_obs, avail_actions
 
     def _get_step_info(self):
@@ -174,20 +187,38 @@ class StarCraft2Environment(Environment):
         Get the state space of the environment.
 
         Returns:
-            A tuple which states for the space of state
+            A tuple which states for the space of state.
         """
         return self._observation_space
 
     @property
     def reward_space(self):
+        """
+        Get the reward space of the environment.
+
+        Returns:
+            The reward space of environment.
+        """
         return self._reward_space
 
     @property
     def done_space(self):
+        """
+        Get the done space of the environment.
+
+        Returns:
+            The done space of environment.
+        """
         return self._done_space
 
     @property
     def config(self):
+        """
+        Get the config of environment.
+
+        Returns:
+            A dictionary which contains environment's info.
+        """
         return {"global_observation_dim": self._global_obs_dim,
                 "episode_limit": self.env_info['episode_limit'],
                 "num_agent": self._num_agent}

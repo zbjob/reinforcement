@@ -24,6 +24,7 @@ np_types = (np.int8, np.int16, np.int32, np.int64,
             np.uint8, np.uint16, np.uint32, np.uint64, np.float16,
             np.float32, np.float64, np.bool_)
 
+
 class Space:
     """
     The class for environment action/observation space.
@@ -48,11 +49,18 @@ class Space:
 
         self._feature_shape = tuple(feature_shape)
         self._dtype = dtype
-        self._batch_shape = tuple(batch_shape) if batch_shape is not None else tuple()
+        self._batch_shape = tuple(
+            batch_shape) if batch_shape is not None else tuple()
         self._low, self._high = self._range(low, high)
 
     def sample(self):
-        '''Take a sample from the space'''
+        '''
+        Sample a valid action from the space
+
+        Returns:
+            Tensor, a valid action.
+        '''
+
         if self.is_discrete:
             return np.random.randint(low=self._low, high=self._high, size=self.shape).astype(self._dtype)
 
@@ -60,27 +68,27 @@ class Space:
 
     @property
     def shape(self):
-        '''Space shape after batching'''
+        '''Space shape after batching.'''
         return self._batch_shape + self._feature_shape
 
     @property
     def np_dtype(self):
-        '''Numpy data type'''
+        '''Numpy data type of current Space.'''
         return self._dtype
 
     @property
     def ms_dtype(self):
-        '''MindSpore data type'''
+        '''MindSpore data type or current Space.'''
         return mstype.pytype_to_dtype(self._dtype)
 
     @property
     def is_discrete(self):
-        '''Is discrete space'''
+        '''Is discrete space.'''
         return issubclass(self._dtype, np.integer) or self._dtype == np.bool_
 
     @property
     def num_values(self):
-        '''The number of optional enumeration values'''
+        '''available action number of current Space.'''
         if not self.is_discrete:
             return self.shape[-1]
 
@@ -95,7 +103,7 @@ class Space:
 
     @property
     def boundary(self):
-        '''The space boundary.'''
+        '''The space boundary of current Space.'''
         return self._low, self._high
 
     def _range(self, low, high):
@@ -105,9 +113,11 @@ class Space:
             if self._dtype == np.bool_:
                 dtype_low, dtype_high = 0, 2
             else:
-                dtype_low, dtype_high = np.iinfo(self._dtype).min, np.iinfo(self._dtype).max
+                dtype_low, dtype_high = np.iinfo(
+                    self._dtype).min, np.iinfo(self._dtype).max
         else:
-            dtype_low, dtype_high = np.finfo(self._dtype).min, np.finfo(self._dtype).max
+            dtype_low, dtype_high = np.finfo(
+                self._dtype).min, np.finfo(self._dtype).max
 
         low = dtype_low if low is None else low
         high = dtype_high if high is None else high

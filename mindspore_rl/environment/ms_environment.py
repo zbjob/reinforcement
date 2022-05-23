@@ -22,9 +22,11 @@ from mindspore_rl.environment.registration import Registry
 
 registry = Registry(domain="MindSpore")
 
+
 def ms_register(name, env_class):
     '''register an environment to MindSpore domain'''
     return registry.register(name, env_class)
+
 
 def ms_create(kwargs):
     '''create a MindSpore domain environment instance'''
@@ -103,7 +105,7 @@ class MsEnvironment(Environment):
 
     def step(self, action):
         r"""
-        Run one timestep of environment.
+        Run one timestep of environment to interact with environment.
 
         Args:
             action (Tensor): Action provided by the all of agents.
