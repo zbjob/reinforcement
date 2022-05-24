@@ -87,7 +87,7 @@ algorithm_config = {
         'data_shape': [(121, 5, 96), (121, 120), (121, 5, 1), (121, 5, 11), (121, 1), (121, 1), (121, 1), (121, 5, 64)],
         'data_type': [
             ms.float32, ms.float32, ms.int32, ms.int32,
-            ms.float32, ms.int32, ms.int32, ms.float32
+            ms.float32, ms.bool_, ms.int32, ms.float32
         ],
         'sample_size': BATCH_SIZE,
     }
