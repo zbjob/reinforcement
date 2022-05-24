@@ -2,7 +2,7 @@
     
     GymEnvironment将 `Gym <https://gym.openai.com/>`_ 封装成一个类来提供在MindSpore图模式下也能和Gym环境交互的能力。
 
-    **参数: **
+    **参数：**
     
     - **params** (dict) - 字典包含GymEnvironment类中所需要的所有参数。
 
@@ -20,7 +20,7 @@
 
         将环境重置为初始状态。reset方法一般在每个episode开始时使用，并返回环境的初始状态值。
 
-        **返回: **
+        **返回：**
 
         表示环境初始状态的Tensor。
 
@@ -28,11 +28,11 @@
 
         执行环境Step函数来和环境交互一次。
 
-        **参数: **
+        **参数：**
 
         - **action** (Tensor) - 包含动作信息的Tensor。
 
-        **返回: **
+        **返回：**
 
         - **state** (Tensor) - 输入动作后的环境返回的新状态。
         - **reward** (Tensor) - 输入动作后环境返回的奖励。

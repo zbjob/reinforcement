@@ -2,7 +2,7 @@
 
     MultiEnvironmentWrapper是多环境场景下的包装器。用户实现自己的单环境类，并在配置文件中设置环境数量大于1时，框架将自动调用此类创建多环境。
 
-    **参数: **
+    **参数：**
 
     - **env_instance** (list(Environment)) - 包含环境实例（继承Environment类）的List。
     - **num_proc** (int) - 在和环境交互时使用的进程数量。默认值： None。
@@ -11,7 +11,7 @@
 
         将环境重置为初始状态。reset方法一般在每个episode开始时使用，并返回环境的初始状态值。
 
-        **返回: **
+        **返回：**
 
         表示环境初始状态的Tensor List。
 
@@ -19,11 +19,11 @@
 
         执行环境Step函数来和环境交互一次。
 
-        **参数: **
+        **参数：**
 
         - **action** (Tensor) - 包含动作信息的Tensor。
 
-        **返回: **
+        **返回：**
         
         - **state** (list(Tensor)) - 输入动作后的环境返回的新状态List。
         - **reward** (list(Tensor)) - 输入动作后环境返回的奖励List。
