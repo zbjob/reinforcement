@@ -82,7 +82,7 @@ class QMIXTrainer(Trainer):
     @ms_function
     def train_one_episode(self):
         """the train one episode implementation"""
-        done = self.zero_int
+        done = self.false
         steps = self.zero_int
         total_reward = self.zero_float
         loss = self.zero_float
@@ -100,7 +100,7 @@ class QMIXTrainer(Trainer):
         episode_reward = self.zeros(
             (self.episode_limit + 1, self.reward_dim), ms.float32)
         episode_done = self.zeros(
-            (self.episode_limit + 1, self.done_dim), ms.int32)
+            (self.episode_limit + 1, self.done_dim), ms.bool_)
         episode_filled = self.zeros(
             (self.episode_limit + 1, self.done_dim), ms.int32)
         episode_hy = self.zeros((self.episode_limit + 1, self.num_agent, 64), ms.float32)
@@ -132,7 +132,7 @@ class QMIXTrainer(Trainer):
             reach_episode_limit = self.expand_dims(
                 self.equal(self.episode_limit, steps), 0)
             if reach_episode_limit:
-                done = self.zero_int
+                done = self.false
             episode_done[steps - 1] = done
             episode_filled[steps - 1] = self.expand_dims(self.one_int, 0)
             reward_squeeze = self.squeeze(reward)
