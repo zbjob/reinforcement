@@ -3,7 +3,7 @@
 
     Agent的基类。作为智能体的定义，由Actor和Leanrner构成。具备基本的act和learn功能用于和环境交互和自我更新。
 
-    ** 参数：**
+    **参数：**
 
     - **actors** (Actor) - Actor 实例。
     - **learner** (learner) - learner 实例。

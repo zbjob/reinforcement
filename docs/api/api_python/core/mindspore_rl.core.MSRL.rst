@@ -3,15 +3,15 @@
 
     MSRL提供了用于强化学习算法开发的方法和API。它向用户公开以下方法。这些方法的输入和输出与用户定义的方法相同。
 
-    ..code-block::
+    .. code-block::
     
-    agent_act
-    agent_get_action
-    sample_buffer
-    agent_learn
-    replay_buffer_sample
-    replay_buffer_insert
-    replay_buffer_reset
+        agent_act
+        agent_get_action
+        sample_buffer
+        agent_learn
+        replay_buffer_sample
+        replay_buffer_insert
+        replay_buffer_reset
 
     **参数：**
 
