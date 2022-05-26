@@ -65,7 +65,7 @@ class MsEnvironment(Environment):
             +--------------------+------------------------------+------------------+----------------------------+
 
     Supported Platforms:
-        "GPU"
+        ``GPU``
 
     Examples:
         >>> config = {'name': 'Tag', 'predator_num': 4}
@@ -92,7 +92,7 @@ class MsEnvironment(Environment):
             Tensor, the initial observation.
 
         Supported Platforms:
-            "GPU"
+            ``GPU``
 
         Examples:
             >>> config = {'name': 'Tag', 'predator_num': 4}
@@ -118,7 +118,7 @@ class MsEnvironment(Environment):
             - **done** (Tensor) - Whether the episode has ended.
 
         Supported Platforms:
-            "GPU"
+            ``GPU``
 
         Examples:
             >>> config = {'name': 'Tag', 'predator_num': 4}

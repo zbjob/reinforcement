@@ -31,6 +31,7 @@ class GymEnvironment(Environment):
 
     Args:
         params (dict): A dictionary contains all the parameters which are used in this class.
+
             +------------------------------+----------------------------+
             |  Configuration Parameters    |  Notices                   |
             +==============================+============================+
