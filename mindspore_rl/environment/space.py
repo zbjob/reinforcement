@@ -30,11 +30,11 @@ class Space:
     The class for environment action/observation space.
 
     Args:
-        - **feature_shape** (Union[list(int), tuple(int), int]): The action/observation shape before batching.
-        - **dtype** (np.dtype): The action/observation space dtype.
-        - **low** (int, float, optional): The action/observation space lower boundary.
-        - **high** (int, float, optional): The action/observation space upper boundary.
-        - **batch_shape** (Union[list(int), tuple(int), int], optional): The batch shape for vectorization.
+        feature_shape (Union[list(int), tuple(int), int]): The action/observation shape before batching.
+        dtype (np.dtype): The action/observation space dtype.
+        low (int, float, optional): The action/observation space lower boundary.
+        high (int, float, optional): The action/observation space upper boundary.
+        batch_shape (Union[list(int), tuple(int), int], optional): The batch shape for vectorization.
           It usually be used in multi-environment and multi-agent cases.
 
     Examples:
