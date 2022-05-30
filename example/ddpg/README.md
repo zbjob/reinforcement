@@ -8,7 +8,7 @@
 
 DDPG uses  an open source reinforcement learning environment library called [Gym](https://github.com/openai/gym), which is developed by OpenAI.
 
-The game solved in DDPG is called [**HalfCheetah-v2**](https://gym.openai.com/envs/HalfCheetah-v2/), it is from Gym, but this game depends on an advanced physics simulation called [MuJoCo](https://github.com/openai/mujoco-py).
+The game solved in DDPG is called [HalfCheetah-v2](https://www.gymlibrary.ml/environments/mujoco/half_cheetah/), it is from Gym, but this game depends on an advanced physics simulation called [MuJoCo](https://github.com/openai/mujoco-py).
 
 ## How to run DDPG
 
@@ -105,4 +105,4 @@ Evaluate result is 6000.300, checkpoint file in /path/ckpt/actor_net/actor_net_9
 
 ## Supported Platform
 
-DDPG algorithm supports Ascend, GPU and CPU platform.
+DDPG algorithm supports GPU and CPU platform.
