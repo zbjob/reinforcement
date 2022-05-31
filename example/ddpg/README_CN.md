@@ -8,7 +8,7 @@
 
 DDPG算法使用了OpenAI开发的一个强化学习环境库叫做[Gym](https://github.com/openai/gym)，来作为算法的游戏环境。
 
-在DDPG中，解决了[**HalfCheetah-v2**](https://gym.openai.com/envs/HalfCheetah-v2/)这个来自Gym库的游戏。与于其他游戏如CartPole不同的是，这个游戏还依赖[MuJoCo](https://github.com/openai/mujoco-py)这个库。
+在DDPG中，解决了[HalfCheetah-v2](https://www.gymlibrary.ml/environments/mujoco/half_cheetah/)这个来自Gym库的游戏。与于其他游戏如CartPole不同的是，这个游戏还依赖[MuJoCo](https://github.com/openai/mujoco-py)这个库。
 
 ## 如何运行DDPG
 
@@ -103,4 +103,4 @@ Evaluate result is 6000.300, checkpoint file in /path/ckpt/actor_net/actor_net_9
 
 ## 支持平台
 
-DDPG算法支持Ascend，GPU和CPU。
+DDPG算法支持GPU和CPU。
