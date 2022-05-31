@@ -1,5 +1,5 @@
 
-.. py:class:: mindspore_rl.Agent(actors, learner)
+.. py:class:: mindspore_rl.agent.Agent(actors, learner)
 
     Agent的基类。作为智能体的定义，由Actor和Leanrner构成。具备基本的act和learn功能用于和环境交互和自我更新。
 
