@@ -29,14 +29,15 @@ class Policy(nn.Cell):
 
     def construct(self, *inputs, **kwargs):
         """
-        The interface of the construct function.
+        The interface of the construct function. Inherited and used by users.
+        Args can refer to 'epsilongreedypolicy', 'randompolicy', etc.
 
         Args:
             inputs: it's depended on the user definition.
             kwargs: it's depended on the user definition.
 
         Returns:
-             User defined.
+             User defined. Usually, it returns an action value or the probability distribution of an action.
         """
 
         raise NotImplementedError("Method should be overridden by subclass.")
