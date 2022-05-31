@@ -1,5 +1,5 @@
 
-.. py:class:: mindspore_rl.core.MSRL
+.. py:class:: mindspore_rl.core.MSRL(config)
 
     MSRL提供了用于强化学习算法开发的方法和API。它向用户公开以下方法。这些方法的输入和输出与用户定义的方法相同。
 

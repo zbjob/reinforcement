@@ -1,5 +1,5 @@
 
-.. py:class:: mindspore_rl.core.Session
+.. py:class:: mindspore_rl.core.Session(config)
 
     Session是一个用于运行MindSpore RL算法的类。
 
