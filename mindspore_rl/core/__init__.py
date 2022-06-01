@@ -21,4 +21,4 @@ from mindspore_rl.core.replay_buffer import ReplayBuffer
 from mindspore_rl.core.msrl import MSRL
 from mindspore_rl.core.session import Session
 
-__all__ = ["MSRL", "Session"]
+__all__ = ["MSRL", "Session", "ReplayBuffer"]
