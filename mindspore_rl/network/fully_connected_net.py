@@ -70,17 +70,17 @@ class FullyConnectedNet(nn.Cell):
 
 class FullyConnectedLayers(nn.Cell):
     r"""
-    This is a fully connected layers module. User can input abitrary number of fc_layers_params, then
+    This is a fully connected layers module. User can input abitrary number of fc_layer_params, then
     this module can create corresponding number of fully connect layers.
 
     Args:
-        fc_layers_params (List[int]): A list of int states for the input and output size of fully
+        fc_layer_params (List[int]): A list of int states for the input and output size of fully
             connected layer. For example, if the input list is [10, 20, 3], then the module will
             create two fully connected layers whose input and output size are (10, 20) and (20, 3)
-            respectively. The length of fc_layers_params should be larger than 3.
+            respectively. The length of fc_layer_params should be larger than 3.
         dropout_layer_params (List[float]): A list of float states for the dropout rate. If the input
             list if [0.5, 0.3], then two dropout layers will be created after each fully connected
-            layer. The length of dropout_layer_params should be one less than fc_layers_params.
+            layer. The length of dropout_layer_params should be one less than fc_layer_params.
             dropout_layer_params is a optional value. Default: None.
         activation_fn (Union[str, Cell, Primitive): An instance of activation function. Default: nn.ReLu().
         weight_init (Union[Tensor, str, Initializer, numbers.Number]): The trainable weight_init parameter.
@@ -96,7 +96,7 @@ class FullyConnectedLayers(nn.Cell):
 
     Examples:
         >>> input = Tensor(np.ones([2, 4]).astype(np.float32))
-        >>> net = FullyConnectedLayers(fc_layers_params=[4, 10, 2])
+        >>> net = FullyConnectedLayers(fc_layer_params=[4, 10, 2])
         >>> output = net(input)
         >>> print(output.shape)
         (2, 2)

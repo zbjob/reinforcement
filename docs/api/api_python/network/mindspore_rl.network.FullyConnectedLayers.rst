@@ -1,5 +1,5 @@
 
-.. py:class:: mindspore_rl.network.FullyConnectedNet(input_size, hidden_size, output_size, compute_type=mindspore.float32)
+.. py:class:: mindspore_rl.network.FullyConnectedNet(input_size, hidden_size, output_size, compute_type=mstype.float32)
 
     一个基本的全连接神经网络。
 
@@ -24,12 +24,12 @@
 
 .. py:class:: mindspore_rl.network.FullyConnectedLayers(fc_layer_params, dropout_layer_params=None, activation_fn=nn.ReLU(), weight_init='normal', bias_init='zeros')
 
-    这是一个全连接层的模块。用户可以输入任意数量的fc_layers_params, 然后该模块可以创建相应数量的全链接层。
+    这是一个全连接层的模块。用户可以输入任意数量的fc_layer_params，然后该模块可以创建相应数量的全链接层。
 
     **参数：**
 
     - **fc_layer_params** (list[int]) - 全连接层输入和输出大小的值列表。例如，输入列表为[10，20，30]，模块将创建两个全连接层，
-      其输入和输出大小分别为(10, 20)和(20,30)。fc_layers_params的长度应大于3。
+      其输入和输出大小分别为(10, 20)和(20,30)。fc_layer_params的长度应大于3。
     - **dropout_layer_params** (list[float]) - 丢弃率的列表。如果输入为[0.5, 0.3]，则在每个全连接层之后将创建两个丢弃层。
       dropout_layer_params的长度应小于fc_layer_params。 dropout_layer_params是个可选值。默认值： None。
     - **activation_fn** (Union[str, Cell, Primitive]) - 激活函数的实例。默认值： nn.ReLU()。
@@ -37,7 +37,7 @@
       `Initializer` 函数。默认值： 'normal'。
     - **bias_init** (Union[Tensor, str, Initializer, numbers.Number]) - 可训练的初始化偏置参数。类型与 `x` 相同。str的值代表
       `Initializer` 函数。默认值： 'zeros'。
-    
+
     **输入：**
 
     - **x** (Tensor) - Tensor的shape为 :math:`(*, fc\_layers\_params[0])`。

@@ -105,7 +105,7 @@ class ReplayBuffer(nn.Cell):
 
         Args:
             exp (List[Tensor]): insert a list of tensor which matches with the initialized shape
-            and type into the buffer.
+                and type into the buffer.
 
         Returns:
              element (List[Tensor]), return the whole buffer after insertion

@@ -10,3 +10,7 @@
     - **actions** (Queue) - 用于将动作传递给环境进程的队列。
     - **observations** (Queue) - 用于将状态传递给环境进程的队列。
     - **initial_states** (Queue) - 用于将初始状态传递给环境进程的队列。
+
+    .. py:method:: run()
+
+        在子进程中运行的方法，可以在子类中重写。

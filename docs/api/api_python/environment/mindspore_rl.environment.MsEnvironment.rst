@@ -30,17 +30,42 @@
       |                    |  step_cost                   |   0.01           |  单个Step的基础成本        |
       +--------------------+------------------------------+------------------+----------------------------+
 
+    .. py:method:: action_space
+        :property:
+
+        获取环境的动作空间。
+
+    .. py:method:: config
+        :property:
+
+        获取环境信息。
+
+    .. py:method:: done_space
+        :property:
+
+        获取环境的终止空间。
+
+    .. py:method:: observation_space
+        :property:
+
+        获取环境的状态空间。
+
     .. py:method:: reset()
 
         将环境重置为初始状态，并返回环境的初始状态值。
 
-        **参数：**
+        **输入：**
 
         没有输入。
 
         **返回：**
 
         表示环境初始状态的Tensor。
+
+    .. py:method:: reward_space
+        :property:
+
+        获取环境的奖励空间。
 
     .. py:method:: step(action)
 
@@ -52,32 +77,10 @@
 
         **返回：**
 
+        3 个张量的元组，状态、奖励和终止。
+
         - **observation** (Tensor) - 输入动作后的环境返回的所有智能体的新状态。
         - **reward** (Tensor) - 输入动作后环境返回的奖励。
         - **done** (Tensor) - 输入动作后环境是否终止。
 
-    .. py:method:: action_space
-        :property:
 
-        返回环境的动作空间。
-
-    .. py:method:: config
-        :property:
-
-        返回环境信息。
-
-    .. py:method:: done_space
-        :property:
-
-        返回环境的终止空间。
-
-
-    .. py:method:: observation_space
-        :property:
-
-        返回环境的状态空间。
-
-    .. py:method:: reward_space
-        :property:
-
-        返回环境的奖励空间。
