@@ -63,7 +63,7 @@ def _mindspore_version_check():
         warning_countdown = 3
         for i in range(warning_countdown, 0, -1):
             logger.warning(
-                f"Please pay attention to the above warning, countdonw: {i}")
+                f"Please pay attention to the above warning, countdown: {i}")
             time.sleep(1)
 
 
