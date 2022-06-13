@@ -14,20 +14,20 @@
 
         **参数：**
 
-        - **phase** (int) - 一个int型的枚举值，用于初始化、收集或评估的阶段。
+        - **phase** (enum) - 一个int型的枚举值，用于初始化、收集或评估的阶段。
         - **params** (tuple(Tensor)) - 作为输入的张量元组，用于计算动作。
 
         **返回：**
 
         - **observation** (tuple(Tensor)) - 作为输出的张量元组，用于生成经验数据。
 
-    .. py:method:: get_actions(phase, params)
+    .. py:method:: get_action(phase, params)
 
-        get_actions 方法接收一个枚举值和观察数据或计算动作期间所需的数据。它将返回一组包含动作和其他数据的输出。此接口中，Agent不与环境交互。
+        get_action 方法接收一个枚举值和观察数据或计算动作期间所需的数据。它将返回一组包含动作和其他数据的输出。此接口中，Agent不与环境交互。
 
         **参数：**
 
-        - **phase** (int) - 一个int型的枚举值，用于初始化、收集、评估或者其他用户定义的阶段。
+        - **phase** (enum) - 一个int型的枚举值，用于初始化、收集、评估或者其他用户定义的阶段。
         - **params** (tuple(Tensor)) - 作为输入的张量元组，用于计算动作。
 
         **返回：**

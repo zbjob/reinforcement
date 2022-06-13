@@ -26,7 +26,7 @@ class RandomPolicy(Policy):
     Produces a random action betweens [0, `acton_space_dim`).
 
     Args:
-        acton_space_dim(int): dimension of the action space.
+        action_space_dim(int): dimension of the action space.
 
     Examples:
         >>> action_space_dim = 2

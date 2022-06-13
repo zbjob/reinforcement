@@ -13,4 +13,4 @@
 
         **返回：**
 
-        返回[0, `action_space_dim`)之间的随机数。
+        [0, `action_space_dim`)之间的随机数。

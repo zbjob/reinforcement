@@ -177,6 +177,7 @@ class StarCraft2Environment(Environment):
     def action_space(self):
         """
         Get the action space of the environment.
+
         Returns:
             A tuple which states for the space of observation.
         """

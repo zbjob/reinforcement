@@ -1,7 +1,8 @@
 
 .. py:class:: mindspore_rl.core.MSRL(config)
 
-    MSRL提供了用于强化学习算法开发的方法和API。它向用户公开以下方法。这些方法的输入和输出与用户定义的方法相同。
+    MSRL提供了用于强化学习算法开发的方法和API。
+    它向用户公开以下方法。这些方法的输入和输出与用户定义的方法相同。
 
     .. code-block::
     
@@ -35,14 +36,6 @@
         - 关键字: `networks`， 值： actor/learner使用的网络列表 (list)。
         - 关键字: `pass_environment`， 值： 如果为True， 用户需要传递环境实例给actor， 为False则不需要 (bool)。
 
-    .. py:method:: init(config)
-
-        MSRL 对象的初始化。该方法创建算法所需的所有数据/对象。它会初始化所有的方法。
-
-        **参数：**
-
-        - **config** (dict) - 算法的配置文件。
-
     .. py:method:: get_replay_buffer
 
         它将返回重放缓存的实例。
@@ -50,7 +43,7 @@
         **返回：**
 
         - **buffers** (object) - 重放缓存的实例。如果缓存为None， 返回也为None。
-    
+
     .. py:method:: get_replay_buffer_elements(transpose=False， shape=None)
 
         它将返回重放缓存中的所有元素。
@@ -62,4 +55,15 @@
 
         **返回：**
 
-        - **elements** (tuple[Tensor]) - 一组包含所有重放缓存中数据的张量。
+        - **elements** (List[Tensor]) - 一组包含所有重放缓存中数据的张量。
+
+    .. py:method:: init(config)
+
+        MSRL 对象的初始化。该方法创建算法所需的所有数据/对象。它会初始化所有的方法。
+
+        **参数：**
+
+        - **config** (dict) - 算法的配置文件。
+
+
+    

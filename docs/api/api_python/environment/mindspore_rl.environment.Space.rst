@@ -10,14 +10,6 @@
     - **high** (int, float) - 动作/状态空间的上边界。默认：None。
     - **batch_shape** (Union[list(int), tuple(int), int]) - 矢量化的批量Shape。通常用于多环境和多智能体的场景。默认：None。
 
-    .. py:method:: sample()
-    
-        从当前Space里随机采样一个合法动作。
-
-        **返回：**
-
-        一个合法动作的Tensor。
-
     .. py:method:: boundary
         :property:
 
@@ -43,9 +35,15 @@
 
         当前空间可选动作的数量。
 
+    .. py:method:: sample()
+
+        从当前Space里随机采样一个合法动作。
+
+        **返回：**
+
+        一个合法动作的Tensor。
+
     .. py:method:: shape
         :property:
 
         批处理后的Space的Shape。
-
-    
