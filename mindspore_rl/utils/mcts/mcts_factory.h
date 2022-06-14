@@ -55,7 +55,9 @@ class MonteCarloTreeFactory {
   std::vector<void*> GetTreeVariableByHandle(int64_t handle);
 
   // Erase the tree and all the nodes which matches the input handle.
-  void Delete(int64_t handle);
+  void DeleteTree(int64_t handle);
+  // Erase the tree and all the nodes which matches the input handle.
+  void DeleteTreeVariable(int64_t handle);
 
  private:
   MonteCarloTreeFactory() = default;
@@ -85,25 +87,21 @@ class MonteCarloTreeRegister {
 // Helper registration macro for NODECLASS
 // When user inherits the base class of MonteCarloTreeNode, user can register the class by NAME.
 // Then user can pass the NAME in python side to create derived class in C++ side.
-#define MS_REG_NODE(NAME, NODECLASS)                                                                               \
-  do {                                                                                                             \
-    static_assert(std::is_base_of<MonteCarloTreeNode, NODECLASS>::value, " must be base of MonteCarloTreeNode");   \
-    static const MonteCarloTreeNodeRegister montecarlo_##NAME##_node_reg(                                          \
-        #NAME, [](std::string name, int action, float prior, int player, int64_t tree_handle,                      \
-                  MonteCarloTreeNodePtr parent_node,                                                               \
-                  int row) { return new NODECLASS(name, action, prior, player, tree_handle, parent_node, row); }); \
-  } while (0)
+#define MS_REG_NODE(NAME, NODECLASS)                                                                           \
+  static_assert(std::is_base_of<MonteCarloTreeNode, NODECLASS>::value, " must be base of MonteCarloTreeNode"); \
+  static const MonteCarloTreeNodeRegister montecarlo_##NAME##_node_reg(                                        \
+      #NAME, [](std::string name, int action, float prior, int player, int64_t tree_handle,                    \
+                MonteCarloTreeNodePtr parent_node,                                                             \
+                int row) { return new NODECLASS(name, action, prior, player, tree_handle, parent_node, row); });
 
 // Helper registration macro for TREECLASS
 // When user inherits the base class of MonteCarloTree, user can register the class by NAME.
 // Then user can pass the NAME in python side to create derived class in C++ side.
-#define MS_REG_TREE(NAME, TREECLASS)                                                                     \
-  do {                                                                                                   \
-    static_assert(std::is_base_of<MonteCarloTree, TREECLASS>::value, " must be base of MonteCarloTree"); \
-    static const MonteCarloTreeRegister montecarlo_##NAME##_tree_reg(                                    \
-        #NAME, [](MonteCarloTreeNodePtr root, float max_utility, int64_t tree_handle) {                  \
-          return new TREECLASS(root, max_utility, tree_handle);                                          \
-        });                                                                                              \
-  } while (0)
+#define MS_REG_TREE(NAME, TREECLASS)                                                                   \
+  static_assert(std::is_base_of<MonteCarloTree, TREECLASS>::value, " must be base of MonteCarloTree"); \
+  static const MonteCarloTreeRegister montecarlo_##NAME##_tree_reg(                                    \
+      #NAME, [](MonteCarloTreeNodePtr root, float max_utility, int64_t tree_handle) {                  \
+        return new TREECLASS(root, max_utility, tree_handle);                                          \
+      });
 
 #endif  // MINDSPORE_RL_UTILS_MCTS_MCTS_FACTORY_H_

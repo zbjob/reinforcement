@@ -19,21 +19,23 @@
 #include "utils/mcts/mcts_factory.h"
 #include "utils/mcts/mcts_tree_node.h"
 
-std::vector<int> MonteCarloTree::Selection(int max_length_action) {
+bool MonteCarloTree::Selection(std::vector<int>* action_list) {
   visited_path_.clear();
   visited_path_.emplace_back(root_);
   MonteCarloTreeNodePtr current_node = root_;
   // Create a max length action to avoid dynamic shape
-  std::vector<int> action_list(max_length_action, -1);
   int i = 0;
   while (!current_node->IsLeafNode()) {
     auto selected_child = current_node->SelectChild();
-    action_list[i] = selected_child->action();
+    if (selected_child == nullptr) {
+      return false;
+    }
+    (*action_list)[i] = selected_child->action();
     visited_path_.emplace_back(selected_child);
     current_node = selected_child;
   }
   placeholder_handle_++;
-  return action_list;
+  return true;
 }
 
 bool MonteCarloTree::Expansion(std::string node_name, int* action, float* prior, int num_action, int player) {
@@ -80,4 +82,9 @@ bool MonteCarloTree::Backpropagation(float* returns) {
     }
   }
   return true;
+}
+
+int MonteCarloTree::BestAction() {
+  auto best_child_node = root_->BestAction();
+  return best_child_node->action();
 }

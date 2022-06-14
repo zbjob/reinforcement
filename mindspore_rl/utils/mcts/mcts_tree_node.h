@@ -41,12 +41,12 @@ class MonteCarloTreeNode {
 
   virtual ~MonteCarloTreeNode() = default;
 
-  // The virtual function of SelectChild, it will select the child whose value of SelectionPolicy is the highest.
-  virtual std::shared_ptr<MonteCarloTreeNode> SelectChild() = 0;
+  // It will select the child whose value of SelectionPolicy is the highest.
+  std::shared_ptr<MonteCarloTreeNode> SelectChild();
 
   // The virtual function of SelectionPolicy. In this function, user needs to implement the rule to select
   // child node, such as UCT(UCB) function, RAVE, AMAF, etc.
-  virtual float SelectionPolicy() const = 0;
+  virtual bool SelectionPolicy(float *uct_value) const = 0;
 
   // The virtual function of Update. It is invoked during backpropagation. User needs implement how to update
   // the local value according to the input returns.
@@ -69,7 +69,7 @@ class MonteCarloTreeNode {
   void set_state(float *input_state) { state_ = input_state; }
   float *state() { return state_; }
 
-  void set_terminate(bool done) { terminal_ = done; }
+  void set_terminal(bool done) { terminal_ = done; }
   bool terminal() { return terminal_; }
 
   void set_outcome(std::vector<float> new_outcome) { outcome_ = new_outcome; }
@@ -78,6 +78,8 @@ class MonteCarloTreeNode {
   int action() { return action_; }
   int row() { return row_; }
   int player() { return player_; }
+  int explore_count() { return explore_count_; }
+  float total_reward() { return total_reward_; }
 
   std::string DebugString() {
     std::ostringstream oss;
