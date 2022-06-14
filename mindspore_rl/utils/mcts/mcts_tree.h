@@ -25,16 +25,17 @@
 
 class MonteCarloTree {
  public:
-  MonteCarloTree(MonteCarloTreeNodePtr root, int64_t tree_handle) : root_(root), tree_handle_(tree_handle) {}
+  MonteCarloTree(MonteCarloTreeNodePtr root, float max_utility, int64_t tree_handle)
+      : root_(root), max_utility_(max_utility), tree_handle_(tree_handle) {}
   ~MonteCarloTree() = default;
 
   // The Selection phase of monte carlo tree search, it will continue selecting child node based on selection
   // policy (like UCT) until leaf node.
-  std::tuple<int64_t, int> Selection();
+  std::vector<int> Selection(int max_length_action);
 
   // The Expansion phase of monte carlo tree search, it will create the child node based on input action and prior
   // for last node in visited path.
-  bool Expansion(int *action, float *prior, int num_element);
+  bool Expansion(std::string node_name, int *action, float *prior, int num_action, int player);
 
   // The Backpropagation phase of monte carlo tree search, it will update the value in each visited node according to
   // the input returns (obtained in simulation).
@@ -44,9 +45,14 @@ class MonteCarloTree {
 
   float *GetState(int index) { return visited_path_[index]->state(); }
 
+  int64_t placeholder_handle() { return placeholder_handle_; }
+
+ private:
+  float max_utility_;  // The max utility of game, which is used in backpropagation.
+
  protected:
   int64_t tree_handle_;                              // The tree handle which is used to create the node.
-  int64_t placeholder_handle_ = 0;                   // A dummy handle.
+  int64_t placeholder_handle_ = -1;                  // A dummy handle.
   MonteCarloTreeNodePtr root_;                       // The ptr of root node.
   std::vector<MonteCarloTreeNodePtr> visited_path_;  // The visited path which is obtained in Selection().
 };
