@@ -18,7 +18,8 @@ Helper components used to implement RL algorithms.
 """
 
 from mindspore_rl.core.replay_buffer import ReplayBuffer
+from mindspore_rl.core.priority_replay_buffer import PriorityReplayBuffer
 from mindspore_rl.core.msrl import MSRL
 from mindspore_rl.core.session import Session
 
-__all__ = ["MSRL", "Session", "ReplayBuffer"]
+__all__ = ["MSRL", "Session", "ReplayBuffer", "PriorityReplayBuffer"]
