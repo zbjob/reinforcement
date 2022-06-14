@@ -38,7 +38,7 @@
 
         - **exp** (list[Tensor]) - 插入的Tensor组，需要符合缓存初始化时的shape和type。
 
-        **返回**
+        **返回：**
 
         - **element** (list[Tensor]) - 返回插入数据后的缓存区。
 

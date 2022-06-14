@@ -44,13 +44,13 @@
 
         - **buffers** (object) - 重放缓存的实例。如果缓存为None， 返回也为None。
 
-    .. py:method:: get_replay_buffer_elements(transpose=False， shape=None)
+    .. py:method:: get_replay_buffer_elements(transpose=False, shape=None)
 
         它将返回重放缓存中的所有元素。
 
         **参数：**
 
-        - **transpose** (bool) - 输出元素是否需要转置， 如果为True， 则shape也需指定。默认值：False。
+        - **transpose** (bool) - 输出元素是否需要转置，如果为True，则shape也需指定。默认值：False。
         - **shape** (tuple[int]) - 转置的shape。默认值：None。
 
         **返回：**
