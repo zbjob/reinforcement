@@ -30,6 +30,8 @@ mindspore_rl.core
 
 .. include:: core/mindspore_rl.core.ReplayBuffer.rst
 
+.. include:: core/mindspore_rl.core.PriorityReplayBuffer.rst
+
 .. automodule:: mindspore_rl.core
     :members:
 
