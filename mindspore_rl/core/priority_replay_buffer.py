@@ -69,10 +69,10 @@ class PriorityReplayBuffer(nn.Cell):
 
         Args:
             transition (List[Tensor]): insert a list of tensor which matches with the initialized shapes
-            and dtypes into the buffer.
+                and dtypes into the buffer.
 
         Returns:
-            handle(Tensor): Priority replay buffer instance handle with dtype int64 and shape (1,).
+            handle(Tensor), Priority replay buffer instance handle with dtype int64 and shape (1,).
         """
 
         return self.push_op(transition)
@@ -82,9 +82,9 @@ class PriorityReplayBuffer(nn.Cell):
         Samples a batch of transitions from the replay buffer.
 
         Returns:
-            indices (Tensor): the transition indices in the replay buffer.
-            weights (Tensor): the weight used to correct for sampling bias.
-            transitions: transitions with variable-length tensors.
+            indices (Tensor), the transition indices in the replay buffer.
+            weights (Tensor), the weight used to correct for sampling bias.
+            transitions (tuple(Tensor)), transitions with variable-length tensors.
         """
 
         return self.sample_op()
@@ -98,7 +98,7 @@ class PriorityReplayBuffer(nn.Cell):
             priorities (Tensor) - transition priorities.
 
         Returns:
-            tuple(Tensor): Transition with its indices and correction weights.
+            tuple(Tensor), Transition with its indices and correction weights.
         """
 
         return self.update_op(indices, priorities)
