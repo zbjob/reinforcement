@@ -31,7 +31,7 @@ class MonteCarloTree {
 
   // The Selection phase of monte carlo tree search, it will continue selecting child node based on selection
   // policy (like UCT) until leaf node.
-  std::vector<int> Selection(int max_length_action);
+  bool Selection(std::vector<int> *action_list);
 
   // The Expansion phase of monte carlo tree search, it will create the child node based on input action and prior
   // for last node in visited path.
@@ -41,11 +41,17 @@ class MonteCarloTree {
   // the input returns (obtained in simulation).
   bool Backpropagation(float *returns);
 
-  void UpdateState(float *input_state, int index) { visited_path_[index]->set_state(input_state); }
+  // Select the best action of root
+  int BestAction();
 
+  void UpdateState(float *input_state, int index) { visited_path_[index]->set_state(input_state); }
   float *GetState(int index) { return visited_path_[index]->state(); }
 
+  void UpdateOutcome(std::vector<float> input_return, int index) { visited_path_[index]->set_outcome(input_return); }
+  void UpdateTerminal(bool is_terminal, int index) { visited_path_[index]->set_terminal(is_terminal); }
+
   int64_t placeholder_handle() { return placeholder_handle_; }
+  std::vector<MonteCarloTreeNodePtr> visited_path() { return visited_path_; }
 
  private:
   float max_utility_;  // The max utility of game, which is used in backpropagation.
