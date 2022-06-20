@@ -1,4 +1,4 @@
-# Copyright 2021 Huawei Technologies Co., Ltd
+# Copyright 2021-2022 Huawei Technologies Co., Ltd
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -68,7 +68,7 @@ class MSRL(nn.Cell):
                 instance into actor, False otherwise (Bool).
     """
 
-    def __init__(self, config):
+    def __init__(self, alg_config, deploy_config=None):
         super(MSRL, self).__init__()
         self.actors = []
         self.learner = None
@@ -77,6 +77,9 @@ class MSRL(nn.Cell):
         self.buffers = []
         self.collect_environment = None
         self.eval_environment = None
+        self.num_collect_env = None
+        self.num_actors = None
+        self.distributed = False
 
         # apis
         self.agent_act = None
@@ -90,9 +93,13 @@ class MSRL(nn.Cell):
             'eval_environment', 'collect_environment', 'policy_and_network',
             'actor', 'learner'
         ]
-        self._compulsory_items_check(config, compulsory_items, 'config')
+        self._compulsory_items_check(alg_config, compulsory_items, 'config')
 
-        self.init(config)
+        if deploy_config is not None:
+            # Need to compute the number of process per worker.
+            self.proc_num = deploy_config['worker_num']
+            self.distributed = deploy_config['distributed']
+        self.init(alg_config)
 
     def _compulsory_items_check(self, config, compulsory_item, position):
         for item in compulsory_item:
@@ -124,7 +131,8 @@ class MSRL(nn.Cell):
 
     def _create_batch_env(self, sub_config, env_num, proc_num):
         """
-        Create the batch environments object from the sub_config, and return the instance of a batch env.
+        Create the batch environments object from the sub_config,
+        and return the instance of a batch env.
 
         Args:
             sub_config (dict): algorithm config of env.
@@ -154,17 +162,22 @@ class MSRL(nn.Cell):
 
         collect_env_config = config['collect_environment']
         eval_env_config = config['eval_environment']
-        num_collect_env = collect_env_config.get('number')
+        self.num_collect_env = collect_env_config.get('number')
         num_eval_env = eval_env_config.get('number')
         collect_num_parallel = collect_env_config.get('num_parallel')
         eval_num_parallel = eval_env_config.get('num_parallel')
+
+        if self.num_collect_env is None:
+            self.num_collect_env = 1
+        if num_eval_env is None:
+            num_eval_env = 1
 
         if collect_num_parallel:
             if collect_num_parallel < 1:
                 raise ValueError("num_parallel of collect_environment can not be non-positive")
             collect_proc_num = collect_num_parallel
         else:
-            collect_proc_num = num_collect_env
+            collect_proc_num = self.num_collect_env
 
         if eval_num_parallel:
             if eval_num_parallel < 1:
@@ -185,25 +198,16 @@ class MSRL(nn.Cell):
         config['collect_environment']['params']['num_agent'] = num_agent
         config['eval_environment']['params']['num_agent'] = num_agent
 
-        if (num_collect_env is None) and (num_eval_env is None):
-            collect_env = self._create_instance(config['collect_environment'], None)
-            eval_env = self._create_instance(config['eval_environment'], None)
-
-        elif (num_collect_env is None) or (num_eval_env is None):
-            raise ValueError("You must give both number of collect_environment and number of \
-                              eval_environment or none of them")
+        if self.num_collect_env > 1:
+            collect_env = self._create_batch_env(config['eval_environment'], self.num_collect_env, collect_proc_num)
+            eval_env = self._create_batch_env(config['eval_environment'], num_eval_env, eval_proc_num)
         else:
-            if num_collect_env > 1:
-                collect_env = self._create_batch_env(config['eval_environment'], num_collect_env, collect_proc_num)
+            collect_env = self._create_instance(config['collect_environment'], None)
+            if num_eval_env > 1:
+                collect_env = MultiEnvironmentWrapper([collect_env], collect_proc_num)
                 eval_env = self._create_batch_env(config['eval_environment'], num_eval_env, eval_proc_num)
-
             else:
-                collect_env = self._create_instance(config['collect_environment'], None)
-                if num_eval_env > 1:
-                    collect_env = MultiEnvironmentWrapper([collect_env], collect_proc_num)
-                    eval_env = self._create_batch_env(config['eval_environment'], num_eval_env, eval_proc_num)
-                else:
-                    eval_env = self._create_instance(config['eval_environment'], None)
+                eval_env = self._create_instance(config['eval_environment'], None)
 
         return collect_env, eval_env
 
@@ -241,11 +245,13 @@ class MSRL(nn.Cell):
         Returns:
             replay_buffer (object), created replay buffer object.
         """
-        compulsory_item = ['type', 'capacity', 'data_shape', 'data_type', 'number']
+        compulsory_item = ['type', 'capacity', 'data_shape', 'data_type']
         self._compulsory_items_check(replay_buffer_config, compulsory_item,
                                      'replay_buffer')
 
-        num_replay_buffer = replay_buffer_config['number']
+        num_replay_buffer = replay_buffer_config.get('number')
+        if num_replay_buffer is None:
+            num_replay_buffer = 1
         replay_buffer_type = replay_buffer_config['type']
         capacity = replay_buffer_config['capacity']
         buffer_data_shapes = replay_buffer_config['data_shape']
@@ -331,6 +337,7 @@ class MSRL(nn.Cell):
             self.__params_generate(config, policy_and_network, 'actor',
                                    'networks')
 
+        self.num_actors = config['actor']['number']
         actor = self._create_instance(config['actor'], actor_id)
         return actor
 
@@ -374,14 +381,24 @@ class MSRL(nn.Cell):
             config (dict): algorithm configuration file.
         """
         # ---------------------- ReplayBuffer ----------------------
-        replay_buffer = config.get('replay_buffer')
-        if replay_buffer:
-            self.buffers = self.__create_replay_buffer(replay_buffer)
-            if replay_buffer.get('number') == 1:
+        replay_buffer_config = config.get('replay_buffer')
+        replay_buffer_global_config = config.get('replay_buffer_global')
+
+        if replay_buffer_config:
+            self.buffers = self.__create_replay_buffer(replay_buffer_config)
+            replay_buffer_num = replay_buffer_config.get('number')
+            if replay_buffer_num is not None and replay_buffer_config.get('number') > 1:
+                def replay_buffer_insert(agent_id):
+                    return self.buffers[agent_id]
+                self.replay_buffer_insert = replay_buffer_insert
+            else:
                 self.replay_buffer_sample = self.buffers.sample
                 self.replay_buffer_insert = self.buffers.insert
                 self.replay_buffer_full = self.buffers.full
                 self.replay_buffer_reset = self.buffers.reset
+
+        if replay_buffer_global_config:
+            self.buffers_global = self.__create_replay_buffer(replay_buffer_global_config)
 
         # ---------------------- Agent ----------------------
         agent_config = config.get('agent')
@@ -395,26 +412,36 @@ class MSRL(nn.Cell):
             # ---------------------- Environment ----------------------
             self.collect_environment, self.eval_environment = self.__create_environments(config)
             # ---------------------------------------------------------
-            if num_actors == 1:
-                policy_and_network = self.__create_policy_and_network(config)
-                self.actors = self.__create_actor(config, policy_and_network)
-                self.learner = self.__create_learner(config, policy_and_network)
+            if self.distributed:
+                self.policy_and_network = self.__create_policy_and_network(config)
+                self.actors = self.__create_actor(config, self.policy_and_network)
+                self.learner = self.__create_learner(config, self.policy_and_network)
                 self.agent_act = self.actors.act
-                self.agent_learn = self.learner.learn
-                self.agent_get_action = self.actors.get_action
-            elif num_actors > 1:
-                self.actors = nn.CellList()
-                if not share_env:
-                    self.collect_environment = nn.CellList()
-                for i in range(num_actors):
-                    if not share_env:
-                        self.collect_environment.append(self.__create_environments(config)[0])
-                    policy_and_network = self.__create_policy_and_network(config)
-                    self.actors.append(self.__create_actor(config, policy_and_network, actor_id=i))
-                self.learner = self.__create_learner(config, policy_and_network)
+                self.agent_evaluate = self.actors.evaluate
+                self.agent_act_init = self.actors.act_init
+                self.agent_update = self.actors.update
                 self.agent_learn = self.learner.learn
             else:
-                raise ValueError("The number of actors should >= 1, but get ", num_actors)
+                if num_actors == 1:
+                    policy_and_network = self.__create_policy_and_network(config)
+                    self.actors = self.__create_actor(config, policy_and_network)
+                    self.learner = self.__create_learner(config, policy_and_network)
+                    self.agent_act = self.actors.act
+                    self.agent_learn = self.learner.learn
+                    self.agent_get_action = self.actors.get_action
+                elif num_actors > 1:
+                    self.actors = nn.CellList()
+                    if not share_env:
+                        self.collect_environment = nn.CellList()
+                    for i in range(num_actors):
+                        if not share_env:
+                            self.collect_environment.append(self.__create_environments(config)[0])
+                        policy_and_network = self.__create_policy_and_network(config)
+                        self.actors.append(self.__create_actor(config, policy_and_network, actor_id=i))
+                    self.learner = self.__create_learner(config, policy_and_network)
+                    self.agent_learn = self.learner.learn
+                else:
+                    raise ValueError("The number of actors should >= 1, but get ", num_actors)
         else:
             raise ValueError(
                 "Sorry, the current does not support multi-agent yet")
