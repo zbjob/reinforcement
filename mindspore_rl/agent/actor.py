@@ -1,4 +1,4 @@
-# Copyright 2021 Huawei Technologies Co., Ltd
+# Copyright 2021-2022 Huawei Technologies Co., Ltd
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -79,4 +79,41 @@ class Actor(nn.Cell):
             observation (tuple(Tensor)): A tuple of tensor as output, which states for experience data.
         """
 
+        raise NotImplementedError("Method should be overridden by subclass.")
+
+    def act_init(self, state):
+        """
+        The interface of the act initialisation function. User will needd to overload this function according to
+        the algothrim.
+
+        Args:
+            state (Tensor): the output state from the environment.
+
+        Returns:
+            - done (Tensor): whether the simulation is finished or not.
+            - reward (Tensor): simulation reward.
+            - state (Tensor): simulation state.
+        """
+        raise NotImplementedError("Method should be overridden by subclass.")
+
+    def evaluate(self, state):
+        """
+        The interface of the act evaluation function. User will needd to overload this function according to
+        the algothrim.
+
+        Args:
+            state (Tensor): the output state from the environment.
+
+        Returns:
+            - done (Tensor): whether the simulation is finished or not.
+            - reward (Tensor): simulation reward.
+            - state (Tensor): simulation state.
+        """
+        raise NotImplementedError("Method should be overridden by subclass.")
+
+    def update(self):
+        """
+        The interface of the update function. User will needd to overload this function according to
+        the algothrim.
+        """
         raise NotImplementedError("Method should be overridden by subclass.")
