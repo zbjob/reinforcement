@@ -8,7 +8,7 @@
 
 PPO算法使用了OpenAI开发的一个强化学习环境库叫做[Gym](https://github.com/openai/gym)，来作为算法的游戏环境。
 
-在PPO中，解决了[**HalfCheetah-v2**](https://gym.openai.com/envs/HalfCheetah-v2/)这个来自Gym库的游戏。与于其他游戏如CartPole不同的是，这个游戏还依赖[MuJoCo](https://github.com/openai/mujoco-py)这个库。
+在PPO中，解决了[**HalfCheetah-v2**](https://www.gymlibrary.ml/environments/mujoco/half_cheetah/)这个来自Gym库的游戏。与于其他游戏如CartPole不同的是，这个游戏还依赖[MuJoCo](https://github.com/openai/mujoco-py)这个库。
 
 ## 如何运行PPO
 
@@ -74,6 +74,64 @@ Load file /path/ckpt/actor_net/actor_net_950.ckpt
 -----------------------------------------
 Evaluate result is 6000.300, checkpoint file in /path/ckpt/actor_net/actor_net_950.ckpt
 -----------------------------------------
+```
+
+### 分布式训练
+
+PPO提供了三种分布式训练模式(仅支持GPU)，分别存于`example/ppo/src/`下的`distribute_policy_3`，`distribute_policy_1`和`distribute_policy_2`，需要具备一定的分布式运行知识，参考[分布式样例](https://www.mindspore.cn/tutorials/experts/zh-CN/master/parallel/train_gpu.html)和[分布式配置](https://www.mindspore.cn/docs/zh-CN/master/faq/distributed_configure.html)。
+
+PPO样例提供了预设的脚本，可以直接运行单机多卡的用例，`example/ppo/scripts/*_local.sh`；也可以运行多机多卡用例，仅需在 `example/ppo/scripts`下，新建hostfile文件。hostfile中描述了多机器运行的ip和可用GPU卡数。如：
+
+```shell
+10.0.1.1 slots=4
+10.0.1.2 slots=4
+```
+
+运行多机用例：
+
+```shell
+> cd example/ppo/scripts
+> bash run_distribute_policy_1_cluster.sh
+```
+
+你会在`example/ppo/scripts/ppo_distribute_policy_1_cluster.log`中获得和下面内容相似的输出
+
+```shell
+Assign fragment 3 on worker 3
+Assign fragment 2 on worker 2
+Assign fragment 1 on worker 1
+Assign fragment 0 on worker 0
+Assign fragment 4 on worker 4
+Assign fragment 5 on worker 5
+Assign fragment 6 on worker 6
+Assign fragment 7 on worker 7
+Start fragment 3 on worker 3
+Start fragment 1 on worker 1
+Start fragment 2 on worker 2
+Start fragment 4 on worker 4
+Start fragment 5 on worker 5
+Start fragment 7 on worker 7
+Start fragment 6 on worker 6
+Start fragment 0 on worker 0
+episode: 0, reward: -127.0022
+episode: 0, reward: -134.23423
+episode: 0, reward: -132.56445
+episode: 0, reward: -135.54523
+episode: 0, reward: -129.30974
+episode: 0, reward: -126.03343
+episode: 0, reward: -135.12637
+episode training time: 30.8687823688723s
+--------------------------
+
+episode: 1, reward: -58.098632
+episode: 1, reward: -60.983003
+episode: 1, reward: -54.672389
+episode: 1, reward: -61.097635
+episode: 1, reward: -60.176465
+episode: 1, reward: -58.143202
+episode: 1, reward: -57.098376
+episode training time: 13.2300376433433s
+--------------------------
 ```
 
 ## 支持平台
