@@ -38,8 +38,8 @@ class PriorityReplayBuffer(nn.Cell):
         sample_size (int): size for sampling from the buffer.
         shapes (List[int]): the shape of each tensor in a buffer element.
         types (List[mindspore.dtype]): the data type of each tensor in a buffer element.
-        Seed0 (int): Seed0 value for random generating. Default: 0.
-        Seed1 (int): Seed1 value for random generating. Default: 0.
+        seed0 (int): Seed0 value for random generating. Default: 0.
+        seed1 (int): Seed1 value for random generating. Default: 0.
 
     Examples:
         >>> import mindspore as ms
@@ -93,7 +93,7 @@ class PriorityReplayBuffer(nn.Cell):
         """
         Update transition prorities.
 
-        Inputs:
+        Args:
             indices (Tensor) - transition indices. The caller needs to ensure the validity of the indices.
             priorities (Tensor) - transition priorities.
 
@@ -110,7 +110,7 @@ class PriorityReplayBuffer(nn.Cell):
         Args:
             handle(Tensor): Priority replay buffer instance handle with dtype int64 and shape (1,).
 
-        Outputs:
+        Returns:
             Priority replay buffer instance handle with dtype int64 and shape (1,).
         """
 
