@@ -23,9 +23,9 @@
 
 class VanillaTreeNode : public MonteCarloTreeNode {
  public:
-  VanillaTreeNode(const std::string &name, int action, float prior, int player, int64_t tree_handle,
-                  MonteCarloTreeNodePtr parent_node, int row)
-      : MonteCarloTreeNode(name, action, prior, player, tree_handle, parent_node, row) {}
+  VanillaTreeNode(const std::string &name, int action, float prior, float *init_reward, int player, int64_t tree_handle,
+                  MonteCarloTreeNodePtr parent_node, int row, int state_size)
+      : MonteCarloTreeNode(name, action, prior, init_reward, player, tree_handle, parent_node, row, state_size) {}
 
   bool SelectionPolicy(float *uct_value) const override;
   bool Update(float *value) override;

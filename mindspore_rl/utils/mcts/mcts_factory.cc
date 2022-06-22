@@ -23,8 +23,8 @@ MonteCarloTreeFactory& MonteCarloTreeFactory::GetInstance() {
 }
 
 MonteCarloTreeNodePtr MonteCarloTreeFactory::CreateNode(const std::string& node_name, int action, float prior,
-                                                        int player, int64_t tree_handle,
-                                                        MonteCarloTreeNodePtr parent_node, int row) {
+                                                        float* init_reward, int player, int64_t tree_handle,
+                                                        MonteCarloTreeNodePtr parent_node, int row, int state_size) {
   auto node_creator = map_node_name_to_node_creator_.find(node_name);
   if (node_creator == map_node_name_to_node_creator_.end()) {
     std::ostringstream oss;
@@ -39,19 +39,20 @@ MonteCarloTreeNodePtr MonteCarloTreeFactory::CreateNode(const std::string& node_
     return nullptr;
   }
   auto node = std::shared_ptr<MonteCarloTreeNode>(
-      node_creator->second(node_name, action, prior, player, tree_handle, parent_node, row));
+      node_creator->second(node_name, action, prior, init_reward, player, tree_handle, parent_node, row, state_size));
   return node;
 }
 
 std::tuple<int64_t, MonteCarloTreePtr> MonteCarloTreeFactory::CreateTree(const std::string& tree_name,
                                                                          const std::string& node_name, int player,
-                                                                         float max_utility,
+                                                                         float max_utility, int state_size,
                                                                          std::vector<void*> input_global_variable) {
   handle_++;
-  auto root = MonteCarloTreeFactory::GetInstance().CreateNode(node_name, 0, 0.0, player, handle_, nullptr, 0);
+  MonteCarloTreePtr tree;
+  auto root =
+      MonteCarloTreeFactory::GetInstance().CreateNode(node_name, 0, 0.0, 0, player, handle_, nullptr, 0, state_size);
   if (tree_name == "Common") {
-    auto tree = std::make_shared<MonteCarloTree>(root, max_utility, handle_);
-    return std::make_tuple(handle_, tree);
+    tree = std::make_shared<MonteCarloTree>(root, max_utility, handle_, state_size);
   } else {
     auto tree_creator = map_tree_name_to_tree_creator_.find(tree_name);
     if (tree_creator == map_tree_name_to_tree_creator_.end()) {
@@ -66,11 +67,11 @@ std::tuple<int64_t, MonteCarloTreePtr> MonteCarloTreeFactory::CreateTree(const s
       // Return nullptr to catch the exception outside.
       return std::make_tuple(handle_, nullptr);
     }
-    auto tree = std::shared_ptr<MonteCarloTree>(tree_creator->second(root, max_utility, handle_));
-    map_handle_to_tree_ptr_.insert(std::make_pair(handle_, tree));
-    map_handle_to_tree_variable_.insert(std::make_pair(handle_, input_global_variable));
-    return std::make_tuple(handle_, tree);
+    tree = std::shared_ptr<MonteCarloTree>(tree_creator->second(root, max_utility, handle_, state_size));
   }
+  map_handle_to_tree_ptr_.insert(std::make_pair(handle_, tree));
+  map_handle_to_tree_variable_.insert(std::make_pair(handle_, input_global_variable));
+  return std::make_tuple(handle_, tree);
 }
 
 void MonteCarloTreeFactory::RegisterNode(const std::string& node_name, NodeCreator&& node_creator) {
@@ -142,6 +143,6 @@ void MonteCarloTreeFactory::DeleteTreeVariable(int64_t handle) {
     }
     oss << "]";
   } else {
-    map_handle_to_tree_ptr_.erase(handle);
+    map_handle_to_tree_variable_.erase(handle);
   }
 }

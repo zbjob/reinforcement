@@ -21,8 +21,7 @@
 #include <iostream>
 
 constexpr int kErrorCode = 2;
-constexpr int kInputAction = 2;
-constexpr int kInputIndex = 2;
+constexpr int kInputIndex = 3;
 
 std::map<int, std::string> map_node_enum_to_string = {{0, "Vanilla"}};
 std::map<int, std::string> map_tree_enum_to_string = {{0, "Common"}};
@@ -30,21 +29,23 @@ std::map<int, std::string> map_tree_enum_to_string = {{0, "Common"}};
 extern "C" int MctsCreation(int nparam, void **params, int *ndims, int64_t **shapes, const char **dtypes, void *stream,
                             void *extra) {
   // Input value
-  // MctsCreation has 4 compulsory input values:
+  // MctsCreation has 5 compulsory input values:
   // 1. The tree enumerate
   // 2. The node enumerate
   // 3. Which player does this root belong to
   // 4. The max utility of this game
+  // 5. Number of element of state
   int64_t *tree_enum = static_cast<int64_t *>(params[0]);
   int64_t *node_enum = static_cast<int64_t *>(params[1]);
   int *player = static_cast<int *>(params[2]);
   float *max_utility = static_cast<float *>(params[3]);
+  int *state_size = static_cast<int *>(params[4]);
   // The input of MctsCreation which starts from 4th will be treated as the global variable of the monte carlo tree. It
   // is shared by all the node in this monte carlo tree. These variable will be saved in a std::vector with void* type.
   // User can call MonteCarloTreeFactory::GetInstance().GetTreeVariableByHandle(tree_handle_) to obtain the variable
   // vector and select the corresponding variable by index.
   std::vector<void *> input_global_variable;
-  for (int i = 4; i < nparam - 1; i++) {
+  for (int i = 5; i < nparam - 1; i++) {
     input_global_variable.push_back(params[i]);
   }
   // Output value
@@ -80,8 +81,8 @@ extern "C" int MctsCreation(int nparam, void **params, int *ndims, int64_t **sha
   auto tree_name = tree_name_iter->second;
   int64_t tree_handle;
   MonteCarloTreePtr tree;
-  std::tie(tree_handle, tree) = MonteCarloTreeFactory::GetInstance().CreateTree(tree_name, node_name, *player,
-                                                                                *max_utility, input_global_variable);
+  std::tie(tree_handle, tree) = MonteCarloTreeFactory::GetInstance().CreateTree(
+      tree_name, node_name, *player, *max_utility, *state_size, input_global_variable);
   if (tree == nullptr) {
     return kErrorCode;
   }
@@ -105,24 +106,34 @@ extern "C" int MctsSelection(int nparam, void **params, int *ndims, int64_t **sh
   // 2. If the max_action is given, it will return a Tensor which is combined by actions of each node in visited path.
   //    Moreover, the Tensor will be filled with -1, if its length does not reach the max_action value.
   //    If the max_action is NOT given, it will only return the last action in visited path.
+  // 3. the length of visited path
   int64_t *visited_path_handle = static_cast<int64_t *>(params[2]);
   int *out_action = static_cast<int *>(params[3]);
+  int *out_path_length = static_cast<int *>(params[4]);
 
   auto tree = MonteCarloTreeFactory::GetInstance().GetTreeByHandle(*tree_handle);
-  std::vector<int> action_list(*max_action, -1);
-  auto ret = tree->Selection(&action_list);
-  if (!ret || tree == nullptr) {
+  if (tree == nullptr) {
+    return kErrorCode;
+  }
+  int size_of_action = *max_action;
+  if (*max_action == -1) {
+    size_of_action = 1;
+  }
+  std::vector<int> action_list(size_of_action, -1);
+  auto ret = tree->Selection(&action_list, *max_action);
+  if (!ret) {
     return kErrorCode;
   }
   visited_path_handle[0] = tree->placeholder_handle();
-  for (int i = 0; i < *max_action; i++) {
+  out_path_length[0] = tree->visited_path().size();
+  for (int i = 0; i < size_of_action; i++) {
     out_action[i] = action_list[i];
   }
   return 0;
 }
 
-extern "C" int MctsExpansioin(int nparam, void **params, int *ndims, int64_t **shapes, const char **dtypes,
-                              void *stream, void *extra) {
+extern "C" int MctsExpansion(int nparam, void **params, int *ndims, int64_t **shapes, const char **dtypes, void *stream,
+                             void *extra) {
   // Input value
   // MctsExpansion has 6 input values:
   // 1. tree_handle is the unique tree handle.
@@ -134,11 +145,12 @@ extern "C" int MctsExpansioin(int nparam, void **params, int *ndims, int64_t **s
   int64_t *tree_handle = static_cast<int64_t *>(params[0]);
   int64_t *node_enum = static_cast<int64_t *>(params[1]);
   int *action = static_cast<int *>(params[3]);
-  float *prior = static_cast<float *>(params[4]);
-  int *player = static_cast<int *>(params[5]);
+  float *init_reward = static_cast<float *>(params[4]);
+  float *prior = static_cast<float *>(params[5]);
+  int *player = static_cast<int *>(params[6]);
   // Output value
   // Whether expansion executes successfully.
-  bool *output = static_cast<bool *>(params[6]);
+  bool *output = static_cast<bool *>(params[7]);
 
   auto node_name_iter = map_node_enum_to_string.find(*node_enum);
   if (node_name_iter == map_node_enum_to_string.end()) {
@@ -154,7 +166,11 @@ extern "C" int MctsExpansioin(int nparam, void **params, int *ndims, int64_t **s
   }
   auto node_name = node_name_iter->second;
   auto tree = MonteCarloTreeFactory::GetInstance().GetTreeByHandle(*tree_handle);
-  output[0] = tree->Expansion(node_name, action, prior, shapes[kInputAction][0], *player);
+  if (tree == nullptr) {
+    return kErrorCode;
+  }
+  output[0] =
+      tree->Expansion(node_name, action, prior, init_reward, shapes[kInputIndex][0], *player, tree->state_size());
   return 0;
 }
 
@@ -268,6 +284,24 @@ extern "C" int UpdateState(int nparam, void **params, int *ndims, int64_t **shap
   return 0;
 }
 
+extern "C" int UpdateRootState(int nparam, void **params, int *ndims, int64_t **shapes, const char **dtypes,
+                               void *stream, void *extra) {
+  // Input value
+  // UpdateState has 2 input values:
+  // 1. tree_handle is the unique tree handle.
+  // 2. State of environment
+  int64_t *tree_handle = static_cast<int64_t *>(params[0]);
+  float *state = static_cast<float *>(params[1]);
+  // Output value
+  // Whether update executes successfully.
+  bool *output = static_cast<bool *>(params[2]);
+
+  auto tree = MonteCarloTreeFactory::GetInstance().GetTreeByHandle(*tree_handle);
+  tree->root()->set_state(state, tree->state_size());
+  output[0] = true;
+  return 0;
+}
+
 extern "C" int GetState(int nparam, void **params, int *ndims, int64_t **shapes, const char **dtypes, void *stream,
                         void *extra) {
   // Input value
@@ -279,15 +313,17 @@ extern "C" int GetState(int nparam, void **params, int *ndims, int64_t **shapes,
   int *index_ptr = static_cast<int *>(params[2]);
   // Output value
   // The state of the node that user specifies
-  bool *output = static_cast<bool *>(params[3]);
+  float *output = static_cast<float *>(params[3]);
 
   auto tree = MonteCarloTreeFactory::GetInstance().GetTreeByHandle(*tree_handle);
   int index = *index_ptr;
   if (index < 0) {
     index += tree->visited_path().size();
   }
-  tree->GetState(index);
-  output[0] = true;
+  auto output_state = tree->GetState(index);
+  for (int i = 0; i < tree->state_size(); i++) {
+    output[i] = output_state[i];
+  }
   return 0;
 }
 
@@ -298,7 +334,7 @@ extern "C" int DestroyTree(int nparam, void **params, int *ndims, int64_t **shap
   int64_t *tree_handle = static_cast<int64_t *>(params[0]);
   // Output value
   // Whether the destroy executes successfully.
-  bool *output = static_cast<bool *>(params[4]);
+  bool *output = static_cast<bool *>(params[1]);
 
   MonteCarloTreeFactory::GetInstance().DeleteTree(*tree_handle);
   MonteCarloTreeFactory::GetInstance().DeleteTreeVariable(*tree_handle);

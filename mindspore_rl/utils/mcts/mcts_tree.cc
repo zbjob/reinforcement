@@ -19,34 +19,45 @@
 #include "utils/mcts/mcts_factory.h"
 #include "utils/mcts/mcts_tree_node.h"
 
-bool MonteCarloTree::Selection(std::vector<int>* action_list) {
+bool MonteCarloTree::Selection(std::vector<int>* action_list, int max_action) {
   visited_path_.clear();
   visited_path_.emplace_back(root_);
   MonteCarloTreeNodePtr current_node = root_;
   // Create a max length action to avoid dynamic shape
   int i = 0;
+  MonteCarloTreeNodePtr selected_child = nullptr;
   while (!current_node->IsLeafNode()) {
-    auto selected_child = current_node->SelectChild();
+    selected_child = current_node->SelectChild();
     if (selected_child == nullptr) {
       return false;
     }
-    (*action_list)[i] = selected_child->action();
+    if (max_action != -1) {
+      (*action_list)[i] = selected_child->action();
+      i++;
+    }
     visited_path_.emplace_back(selected_child);
     current_node = selected_child;
+  }
+  // If max_action is -1, which means that the Selection will only return the last action.
+  if (max_action == -1 && selected_child != nullptr) {
+    (*action_list)[0] = selected_child->action();
   }
   placeholder_handle_++;
   return true;
 }
 
-bool MonteCarloTree::Expansion(std::string node_name, int* action, float* prior, int num_action, int player) {
+bool MonteCarloTree::Expansion(std::string node_name, int* action, float* prior, float* init_reward, int num_action,
+                               int player, int state_size) {
   // Expand the last node of visited_path.
   auto leaf_node = visited_path_.at(visited_path_.size() - 1);
   for (int i = 0; i < num_action; i++) {
     auto action_i = action[i];
-    auto prior_i = prior[i];
-    auto child_node = MonteCarloTreeFactory::GetInstance().CreateNode(node_name, action_i, prior_i, player,
-                                                                      tree_handle_, leaf_node, leaf_node->row());
-    leaf_node->AddChild(child_node);
+    if (action_i != -1) {
+      auto prior_i = prior[i];
+      auto child_node = MonteCarloTreeFactory::GetInstance().CreateNode(
+          node_name, action_i, prior_i, init_reward, player, tree_handle_, leaf_node, leaf_node->row() + 1, state_size);
+      leaf_node->AddChild(child_node);
+    }
   }
   return true;
 }

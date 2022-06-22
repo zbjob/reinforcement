@@ -21,17 +21,20 @@
 
 bool VanillaTreeNode::SelectionPolicy(float* uct_value) const {
   if (!outcome_.empty()) {
-    return outcome_[player_];
+    *uct_value = outcome_[player_];
+    return true;
   }
   if (explore_count_ == 0) {
-    return std::numeric_limits<float>::infinity();
+    *uct_value = std::numeric_limits<float>::infinity();
+    return true;
   }
 
-  auto uct_ptr = static_cast<float*>(MonteCarloTreeFactory::GetInstance().GetTreeVariableByHandle(tree_handle_)[0]);
-  if (uct_ptr == nullptr) {
+  auto global_variable_vector = MonteCarloTreeFactory::GetInstance().GetTreeVariableByHandle(tree_handle_);
+  if (global_variable_vector.empty()) {
     std::cout << "[Error]Please input a constant value for UCT calculation" << std::endl;
     return false;
   }
+  auto uct_ptr = static_cast<float*>(global_variable_vector[0]);
   *uct_value =
       total_reward_ / explore_count_ + (*uct_ptr) * std::sqrt(std::log(parent_->explore_count()) / explore_count_);
   return true;

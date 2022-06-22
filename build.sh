@@ -16,7 +16,14 @@
 
 echo "---------------- Reinforcement: build start ----------------"
 BASEPATH=$(cd "$(dirname $0)"; pwd)
+BUILD_PATH="${BASEPATH}/build"
+CMAKE_ARGS="${CMAKE_ARGS} -DCMAKE_INSTALL_PREFIX=${BUILD_PATH}"
+mkdir ${BUILD_PATH}
+cd ${BUILD_PATH}
+cmake ${CMAKE_ARGS} ${BASEPATH}
+make && make install
 
+cd ${BASEPATH}
 python3 setup.py bdist_wheel -d ${BASEPATH}/output
 
 if [ ! -d "${BASEPATH}/output" ]; then
