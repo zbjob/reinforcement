@@ -16,7 +16,7 @@
     - **seed0** (int) - 随机数种子0值。默认值：0。
     - **seed1** (int) - 随机数种子1值。默认值：0。
 
-    .. py:method:: Push(*transition)
+    .. py:method:: push(*transition)
 
         将transition推送到缓存区。如果缓存区已满，则覆盖最早的数据。
 
