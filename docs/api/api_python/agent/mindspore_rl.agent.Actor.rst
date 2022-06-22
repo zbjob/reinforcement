@@ -16,6 +16,34 @@
 
         - **observation** (tuple(Tensor)) - 作为输出的张量元组，用于生成经验数据。
 
+    .. py:method:: act_init(state)
+
+        通过输入的state来初始化act的接口，用户需要根据算法重写。
+
+        **参数：**
+
+        - **state** (Tensor) - 与环境交互返回的状态数据。
+
+        **返回：**
+
+        - **done** (Tensor) - 仿真是否结束的标志。
+        - **reward** (Tensor) - 仿真的结果。
+        - **state** (Tensor) - 仿真的状态。
+
+    .. py:method:: evaluate(state)
+
+        通过输入的state来初始化evaluate的接口，用户需要根据算法重写。
+
+        **参数：**
+
+        - **state** (Tensor) - 与环境交互返回的状态数据。
+
+        **返回：**
+
+        - **done** (Tensor) - 仿真是否结束的标志。
+        - **reward** (Tensor) - 仿真的结果。
+        - **state** (Tensor) - 仿真的状态。
+
     .. py:method:: get_action(phase, params)
 
         get_action 是用来获得动作的方法。用户需要根据算法重载此函数。但该函数入参需为phase和params。此接口不会与环境交互。
@@ -28,4 +56,3 @@
         **返回：**
 
         - **action** (tuple(Tensor)) - 作为输出的张量元组，包含动作和其他所需数据的张量。
-

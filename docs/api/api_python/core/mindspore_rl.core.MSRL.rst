@@ -1,5 +1,5 @@
 
-.. py:class:: mindspore_rl.core.MSRL(config)
+.. py:class:: mindspore_rl.core.MSRL(alg_config, deploy_config=None)
 
     MSRL提供了用于强化学习算法开发的方法和API。
     它向用户公开以下方法。这些方法的输入和输出与用户定义的方法相同。
@@ -16,7 +16,8 @@
 
     **参数：**
 
-    - **config** (dict) - 提供算法配置。
+    - **algo_config** (dict) - 提供算法配置。
+    - **deploy_config** (dict) - 提供分布式配置。
 
       - **顶层** - 定义算法组件。
 
