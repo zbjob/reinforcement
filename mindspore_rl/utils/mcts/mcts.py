@@ -22,6 +22,7 @@ import mindspore.ops as ops
 import mindspore.nn as nn
 from mindspore.ops import operations as P
 import mindspore.nn.probability.distribution as msd
+from mindspore.common import ms_function
 
 
 # Node Enum Value
@@ -84,8 +85,18 @@ class MCTS(nn.Cell):
         self.update_state = ops.Custom("{}/libmcts.so:UpdateState".format(current_path), (1,), (ms.bool_), "aot")
         self.update_root_state = ops.Custom(
             "{}/libmcts.so:UpdateRootState".format(current_path), (1,), (ms.bool_), "aot")
-        self.get_state = ops.Custom("{}/libmcts.so:GetState".format(current_path), state_shape, (ms.float32,), "aot")
+        self.get_state = ops.Custom("{}/libmcts.so:GetState".format(current_path), state_shape, (ms.float32), "aot")
         self.destroy_tree = ops.Custom("{}/libmcts.so:DestroyTree".format(current_path), (1,), (ms.bool_), "aot")
+        self.depend = P.Depend()
+
+        # Add side effect annotation
+        self.mcts_expansion.add_prim_attr("side_effect_mem", True)
+        self.mcts_backpropagation.add_prim_attr("side_effect_mem", True)
+        self.update_node_outcome.add_prim_attr("side_effect_mem", True)
+        self.update_node_terminal.add_prim_attr("side_effect_mem", True)
+        self.update_state.add_prim_attr("side_effect_mem", True)
+        self.update_root_state.add_prim_attr("side_effect_mem", True)
+        self.destroy_tree.add_prim_attr("side_effect_mem", True)
 
         self.zero = Tensor(0, ms.int32)
         self.zero_float = Tensor(0, ms.float32)
@@ -103,6 +114,7 @@ class MCTS(nn.Cell):
             temp_size *= shape
         self.state_size = temp_size
 
+    @ms_function
     def mcts_search(self, *args):
         """
         mcts_search is the main function of MCTS. Invoke this function will return the best action of current
@@ -137,11 +149,13 @@ class MCTS(nn.Cell):
         while i < self.max_iteration:
             # 1. Interact with the replica of environment, and update the latest state and its reward
             visited_node, last_action, visited_path_length = self.mcts_selection(tree_handle, self.max_action)
+            last_state = self.get_state(tree_handle, visited_node, visited_path_length-2)
             if expanded:
-                last_state = self.get_state(tree_handle, visited_node, visited_path_length-2)
                 self.env.load(last_state)
                 new_state, reward, _ = self.env.step(last_action)
-                self.update_state(tree_handle, visited_node, visited_path_length-1, new_state)
+            else:
+                new_state, reward, _ = self.env.load(last_state)
+            self.update_state(tree_handle, visited_node, visited_path_length-1, new_state)
             # 2. Calculate the legal action and their probability of the latest state
             legal_action = self.env.legal_action()
             current_player = self.env.current_player()
@@ -160,6 +174,7 @@ class MCTS(nn.Cell):
             self.mcts_backpropagation(tree_handle, visited_node, returns)
             i += 1
         action = self.best_action(tree_handle)
+        tree_handle = self.depend(tree_handle, action)
         self.destroy_tree(tree_handle)
         return action
 

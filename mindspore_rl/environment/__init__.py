@@ -25,8 +25,9 @@ from mindspore_rl.environment.space import Space
 from mindspore_rl.environment.env_process import EnvironmentProcess
 from mindspore_rl.environment.multi_environment_wrapper import MultiEnvironmentWrapper
 from mindspore_rl.environment.sc2_environment import StarCraft2Environment
+from mindspore_rl.environment.tic_tac_toe_environment import TicTacToeEnvironment
 
 __all__ = ["GymEnvironment", "MultiEnvironmentWrapper", "Environment", "Space", "MsEnvironment", "EnvironmentProcess",
-           "StarCraft2Environment"]
+           "StarCraft2Environment", "TicTacToeEnvironment"]
 
 ms_register('Tag', TagEnvironment)
