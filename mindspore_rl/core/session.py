@@ -20,9 +20,9 @@ from mindspore_rl.environment.multi_environment_wrapper import MultiEnvironmentW
 from mindspore.communication import init, get_rank
 
 
-class Workers():
+class _Workers():
     r'''
-    The Workers class is class for the distributed algorithms.
+    The _Workers class is class for the distributed algorithms.
 
     Args:
         msrl (MSRL): The MSRL instance.
@@ -77,7 +77,7 @@ class Session():
             init("nccl")
             from fragments import get_all_fragments
             fragment_list = get_all_fragments(self.msrl.num_actors)
-            workers = Workers(self.msrl, fragment_list, duration, episode)
+            workers = _Workers(self.msrl, fragment_list, duration, episode)
             workers.run()
         else:
             if params is None:

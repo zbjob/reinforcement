@@ -419,7 +419,6 @@ class MSRL(nn.Cell):
                 self.agent_act = self.actors.act
                 self.agent_evaluate = self.actors.evaluate
                 self.agent_act_init = self.actors.act_init
-                self.agent_update = self.actors.update
                 self.agent_learn = self.learner.learn
             else:
                 if num_actors == 1:
