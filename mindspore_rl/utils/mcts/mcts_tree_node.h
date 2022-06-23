@@ -17,6 +17,7 @@
 #ifndef MINDSPORE_RL_UTILS_MCTS_MCTS_TREE_NODE_H_
 #define MINDSPORE_RL_UTILS_MCTS_MCTS_TREE_NODE_H_
 
+#include <iostream>
 #include <memory>
 #include <sstream>
 #include <string>
@@ -25,19 +26,24 @@
 class MonteCarloTreeNode {
  public:
   // The base class of MonteCarloTreeNode.
-  MonteCarloTreeNode(std::string name, int action, float prior, int player, int64_t tree_handle,
-                     std::shared_ptr<MonteCarloTreeNode> parent_node, int row)
+  MonteCarloTreeNode(std::string name, int action, float prior, float *init_reward, int player, int64_t tree_handle,
+                     std::shared_ptr<MonteCarloTreeNode> parent_node, int row, int state_size)
       : name_(name),
         action_(action),
         prior_(prior),
         player_(player),
         row_(row),
-        explore_count_(0),
         total_reward_(0),
-        state_(nullptr),
+        explore_count_(0),
         terminal_(false),
         tree_handle_(tree_handle),
-        parent_(parent_node) {}
+        parent_(parent_node) {
+    if (state_size > 0) {
+      state_ = reinterpret_cast<float *>(malloc(sizeof(float) * state_size));
+    } else {
+      std::cout << "The state size is smaller than 0, please check" << std::endl;
+    }
+  }
 
   virtual ~MonteCarloTreeNode() = default;
 
@@ -66,7 +72,11 @@ class MonteCarloTreeNode {
   void AddChild(std::shared_ptr<MonteCarloTreeNode> child) { children_.emplace_back(child); }
   std::vector<std::shared_ptr<MonteCarloTreeNode>> children() { return children_; }
 
-  void set_state(float *input_state) { state_ = input_state; }
+  void set_state(float *input_state, int state_size) {
+    for (int i = 0; i < state_size; i++) {
+      state_[i] = input_state[i];
+    }
+  }
   float *state() { return state_; }
 
   void set_terminal(bool done) { terminal_ = done; }
@@ -83,8 +93,8 @@ class MonteCarloTreeNode {
 
   std::string DebugString() {
     std::ostringstream oss;
-    oss << tree_handle_ << "_" << name_ << "_" << row_ << "_" << player_;
-    oss << "_" << action_ << "_" << terminal_ << "\n";
+    oss << tree_handle_ << "_" << name_ << "_row_" << row_ << "_player_" << player_;
+    oss << "_action_" << action_ << "_terminal_" << terminal_;
     return oss.str();
   }
 
