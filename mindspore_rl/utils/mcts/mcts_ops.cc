@@ -187,6 +187,9 @@ extern "C" int MctsBackpropagation(int nparam, void **params, int *ndims, int64_
   // Whether backpropagation executes successfully.
   bool *output = static_cast<bool *>(params[3]);
   auto tree = MonteCarloTreeFactory::GetInstance().GetTreeByHandle(*tree_handle);
+  if (tree == nullptr) {
+    return kErrorCode;
+  }
   output[0] = tree->Backpropagation(returns);
   return 0;
 }
@@ -201,7 +204,11 @@ extern "C" int BestAction(int nparam, void **params, int *ndims, int64_t **shape
   int *output = static_cast<int *>(params[1]);
 
   auto tree = MonteCarloTreeFactory::GetInstance().GetTreeByHandle(*tree_handle);
+  if (tree == nullptr) {
+    return kErrorCode;
+  }
   output[0] = tree->BestAction();
+  return 0;
 }
 
 extern "C" int UpdateOutcome(int nparam, void **params, int *ndims, int64_t **shapes, const char **dtypes, void *stream,
@@ -225,6 +232,9 @@ extern "C" int UpdateOutcome(int nparam, void **params, int *ndims, int64_t **sh
     return_value.emplace_back(outcome[i]);
   }
   auto tree = MonteCarloTreeFactory::GetInstance().GetTreeByHandle(*tree_handle);
+  if (tree == nullptr) {
+    return kErrorCode;
+  }
   int index = *index_ptr;
   if (index < 0) {
     index += tree->visited_path().size();
@@ -250,6 +260,9 @@ extern "C" int UpdateTerminal(int nparam, void **params, int *ndims, int64_t **s
   bool *output = static_cast<bool *>(params[4]);
 
   auto tree = MonteCarloTreeFactory::GetInstance().GetTreeByHandle(*tree_handle);
+  if (tree == nullptr) {
+    return kErrorCode;
+  }
   int index = *index_ptr;
   if (index < 0) {
     index += tree->visited_path().size();
@@ -275,6 +288,9 @@ extern "C" int UpdateState(int nparam, void **params, int *ndims, int64_t **shap
   bool *output = static_cast<bool *>(params[4]);
 
   auto tree = MonteCarloTreeFactory::GetInstance().GetTreeByHandle(*tree_handle);
+  if (tree == nullptr) {
+    return kErrorCode;
+  }
   int index = *index_ptr;
   if (index < 0) {
     index += tree->visited_path().size();
@@ -297,6 +313,9 @@ extern "C" int UpdateRootState(int nparam, void **params, int *ndims, int64_t **
   bool *output = static_cast<bool *>(params[2]);
 
   auto tree = MonteCarloTreeFactory::GetInstance().GetTreeByHandle(*tree_handle);
+  if (tree == nullptr) {
+    return kErrorCode;
+  }
   tree->root()->set_state(state, tree->state_size());
   output[0] = true;
   return 0;
@@ -316,6 +335,9 @@ extern "C" int GetState(int nparam, void **params, int *ndims, int64_t **shapes,
   float *output = static_cast<float *>(params[3]);
 
   auto tree = MonteCarloTreeFactory::GetInstance().GetTreeByHandle(*tree_handle);
+  if (tree == nullptr) {
+    return kErrorCode;
+  }
   int index = *index_ptr;
   if (index < 0) {
     index += tree->visited_path().size();
@@ -335,7 +357,10 @@ extern "C" int DestroyTree(int nparam, void **params, int *ndims, int64_t **shap
   // Output value
   // Whether the destroy executes successfully.
   bool *output = static_cast<bool *>(params[1]);
-
+  auto tree = MonteCarloTreeFactory::GetInstance().GetTreeByHandle(*tree_handle);
+  if (tree == nullptr) {
+    return kErrorCode;
+  }
   MonteCarloTreeFactory::GetInstance().DeleteTree(*tree_handle);
   MonteCarloTreeFactory::GetInstance().DeleteTreeVariable(*tree_handle);
 
