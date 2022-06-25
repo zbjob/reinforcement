@@ -26,7 +26,7 @@ import numpy as np
 
 class EpsilonGreedyPolicy(policy.Policy):
     r"""
-    Produces an epsilon-greedy sample action base on the given policy.
+    Produces a sample action base on the given epsilon-greedy policy.
 
     Args:
         input_network (Cell): A network returns policy action.

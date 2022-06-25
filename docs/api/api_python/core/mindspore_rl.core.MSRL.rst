@@ -16,7 +16,7 @@
 
     **参数：**
 
-    - **algo_config** (dict) - 提供算法配置。
+    - **alg_config** (dict) - 提供算法配置。
     - **deploy_config** (dict) - 提供分布式配置。
 
       - **顶层** - 定义算法组件。
@@ -31,15 +31,15 @@
       - **第二层** - 每个算法组件的配置。
 
         - 关键字: `number`， 值： actor/learner的数量 (int)。
-        - 关键字: `type`， 值： actor/learner/policy_and_network_environment (class)。
-        - 关键字: `params`， 值： actor/learner/policy_and_network_environment的参数 (dict)。
+        - 关键字: `type`， 值： actor/learner/policy_and_network/environment (class)。
+        - 关键字: `params`， 值： actor/learner/policy_and_network/environment的参数 (dict)。
         - 关键字: `policies`， 值： actor/learner使用的策略列表 (list)。
         - 关键字: `networks`， 值： actor/learner使用的网络列表 (list)。
         - 关键字: `pass_environment`， 值： 如果为True， 用户需要传递环境实例给actor， 为False则不需要 (bool)。
 
     .. py:method:: get_replay_buffer
 
-        它将返回重放缓存的实例。
+        返回重放缓存的实例。
 
         **返回：**
 
@@ -47,7 +47,7 @@
 
     .. py:method:: get_replay_buffer_elements(transpose=False, shape=None)
 
-        它将返回重放缓存中的所有元素。
+        返回重放缓存中的所有元素。
 
         **参数：**
 

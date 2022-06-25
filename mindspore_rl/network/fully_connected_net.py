@@ -77,7 +77,7 @@ class FullyConnectedLayers(nn.Cell):
         fc_layer_params (List[int]): A list of int states for the input and output size of fully
             connected layer. For example, if the input list is [10, 20, 3], then the module will
             create two fully connected layers whose input and output size are (10, 20) and (20, 3)
-            respectively. The length of fc_layer_params should be larger than 3.
+            respectively. The length of fc_layer_params should be great equal than 3.
         dropout_layer_params (List[float]): A list of float states for the dropout rate. If the input
             list if [0.5, 0.3], then two dropout layers will be created after each fully connected
             layer. The length of dropout_layer_params should be one less than fc_layer_params.
@@ -95,6 +95,9 @@ class FullyConnectedLayers(nn.Cell):
         Tensor of shape :math:`(*, fc\_layers\_params[-1])`.
 
     Examples:
+        >>> import numpy as np
+        >>> from mindspore import Tensor
+        >>> mindspore_rl.network.fully_connected_net import FullyConnectedLayers
         >>> input = Tensor(np.ones([2, 4]).astype(np.float32))
         >>> net = FullyConnectedLayers(fc_layer_params=[4, 10, 2])
         >>> output = net(input)
@@ -110,7 +113,7 @@ class FullyConnectedLayers(nn.Cell):
         super().__init__()
         layers = []
         if len(fc_layer_params) < 3:
-            raise ValueError("The length of fc_layer_params must be largert than 2, \
+            raise ValueError("The length of fc_layer_params must be great equal than 3, \
                              but the length of fc_layer_params is %d." % len(fc_layer_params))
         if dropout_layer_params:
             if len(dropout_layer_params) != (len(fc_layer_params) - 1):

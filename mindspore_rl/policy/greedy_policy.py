@@ -22,7 +22,7 @@ from mindspore_rl.policy import policy
 
 class GreedyPolicy(policy.Policy):
     r"""
-    Produces a greedy action base on the given policy.
+    Produces a sample action base on the given greedy policy.
 
     Args:
         input_network(Cell): network used to generate action probs by input state.
