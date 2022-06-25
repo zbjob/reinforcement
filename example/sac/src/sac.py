@@ -222,8 +222,7 @@ class SACLearner(Learner):
         def construct(self, next_state, reward, state, action):
             """Calculate critic loss"""
             next_means, next_stds = self.actor_net(next_state)
-            next_action = self.dist.sample((), next_means, next_stds)
-            next_log_prob = self.dist.log_prob(next_action, next_means, next_stds)
+            next_action, next_log_prob = self.dist.sample_and_log_prob((), next_means, next_stds)
 
             target_q_value1 = self.target_critic_net1(next_state, next_action).squeeze(axis=-1)
             target_q_value2 = self.target_critic_net2(next_state, next_action).squeeze(axis=-1)
@@ -253,8 +252,7 @@ class SACLearner(Learner):
 
         def construct(self, state):
             means, stds = self.actor_net(state)
-            action = self.dist.sample((), means, stds)
-            log_prob = self.dist.log_prob(action, means, stds)
+            action, log_prob = self.dist.sample_and_log_prob((), means, stds)
 
             target_q_value1 = self.critic_net1(state, action)
             target_q_value2 = self.critic_net2(state, action)
@@ -274,8 +272,7 @@ class SACLearner(Learner):
 
         def construct(self, state_list):
             means, stds = self.actor_net(state_list)
-            action = self.dist.sample((), means, stds)
-            log_prob = self.dist.log_prob(action, means, stds)
+            _, log_prob = self.dist.sample_and_log_prob((), means, stds)
             entropy_diff = -log_prob - self.target_entropy
             alpha_loss = self.alpha * entropy_diff
             alpha_loss = alpha_loss.mean()
