@@ -9,7 +9,7 @@
 
     - **input_size** (int) - 输入的特征数。
     - **hidden_size** (int) - 隐藏层的特征数量。
-    - **weight_init** (str/Initializer) - 初始化方法。默认值： normal。
+    - **weight_init** (str/Initializer) - 初始化方法。默认值： 'normal'。
     - **num_layers** (int) - GRU层的数量。默认值： 1。
     - **has_bias** (bool) - cell中是否有偏置。默认值： True。
     - **batch_first** (bool) - 指定输入 `x` 的第一个维度是否为批处理大小。默认值： False。

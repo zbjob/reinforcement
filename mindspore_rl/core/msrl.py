@@ -41,7 +41,8 @@ class MSRL(nn.Cell):
         replay_buffer_reset
 
     Args:
-        config(dict): provides the algorithm configuration.
+        alg_config(dict): provides the algorithm configuration.
+        deploy_config(dict): provides the distribute configuration.
 
             - Top level: defines the algorithm components.
 

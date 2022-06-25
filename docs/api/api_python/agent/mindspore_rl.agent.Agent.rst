@@ -1,7 +1,7 @@
 
 .. py:class:: mindspore_rl.agent.Agent(actors, learner)
 
-    Agent的基类。作为智能体的定义，由Actor和Leanrner构成。具备基本的act和learn功能用于和环境交互和自我更新。
+    Agent的基类。作为智能体的定义，由Actor和Leaner构成。具备基本的act和learn功能用于和环境交互和自我更新。
 
     **参数：**
 
@@ -36,7 +36,7 @@
     
     .. py:method:: learn(experience)
 
-        learn 方法经一组经验数据作为输入，以计算损失并更新权重。
+        learn 方法接收一组经验数据作为输入，以计算损失并更新权重。
 
         **参数：**
 

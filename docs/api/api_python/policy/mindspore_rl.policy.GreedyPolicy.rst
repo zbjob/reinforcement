@@ -1,7 +1,7 @@
 
 .. py:class:: mindspore_rl.policy.GreedyPolicy(input_network)
 
-    基于给定策略生成greedy的采样动作。
+    基于给定的贪婪策略生成采样动作。
 
     **参数：**
 

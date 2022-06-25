@@ -35,7 +35,7 @@ class GruNet(nn.Cell):
     Args:
         input_size (int): Number of features of input.
         hidden_size (int):  Number of features of hidden layer.
-        weight_init (str or initializer): Initialize method. Default: normal.
+        weight_init (str or initializer): Initialize method. Default: 'normal'.
         num_layers (int): Number of layers of stacked GRU. Default: 1.
         has_bias (bool): Whether the cell has bias. Default: True.
         batch_first (bool): Specifies whether the first dimension of input `x` is batch_size. Default: False.

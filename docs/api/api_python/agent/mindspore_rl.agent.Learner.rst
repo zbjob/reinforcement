@@ -5,7 +5,7 @@
 
     .. py:method:: learn(experience)
 
-        learn 方法的介绍。 `learn` 方法的行为取决于用户的实现。通常，它接受来自重放缓存中的 `samples` 或其他Tensors，并计算更新网络的损失。
+        learn 方法的接口。 `learn` 方法的行为取决于用户的实现。通常，它接受来自重放缓存中的 `samples` 或其他Tensors，并计算用于更新网络的损失。
 
         **参数：**
 
