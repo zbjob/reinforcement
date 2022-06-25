@@ -11,8 +11,8 @@
         +---+---+---+
 
     **参数：**
-    - **params** (dict) - 字典包含TicTacToeEnvironment类中所需要的所有参数。
 
+    - **params** (dict) - 字典包含TicTacToeEnvironment类中所需要的所有参数。
     - **env_id** (int) - 环境id，用于设置环境内种子。
 
     .. py:method:: action_space
@@ -70,7 +70,6 @@
 
         一个代表当前状态的Tensor。
 
-    
     .. py:method:: load(state)
 
         加载输入的状态。环境会根据输入的状态，更新当前的状态，合法动作和是否结束。
