@@ -13,10 +13,12 @@
 # limitations under the License.
 # ============================================================================
 """SAC"""
+import numpy as np
 import mindspore
 import mindspore.nn.probability.distribution as msd
 import mindspore.nn.probability.bijector as msb
 from mindspore.ops import operations as P
+from mindspore import Tensor
 
 
 class TanhBijector(msb.Bijector):
@@ -37,20 +39,17 @@ class TanhBijector(msb.Bijector):
         self.atanh = P.Atanh()
         self.square = P.Square()
         self.log = P.Log()
+        self.softplus = P.Softplus()
+        self.log2 = Tensor([np.log(2.0)], mindspore.float32)
 
-    def _forward(self, x):
-        return self.tanh(x)
-
-    def _inverse(self, y):
-        y = y.clip(-0.99999997, 0.99999997)
-        return self.atanh(y)
-
-    def _inverse_log_jacobian(self, y):
-        y = y.clip(-0.99999997, 0.99999997)
-        log_jac = -self.log(1. - self.square(y))
+    def forward_log_jacobian(self, x):
+        log_jac = 2.0 * (self.log2 - x - self.softplus(-2.0 * x))
         if self.reduce_axis is not None:
             log_jac = log_jac.sum(axis=self.reduce_axis)
         return log_jac
+
+    def _forward(self, x):
+        return self.tanh(x)
 
 
 class MultivariateNormalDiag(msd.Normal):
@@ -87,12 +86,19 @@ class TanhMultivariateNormalDiag(msd.TransformedDistribution):
                                                          seed=seed,
                                                          name=name)
 
+    def sample_and_log_prob(self, shape, means, stds):
+        '''
+        Combine sample() and log_prob() to improve numeric stable:
+        x' = atanh(tanh(x).clip()) will result error results when x is in the saturation ragion.
+        '''
+        x = self.distribution.sample(shape, means, stds)
+        y = self.bijector.forward(x)
+
+        unadjust_prob = self.distribution.log_prob(x, means, stds)
+        log_jacobian = self.bijector.forward_log_jacobian(x)
+        log_prob = unadjust_prob - log_jacobian
+        return y, log_prob
+
     def _sample(self, *args, **kwargs):
         org_sample = self.distribution.sample(*args, **kwargs)
         return self.bijector.forward(org_sample)
-
-    def _log_prob(self, value, *args, **kwargs):
-        inverse_value = self.bijector.inverse(value)
-        unadjust_prob = self.distribution.log_prob(inverse_value, *args, **kwargs)
-        log_jacobian = self.bijector.inverse_log_jacobian(value)
-        return unadjust_prob + log_jacobian
