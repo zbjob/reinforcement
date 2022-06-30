@@ -16,7 +16,7 @@
 
         **返回：**
 
-        缓存区已满返回True，否则返回False。
+        - **Full** (bool) - 缓存区已满返回True，否则返回False。
 
     .. py:method:: get_item(index)
 
@@ -56,7 +56,7 @@
 
         **返回：**
 
-        一组从缓存区随机采样出的元素。
+        - **data** (Tuple(Tensor)) - 一组从缓存区随机采样出的元素。
 
     .. py:method:: size()
 

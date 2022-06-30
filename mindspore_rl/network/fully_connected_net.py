@@ -32,6 +32,8 @@ class FullyConnectedNet(nn.Cell):
         compute_type(mindspore.dtype): data type used for fully connected layer. Default: mindspore.dtype.float32
 
     Examples:
+        >>> from mindspore import Tensor
+        >>> from mindspore_rl.network.fully_connected_net import FullyConnectedNet
         >>> input = Tensor(np.ones([2, 4]).astype(np.float32))
         >>> net = FullyConnectedNet(4, 10, 2)
         >>> output = net(input)
@@ -77,7 +79,7 @@ class FullyConnectedLayers(nn.Cell):
         fc_layer_params (List[int]): A list of int states for the input and output size of fully
             connected layer. For example, if the input list is [10, 20, 3], then the module will
             create two fully connected layers whose input and output size are (10, 20) and (20, 3)
-            respectively. The length of fc_layer_params should be great equal than 3.
+            respectively. The length of fc_layer_params should be greater than or equal to 3.
         dropout_layer_params (List[float]): A list of float states for the dropout rate. If the input
             list if [0.5, 0.3], then two dropout layers will be created after each fully connected
             layer. The length of dropout_layer_params should be one less than fc_layer_params.
@@ -97,7 +99,7 @@ class FullyConnectedLayers(nn.Cell):
     Examples:
         >>> import numpy as np
         >>> from mindspore import Tensor
-        >>> mindspore_rl.network.fully_connected_net import FullyConnectedLayers
+        >>> from mindspore_rl.network.fully_connected_net import FullyConnectedLayers
         >>> input = Tensor(np.ones([2, 4]).astype(np.float32))
         >>> net = FullyConnectedLayers(fc_layer_params=[4, 10, 2])
         >>> output = net(input)

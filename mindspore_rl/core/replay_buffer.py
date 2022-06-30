@@ -133,7 +133,7 @@ class ReplayBuffer(nn.Cell):
         and output them.
 
         Returns:
-            A set of sampled elements from the buffer.
+            data (Tuple(Tensor)), A set of sampled elements from the buffer.
         """
 
         return self.buffer_sample(self.buffer, self.count, self.head)
@@ -164,7 +164,7 @@ class ReplayBuffer(nn.Cell):
         Check if the replaybuffer is full or not.
 
         Returns:
-            True if the replaybuffer is full, False otherwise.
+            Full(bool), True if the replaybuffer is full, False otherwise.
         """
 
         count = self.reshape(self.count, (1,))
