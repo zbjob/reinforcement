@@ -52,13 +52,9 @@
 
         - **handle** (Tensor) - 优先级经验回放缓存句柄，数据和维度分别是int64和（1,）。
 
-    .. py:method:: destroy(handle)
+    .. py:method:: destroy()
 
         销毁经验回放缓存。
-
-        **参数：**
-
-        - **handle** (Tensor) - 优先级经验回放缓存句柄，数据和维度分别是int64和（1,）。
 
         **返回：**
 

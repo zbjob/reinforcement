@@ -107,9 +107,6 @@ class PriorityReplayBuffer(nn.Cell):
         r"""
         Destroy the replay buffer.
 
-        Args:
-            handle(Tensor): Priority replay buffer instance handle with dtype int64 and shape (1,).
-
         Returns:
             Priority replay buffer instance handle with dtype int64 and shape (1,).
         """
