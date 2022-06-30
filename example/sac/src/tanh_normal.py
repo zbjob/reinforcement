@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # ============================================================================
-"""SAC"""
+"""TanhMultivariateNormalDiag"""
 import numpy as np
 import mindspore
 import mindspore.nn.probability.distribution as msd
@@ -37,18 +37,10 @@ class TanhBijector(msb.Bijector):
         self.reduce_axis = reduce_axis
         self.tanh = P.Tanh()
         self.softplus = P.Softplus()
-        self.select = P.Select()
-        self.exp = P.Exp()
         self.log2 = Tensor([np.log(2.0)], mindspore.float32)
 
-    def general_softplus(self, x):
-        # The GPU/CPU softplus will overflow when x greater than 85
-        # Add extra protection to improve nermeric stable.
-        y = self.softplus(x)
-        return self.select(x > 15., x, self.select(x < 15., self.exp(x), y))
-
     def forward_log_jacobian(self, x):
-        log_jac = 2.0 * (self.log2 - x - self.general_softplus(-2.0 * x))
+        log_jac = 2.0 * (self.log2 - x - self.softplus(-2.0 * x))
         if self.reduce_axis is not None:
             log_jac = log_jac.sum(axis=self.reduce_axis)
         return log_jac
