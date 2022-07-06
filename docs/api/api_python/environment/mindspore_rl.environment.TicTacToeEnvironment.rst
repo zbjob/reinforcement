@@ -18,39 +18,39 @@
     .. py:method:: action_space
         :property:
 
-        返回环境的动作空间。
+        Space，环境的动作空间。
 
     .. py:method:: config
         :property:
 
-        返回一个包含环境信息的字典。
+        dict，一个包含环境信息的字典。
 
     .. py:method:: done_space
         :property:
 
-        返回环境的终止空间。
+        Space，环境的终止空间。
 
     .. py:method:: observation_space
         :property:
 
-        返回环境的状态空间。
+        Space，环境的状态空间。
 
     .. py:method:: reward_space
         :property:
 
-        返回环境的奖励空间。
+        Space，环境的奖励空间。
 
     .. py:method:: reset()
 
-        将环境重置为初始状态。reset方法一般在每个episode开始时使用，并返回环境的初始状态值。
+        将环境重置为初始状态。reset方法一般在每一局游戏开始时使用，并返回环境的初始状态值。
 
         **返回：**
 
-        表示环境初始状态的Tensor。
+        Tensor，表示环境初始状态。
 
     .. py:method:: step(action)
 
-        执行环境Step函数来和环境交互一次。
+        执行环境Step函数来和环境交互一回合。
 
         **参数：**
 
@@ -76,7 +76,7 @@
 
         **参数：**
         
-        - **state** (Tensor) - 输入的环境状态
+        - **state** (Tensor) - 输入的环境状态。
 
         **返回：**
 
@@ -86,11 +86,11 @@
 
     .. py:method:: calculate_rewards()
 
-        返回当前状态的收益
+        返回当前状态的收益。
 
         **返回：**
 
-        一个表示当前状态收益的Tensor。
+        Tensor，表示当前状态收益。
 
     .. py:method:: legal_action()
 
@@ -98,15 +98,15 @@
 
         **返回：**
 
-        一个表示合法动作的Tensor。
+        Tensor，表示合法动作。
 
     .. py:method:: max_utility()
 
-        返回井字棋游戏的最大收益
+        返回井字棋游戏的最大收益。
 
         **返回：**
 
-        一个表示最大收益的Tensor。
+        Tensor，表示最大收益。
 
     .. py:method:: current_player()
 
@@ -114,7 +114,7 @@
 
         **返回：**
 
-        一个表示当前玩家的Tensor。
+        Tensor，表示当前玩家。
 
     .. py:method:: is_terminal()
 

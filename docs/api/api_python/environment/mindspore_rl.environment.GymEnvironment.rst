@@ -18,15 +18,15 @@
 
     .. py:method:: reset()
 
-        将环境重置为初始状态。reset方法一般在每个episode开始时使用，并返回环境的初始状态值。
+        将环境重置为初始状态。reset方法一般在每一局游戏开始时使用，并返回环境的初始状态值。
 
         **返回：**
 
-        表示环境初始状态的Tensor。
+        Tensor，表示环境初始状态。
 
     .. py:method:: step(action)
 
-        执行环境Step函数来和环境交互一次。
+        执行环境Step函数来和环境交互一回合。
 
         **参数：**
 
@@ -41,24 +41,24 @@
     .. py:method:: action_space
         :property:
 
-        返回环境的动作空间。
+        Space，环境的动作空间。
 
     .. py:method:: config
         :property:
 
-        返回一个包含环境信息的字典。
+        dict，一个包含环境信息的字典。
 
     .. py:method:: done_space
         :property:
 
-        返回环境的终止空间。
+        Space，环境的终止空间。
 
     .. py:method:: observation_space
         :property:
 
-        返回环境的状态空间。
+        Space，环境的状态空间。
 
     .. py:method:: reward_space
         :property:
 
-        返回环境的奖励空间。
+        Space，环境的奖励空间。

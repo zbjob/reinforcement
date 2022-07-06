@@ -9,12 +9,12 @@
 
     - **input_size** (int) - 输入的特征数。
     - **hidden_size** (int) - 隐藏层的特征数量。
-    - **weight_init** (str/Initializer) - 初始化方法。默认值： 'normal'。
+    - **weight_init** (str/Initializer) - 初始化方法，如normal、uniform。默认值： 'normal'。
     - **num_layers** (int) - GRU层的数量。默认值： 1。
     - **has_bias** (bool) - cell中是否有偏置。默认值： True。
     - **batch_first** (bool) - 指定输入 `x` 的第一个维度是否为批处理大小。默认值： False。
     - **dropout** (float) - 如果不是0.0, 则在除最后一层外的每个GRU层的输出上附加 `Dropout` 层。默认值： 0.0。取值范围 [0.0, 1.0)。
-    - **bidirectional** (bool) - 指定它是否为双向GRU，如果bidirectional=True则num_direction=2，否则为1。默认值： False。
+    - **bidirectional** (bool) - 指定它是否为双向GRU，如果bidirectional=True则为双向，否则为单向。默认值： False。
 
     **输入：**
 
