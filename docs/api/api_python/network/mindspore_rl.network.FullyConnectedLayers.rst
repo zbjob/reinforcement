@@ -34,9 +34,9 @@
       dropout_layer_params的长度应小于fc_layer_params。 dropout_layer_params是个可选值。默认值： None。
     - **activation_fn** (Union[str, Cell, Primitive]) - 激活函数的实例。默认值： nn.ReLU()。
     - **weight_init** (Union[Tensor, str, Initializer, numbers.Number]) - 可训练的初始化权重参数。类型与 `x` 相同。str的值代表
-      `Initializer` 函数。默认值： 'normal'。
+      `Initializer` 函数，如normal、uniform。默认值： 'normal'。
     - **bias_init** (Union[Tensor, str, Initializer, numbers.Number]) - 可训练的初始化偏置参数。类型与 `x` 相同。str的值代表
-      `Initializer` 函数。默认值： 'zeros'。
+      `Initializer` 函数，如normal、uniform。默认值： 'zeros'。
 
     **输入：**
 

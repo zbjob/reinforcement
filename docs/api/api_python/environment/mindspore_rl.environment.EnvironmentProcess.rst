@@ -1,6 +1,6 @@
 .. py:class:: mindspore_rl.environment.EnvironmentProcess(proc_no, env_num, envs, actions, observations, initial_states)
 
-    负责创建一个独立进程用作智能体与一个或多个环境交互。
+    负责创建一个独立进程用作与一个或多个环境交互。
 
     **参数：**
 
