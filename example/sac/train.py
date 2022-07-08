@@ -38,13 +38,14 @@ def train(episode=options.episode):
     '''SAC train entry.'''
     if options.device_target != 'Auto':
         context.set_context(device_target=options.device_target)
-    if context.get_context('device_target') in ['CPU']:
+    device = context.get_context('device_target')
+    if device in ['CPU', 'GPU']:
         context.set_context(enable_graph_kernel=True)
 
     compute_type = mstype.float32 if options.precision_mode == 'fp32' else mstype.float16
     config.algorithm_config['policy_and_network']['params']['compute_type'] = compute_type
-    if compute_type == mstype.float16 and options.device_target != 'Ascend':
-        raise ValueError("Fp16 mode is supported by Ascend backend.")
+    if compute_type == mstype.float16 and device in ['CPU']:
+        raise ValueError("Fp16 mode is supported by Ascend and GPU backend.")
 
     context.set_context(mode=context.GRAPH_MODE, max_call_depth=100000)
     sac_session = Session(config.algorithm_config)
