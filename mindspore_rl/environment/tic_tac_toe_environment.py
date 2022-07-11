@@ -29,13 +29,13 @@ class TicTacToeEnvironment(Environment):
     draw Os or Xs in a three-by-tree grid. When three of their marks are in a Horizontal, vertical or diagonal row,
     that player will be the winner. The following figure is an example of Tic-Tac-Toe.
 
-        +---+---+---+
-        | o |   | x |
-        +---+---+---+
-        | x | o |   |
-        +---+---+---+
-        |   | x | o |
-        +---+---+---+
+    +---+---+---+
+    | o |   | x |
+    +---+---+---+
+    | x | o |   |
+    +---+---+---+
+    |   | x | o |
+    +---+---+---+
 
     Args:
         params (dict): A dictionary contains all the parameters which are used in this class.
