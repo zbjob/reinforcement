@@ -115,7 +115,7 @@ class FullyConnectedLayers(nn.Cell):
         super().__init__()
         layers = []
         if len(fc_layer_params) < 3:
-            raise ValueError("The length of fc_layer_params must be great equal than 3, \
+            raise ValueError("The length of fc_layer_params must be greater than or equal to 3, \
                              but the length of fc_layer_params is %d." % len(fc_layer_params))
         if dropout_layer_params:
             if len(dropout_layer_params) != (len(fc_layer_params) - 1):
