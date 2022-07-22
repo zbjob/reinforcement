@@ -14,12 +14,11 @@
         replay_buffer_insert
         replay_buffer_reset
 
-    **参数：**
+    参数：
+        - **alg_config** (dict) - 提供算法配置。
+        - **deploy_config** (dict) - 提供分布式配置。
 
-    - **alg_config** (dict) - 提供算法配置。
-    - **deploy_config** (dict) - 提供分布式配置。
-
-      - **顶层** - 定义算法组件。
+          - **顶层** - 定义算法组件。
 
         - 关键字: `actor`， 值： actor的配置 (dict)。
         - 关键字: `learner`， 值： learner的配置 (dict)。
@@ -28,7 +27,7 @@
         - 关键字: `eval_environment`， 值： 评估环境的配置 (dict)。
         - 关键字: `replay_buffer`， 值： 重放缓存的配置 (dict)。
 
-      - **第二层** - 每个算法组件的配置。
+          - **第二层** - 每个算法组件的配置。
 
         - 关键字: `number`， 值： actor/learner的数量 (int)。
         - 关键字: `type`， 值： actor/learner/policy_and_network/environment (class)。
@@ -41,30 +40,26 @@
 
         返回重放缓存的实例。
 
-        **返回：**
-
-        - **buffers** (object) - 重放缓存的实例。如果缓存为None， 返回也为None。
+        返回：
+            - **buffers** (object) - 重放缓存的实例。如果缓存为None， 返回也为None。
 
     .. py:method:: get_replay_buffer_elements(transpose=False, shape=None)
 
         返回重放缓存中的所有元素。
 
-        **参数：**
+        参数：
+            - **transpose** (bool) - 输出元素是否需要转置，如果为True，则shape也需指定。默认值：False。
+            - **shape** (tuple[int]) - 转置的shape。默认值：None。
 
-        - **transpose** (bool) - 输出元素是否需要转置，如果为True，则shape也需指定。默认值：False。
-        - **shape** (tuple[int]) - 转置的shape。默认值：None。
-
-        **返回：**
-
-        - **elements** (List[Tensor]) - 一组包含所有重放缓存中数据的张量。
+        返回：
+            - **elements** (List[Tensor]) - 一组包含所有重放缓存中数据的张量。
 
     .. py:method:: init(config)
 
         MSRL 对象的初始化。该方法创建算法所需的所有数据/对象。它会初始化所有的方法。
 
-        **参数：**
-
-        - **config** (dict) - 算法的配置文件。
+        参数：
+            - **config** (dict) - 算法的配置文件。
 
 
     
