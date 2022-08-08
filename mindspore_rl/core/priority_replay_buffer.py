@@ -94,8 +94,8 @@ class PriorityReplayBuffer(nn.Cell):
         Update transition prorities.
 
         Args:
-            indices (Tensor) - transition indices. The caller needs to ensure the validity of the indices.
-            priorities (Tensor) - transition priorities.
+            indices (Tensor): transition indices. The caller needs to ensure the validity of the indices.
+            priorities (Tensor): transition priorities.
 
         Returns:
             tuple(Tensor), Transition with its indices and correction weights.

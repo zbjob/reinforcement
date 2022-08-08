@@ -14,22 +14,22 @@
  * limitations under the License.
  */
 
-#ifndef MINDSPORE_RL_UTILS_MCTS_VANILLA_H_
-#define MINDSPORE_RL_UTILS_MCTS_VANILLA_H_
+#ifndef MINDSPORE_RL_UTILS_MCTS_CPU_CPU_VANILLA_H_
+#define MINDSPORE_RL_UTILS_MCTS_CPU_CPU_VANILLA_H_
 
 #include <utils/mcts/mcts_factory.h>
-#include <utils/mcts/mcts_tree_node.h>
+#include <utils/mcts/cpu/cpu_mcts_tree_node.h>
 #include <string>
 
-class VanillaTreeNode : public MonteCarloTreeNode {
+class CPUVanillaTreeNode : public CPUMonteCarloTreeNode {
  public:
-  VanillaTreeNode(const std::string &name, int action, float prior, float *init_reward, int player, int64_t tree_handle,
-                  MonteCarloTreeNodePtr parent_node, int row, int state_size)
-      : MonteCarloTreeNode(name, action, prior, init_reward, player, tree_handle, parent_node, row, state_size) {}
+  CPUVanillaTreeNode(const std::string &name, int *action, float *prior, float *init_reward, int player,
+                     int64_t tree_handle, MonteCarloTreeNodePtr parent_node, int row, int state_size)
+      : CPUMonteCarloTreeNode(name, action, prior, init_reward, player, tree_handle, parent_node, row, state_size) {}
 
   bool SelectionPolicy(float *uct_value) const override;
-  bool Update(float *value) override;
+  bool Update(float *value, int total_num_player) override;
 };
-MS_REG_NODE(Vanilla, VanillaTreeNode);
+MS_REG_NODE(CPUVanilla, CPUVanillaTreeNode);
 
-#endif  // MINDSPORE_RL_UTILS_MCTS_VANILLA_H_
+#endif  // MINDSPORE_RL_UTILS_MCTS_CPU_CPU_VANILLA_H_

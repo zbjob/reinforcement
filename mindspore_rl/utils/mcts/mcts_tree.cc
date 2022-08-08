@@ -19,7 +19,7 @@
 #include "utils/mcts/mcts_factory.h"
 #include "utils/mcts/mcts_tree_node.h"
 
-bool MonteCarloTree::Selection(std::vector<int>* action_list, int max_action) {
+bool MonteCarloTree::Selection(int *action_list, int max_action) {
   visited_path_.clear();
   visited_path_.emplace_back(root_);
   MonteCarloTreeNodePtr current_node = root_;
@@ -32,7 +32,7 @@ bool MonteCarloTree::Selection(std::vector<int>* action_list, int max_action) {
       return false;
     }
     if (max_action != -1) {
-      (*action_list)[i] = selected_child->action();
+      Memcpy(action_list + i, selected_child->action(), sizeof(int));
       i++;
     }
     visited_path_.emplace_back(selected_child);
@@ -40,29 +40,13 @@ bool MonteCarloTree::Selection(std::vector<int>* action_list, int max_action) {
   }
   // If max_action is -1, which means that the Selection will only return the last action.
   if (max_action == -1 && selected_child != nullptr) {
-    (*action_list)[0] = selected_child->action();
+    Memcpy(action_list, selected_child->action(), sizeof(int));
   }
   placeholder_handle_++;
   return true;
 }
 
-bool MonteCarloTree::Expansion(std::string node_name, int* action, float* prior, float* init_reward, int num_action,
-                               int player, int state_size) {
-  // Expand the last node of visited_path.
-  auto leaf_node = visited_path_.at(visited_path_.size() - 1);
-  for (int i = 0; i < num_action; i++) {
-    auto action_i = action[i];
-    if (action_i != -1) {
-      auto prior_i = prior[i];
-      auto child_node = MonteCarloTreeFactory::GetInstance().CreateNode(
-          node_name, action_i, prior_i, init_reward, player, tree_handle_, leaf_node, leaf_node->row() + 1, state_size);
-      leaf_node->AddChild(child_node);
-    }
-  }
-  return true;
-}
-
-bool MonteCarloTree::Backpropagation(float* returns) {
+bool MonteCarloTree::Backpropagation(float *returns) {
   // Reverse the visited path, update from the bottom to the top.
   std::reverse(visited_path_.begin(), visited_path_.end());
   auto leaf_node = visited_path_[0];
@@ -73,12 +57,12 @@ bool MonteCarloTree::Backpropagation(float* returns) {
   }
   // For each node in visited path, call the Update() to update the value.
   // If current branch is solved, backprop the best outcome from the bottom to top.
-  for (auto& node : visited_path_) {
-    node->Update(returns);
+  for (auto &node : visited_path_) {
+    node->Update(returns, total_num_player_);
     if (solved && !node->IsLeafNode()) {
       MonteCarloTreeNodePtr best = nullptr;
       bool all_solved = true;
-      for (const auto& child : node->children()) {
+      for (const auto &child : node->children()) {
         if (child->outcome().empty()) {
           all_solved = false;
         } else if (best == nullptr || child->outcome()[child->player()] > best->outcome()[best->player()]) {
@@ -92,10 +76,11 @@ bool MonteCarloTree::Backpropagation(float* returns) {
       }
     }
   }
-  return true;
+  bool fully_solved = !root_->outcome().empty();
+  return fully_solved;
 }
 
-int MonteCarloTree::BestAction() {
+int *MonteCarloTree::BestAction() {
   auto best_child_node = root_->BestAction();
   return best_child_node->action();
 }

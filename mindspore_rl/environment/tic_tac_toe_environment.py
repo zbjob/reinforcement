@@ -17,7 +17,6 @@
 import numpy as np
 
 import mindspore as ms
-from mindspore import Tensor
 from mindspore.ops import operations as P
 from mindspore_rl.environment import Environment
 from mindspore_rl.environment import Space
@@ -57,8 +56,9 @@ class TicTacToeEnvironment(Environment):
 
         self._board = np.zeros((3, 3), np.float32)
         self._current_player_var = 0
+        self._total_num_player = 2.0
         self._avail_action = np.array([0, 1, 2, 3, 4, 5, 6, 7, 8], np.int32)
-        self._max_utility = Tensor(1.0, ms.float32)
+        self._max_utility = 1.0
         self.params = params
         self.env_id = env_id
 
@@ -66,8 +66,6 @@ class TicTacToeEnvironment(Environment):
         self._player_two_win = np.array([-1.0, 1.0], np.float32)
         self._draw_or_no_result = np.array([0, 0], np.float32)
         self._done = np.array([False], np.bool_)
-
-        self.print = P.Print()
 
         self._observation_space = Space((3, 3), np.float32, low=-1, high=2)
         self._action_space = Space((1,), np.int32, low=0, high=9)
@@ -214,9 +212,18 @@ class TicTacToeEnvironment(Environment):
         Return the max utility of Tic-Tac-Toe.
 
         Returns:
-            A tensor which states for max utility
+            A tensor which states for max utility.
         """
         return self._max_utility
+
+    def total_num_player(self):
+        """
+        Return the total number of player
+
+        Returns:
+            int, the total number of player.
+        """
+        return self._total_num_player
 
     def current_player(self):
         """
@@ -264,22 +271,24 @@ class TicTacToeEnvironment(Environment):
 
     def _load(self, state):
         """private load function"""
+        self._board = state
         new_avail = np.array([0, 1, 2, 3, 4, 5, 6, 7, 8], np.int32)
         for row in range(3):
             for column in range(3):
                 if state[row][column] != 0:
                     new_avail[row*3+column] = -1
-        if new_avail.sum() == -9:
-            self._done = True
+        out_reward = self._rewards()
+        if (new_avail.sum() == -9) or (out_reward == self._player_one_win).all() \
+                or (out_reward == self._player_two_win).all():
+            self._done = np.array([True], np.bool_)
         else:
-            self._done = False
+            self._done = np.array([False], np.bool_)
         if state.sum() == 0:
             self._current_player_var = 0
         else:
             self._current_player_var = 1
         self._avail_action = new_avail
-        self._board = state
-        return self._board, self._rewards(), self._done
+        return self._board, out_reward, self._done
 
     def _legal_action(self):
         """private legal action function"""
