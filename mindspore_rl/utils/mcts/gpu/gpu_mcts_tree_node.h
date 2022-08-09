@@ -14,19 +14,21 @@
  * limitations under the License.
  */
 
-#ifndef MINDSPORE_RL_UTILS_MCTS_CPU_CPU_MCTS_TREE_NODE_H_
-#define MINDSPORE_RL_UTILS_MCTS_CPU_CPU_MCTS_TREE_NODE_H_
+#ifndef MINDSPORE_RL_UTILS_MCTS_GPU_GPU_MCTS_TREE_NODE_H_
+#define MINDSPORE_RL_UTILS_MCTS_GPU_GPU_MCTS_TREE_NODE_H_
 
 #include <utils/mcts/mcts_tree_node.h>
+#include <utils/mcts/gpu/cuda_impl/argmax_impl.cuh>
+#include <cuda_runtime_api.h>
 #include <vector>
 #include <algorithm>
 #include <memory>
 #include <string>
 #include <cstring>
 
-class CPUMonteCarloTreeNode : public MonteCarloTreeNode {
+class GPUMonteCarloTreeNode : public MonteCarloTreeNode {
  public:
-  CPUMonteCarloTreeNode(std::string name, int *action, float *prior, float *init_reward, int player,
+  GPUMonteCarloTreeNode(std::string name, int *action, float *prior, float *init_reward, int player,
                         int64_t tree_handle, std::shared_ptr<MonteCarloTreeNode> parent_node, int row, int state_size)
       : MonteCarloTreeNode(name, action, prior, init_reward, player, tree_handle, parent_node, row, state_size) {
     if (state_size > 0) {
@@ -36,7 +38,7 @@ class CPUMonteCarloTreeNode : public MonteCarloTreeNode {
     }
   }
 
-  ~CPUMonteCarloTreeNode() override = default;
+  ~GPUMonteCarloTreeNode() override = default;
 
   void InitNode(int state_size, float *init_reward, int *action, float *prior) override;
   int GetMaxPosition(float *selection_value, int num_items, void *device_stream) override;
@@ -44,9 +46,11 @@ class CPUMonteCarloTreeNode : public MonteCarloTreeNode {
   virtual void SetInitReward(float *init_reward) { Memcpy(total_reward_, init_reward + player_, sizeof(float)); }
 
   std::string DebugString() override {
+    int *action_host = new int[sizeof(int)];
+    cudaMemcpy(action_host, action_, sizeof(int), cudaMemcpyDeviceToHost);
     std::ostringstream oss;
     oss << tree_handle_ << "_" << name_ << "_row_" << row_ << "_player_" << player_;
-    oss << "_action_" << *action_ << "_terminal_" << terminal_;
+    oss << "_action_" << *action_host << "_terminal_" << terminal_;
     return oss.str();
   }
 
@@ -60,4 +64,4 @@ class CPUMonteCarloTreeNode : public MonteCarloTreeNode {
   virtual bool Update(float *returns, int num_player, void *device_stream) = 0;
 };
 
-#endif  // MINDSPORE_RL_UTILS_MCTS_CPU_CPU_MCTS_TREE_NODE_H_
+#endif  // MINDSPORE_RL_UTILS_MCTS_GPU_GPU_MCTS_TREE_NODE_H_

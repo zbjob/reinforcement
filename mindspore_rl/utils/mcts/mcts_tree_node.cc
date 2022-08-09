@@ -17,21 +17,21 @@
 #include <utils/mcts/mcts_tree_node.h>
 #include <algorithm>
 
-MonteCarloTreeNodePtr MonteCarloTreeNode::SelectChild() {
+MonteCarloTreeNodePtr MonteCarloTreeNode::SelectChild(void *device_stream) {
   float *selection_value = reinterpret_cast<float *>(AllocateMem(sizeof(float) * children_.size()));
   float *uct_value = reinterpret_cast<float *>(AllocateMem(sizeof(float)));
   // For each child, use selection policy to calculate corresponding value,
   // then choose the largest one.
   int i = 0;
   for (auto &child : children_) {
-    bool ret = child->SelectionPolicy(uct_value);
+    bool ret = child->SelectionPolicy(uct_value, device_stream);
     if (!ret) {
       return nullptr;
     }
-    Memcpy(selection_value + i, uct_value, sizeof(float));
+    MemcpyAsync(selection_value + i, uct_value, sizeof(float), device_stream);
     i++;
   }
-  int64_t max_position = GetMaxPosition(selection_value, children_.size());
+  int64_t max_position = GetMaxPosition(selection_value, children_.size(), device_stream);
   Free(selection_value);
   Free(uct_value);
   return children_[max_position];

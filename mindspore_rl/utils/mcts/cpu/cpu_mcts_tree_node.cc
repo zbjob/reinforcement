@@ -43,7 +43,7 @@ void CPUMonteCarloTreeNode::InitNode(int state_size, float *init_reward, int *ac
   }
 }
 
-int CPUMonteCarloTreeNode::GetMaxPosition(float *selection_value, int num_items) {
+int CPUMonteCarloTreeNode::GetMaxPosition(float *selection_value, int num_items, void *device_stream) {
   int max_index = -1;
   float max_value = -std::numeric_limits<float>::infinity();
   for (int i = 0; i < num_items; i++) {
@@ -70,6 +70,11 @@ bool CPUMonteCarloTreeNode::BestActionPolicy(MonteCarloTreeNodePtr node) const {
 void *CPUMonteCarloTreeNode::AllocateMem(size_t size) { return malloc(size); }
 
 bool CPUMonteCarloTreeNode::Memcpy(void *dst_ptr, void *src_ptr, size_t size) {
+  std::memcpy(dst_ptr, src_ptr, size);
+  return true;
+}
+
+bool CPUMonteCarloTreeNode::MemcpyAsync(void *dst_ptr, void *src_ptr, size_t size, void *device_stream) {
   std::memcpy(dst_ptr, src_ptr, size);
   return true;
 }

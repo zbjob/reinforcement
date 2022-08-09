@@ -36,7 +36,7 @@ class MonteCarloTree {
 
   // The Selection phase of monte carlo tree search, it will continue selecting child node based on selection
   // policy (like UCT) until leaf node.
-  bool Selection(int *action_list, int max_action);
+  bool Selection(int *action_list, int max_action, void *device_stream);
 
   // The Expansion phase of monte carlo tree search, it will create the child node based on input action and prior
   // for last node in visited path.
@@ -45,7 +45,7 @@ class MonteCarloTree {
 
   // The Backpropagation phase of monte carlo tree search, it will update the value in each visited node according to
   // the input returns (obtained in simulation).
-  bool Backpropagation(float *returns);
+  bool Backpropagation(float *returns, void *device_stream);
 
   // Select the best action of root
   int *BestAction();

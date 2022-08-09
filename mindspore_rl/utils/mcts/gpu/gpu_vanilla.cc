@@ -14,30 +14,30 @@
  * limitations under the License.
  */
 
-#include <utils/mcts/cpu/cpu_vanilla.h>
+#include <utils/mcts/gpu/gpu_vanilla.h>
+#include <utils/mcts/gpu/cuda_impl/vanilla_impl.cuh>
 #include <cmath>
 #include <iostream>
 #include <limits>
 
-bool CPUVanillaTreeNode::SelectionPolicy(float *uct_value, void *device_stream) const {
+bool GPUVanillaTreeNode::SelectionPolicy(float *uct_value, void *device_stream) const {
   if (!outcome_.empty()) {
-    *uct_value = outcome_[player_];
-    return true;
-  }
-  if (*explore_count_ == 0) {
-    *uct_value = std::numeric_limits<float>::infinity();
+    auto out_value = outcome_[player_];
+    cudaMemcpy(uct_value, &out_value, sizeof(float), cudaMemcpyHostToDevice);
     return true;
   }
 
   auto global_variable_vector = MonteCarloTreeFactory::GetInstance().GetTreeVariableByHandle(tree_handle_);
-  auto uct_ptr = global_variable_vector[0];
-  *uct_value =
-    *total_reward_ / *explore_count_ + uct_ptr * std::sqrt(std::log(*(parent_->explore_count())) / *explore_count_);
+  auto uct_ptr = global_variable_vector;
+
+  int *parent_explore_count = parent_->explore_count();
+  CalSelectionPolicy(explore_count_, total_reward_, parent_explore_count, uct_ptr, uct_value,
+                     static_cast<cudaStream_t>(device_stream));
   return true;
 }
 
-bool CPUVanillaTreeNode::Update(float *values, int total_num_player, void *device_stream) {
-  *total_reward_ += values[player_];
-  *explore_count_ += 1;
+bool GPUVanillaTreeNode::Update(float *values, int total_num_player, void *device_stream) {
+  CalUpdate(explore_count_, total_reward_, values, player_, reinterpret_cast<cudaStream_t>(device_stream));
+
   return true;
 }
