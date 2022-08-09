@@ -22,7 +22,6 @@ import mindspore.nn.probability.distribution as msd
 from mindspore.ops import operations as P
 
 from mindspore_rl.utils.mcts import MCTS, VanillaFunc
-from mindspore_rl.utils.mcts.mcts import VANILLA, COMMON
 from mindspore_rl.environment import TicTacToeEnvironment
 
 
@@ -34,8 +33,12 @@ class VanillaMCTSWithTicTacToe(nn.Cell):
         super().__init__()
         self.env = TicTacToeEnvironment(None)
         vanilla_func = VanillaFunc(self.env)
-        self.mcts = MCTS(self.env, COMMON, VANILLA, -1, max_iteration, self.env.observation_space.shape, vanilla_func)
-        self.uct = Tensor(uct, ms.float32)
+        uct = Tensor(uct, ms.float32)
+        max_action = -1.0
+        root_player = 1.0
+        self.mcts = MCTS(self.env, "CPUCommon", "CPUVanilla", root_player, max_action, max_iteration,
+                         self.env.observation_space.shape, vanilla_func, "CPU", uct)
+
         self.false = Tensor(False, ms.bool_)
 
         self.ones_like = P.OnesLike()
@@ -58,11 +61,12 @@ class VanillaMCTSWithTicTacToe(nn.Cell):
             print(new_state)
             if not done:
                 ckpt = self.env.save()
-                action = self.mcts.mcts_search(self.uct)
+                action = self.mcts.mcts_search()
                 self.env.load(ckpt)
                 new_state, reward, done = self.env.step(action[0])
                 print("player 2 acts")
                 print(new_state)
+        self.mcts.destroy()
         if reward[0] == 0:
             print("Draw")
         elif reward[0] == 1:

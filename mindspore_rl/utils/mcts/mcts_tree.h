@@ -25,31 +25,55 @@
 
 class MonteCarloTree {
  public:
-  MonteCarloTree(MonteCarloTreeNodePtr root, float max_utility, int64_t tree_handle, int state_size)
-      : root_(root), max_utility_(max_utility), tree_handle_(tree_handle), state_size_(state_size) {}
-  ~MonteCarloTree() = default;
+  MonteCarloTree(MonteCarloTreeNodePtr root, float max_utility, int64_t tree_handle, int state_size,
+                 int total_num_player)
+      : root_(root),
+        max_utility_(max_utility),
+        tree_handle_(tree_handle),
+        state_size_(state_size),
+        total_num_player_(total_num_player) {}
+  virtual ~MonteCarloTree() = default;
 
   // The Selection phase of monte carlo tree search, it will continue selecting child node based on selection
   // policy (like UCT) until leaf node.
-  bool Selection(std::vector<int> *action_list, int max_action);
+  bool Selection(int *action_list, int max_action);
 
   // The Expansion phase of monte carlo tree search, it will create the child node based on input action and prior
   // for last node in visited path.
-  bool Expansion(std::string node_name, int *action, float *prior, float *init_reward, int num_action, int player,
-                 int state_size);
+  virtual bool Expansion(std::string node_name, int *action, float *prior, float *init_reward, int num_action,
+                         int state_size) = 0;
 
   // The Backpropagation phase of monte carlo tree search, it will update the value in each visited node according to
   // the input returns (obtained in simulation).
   bool Backpropagation(float *returns);
 
   // Select the best action of root
-  int BestAction();
+  int *BestAction();
 
-  void UpdateState(float *input_state, int index) { visited_path_[index]->set_state(input_state, state_size_); }
+  virtual void *AllocateMem(size_t size) = 0;
+  virtual bool Memcpy(void *dst_ptr, void *src_ptr, size_t size) = 0;
+  virtual bool Memset(void *dst_ptr, int value, size_t size) = 0;
+  virtual bool Free(void *ptr) = 0;
+
+  bool Restore() {
+    root_->FreeNode();
+    root_->InitNode(state_size_, nullptr, nullptr, nullptr);
+  }
+
+  bool UpdateState(float *input_state, int index) {
+    visited_path_[index]->set_state(input_state, state_size_);
+    return true;
+  }
   float *GetState(int index) { return visited_path_[index]->state(); }
 
-  void UpdateOutcome(std::vector<float> input_return, int index) { visited_path_[index]->set_outcome(input_return); }
-  void UpdateTerminal(bool is_terminal, int index) { visited_path_[index]->set_terminal(is_terminal); }
+  bool UpdateOutcome(std::vector<float> input_return, int index) {
+    visited_path_[index]->set_outcome(input_return);
+    return true;
+  }
+  bool UpdateTerminal(bool is_terminal, int index) {
+    visited_path_[index]->set_terminal(is_terminal);
+    return true;
+  }
 
   int64_t placeholder_handle() { return placeholder_handle_; }
   std::vector<MonteCarloTreeNodePtr> visited_path() { return visited_path_; }
@@ -60,6 +84,7 @@ class MonteCarloTree {
   float max_utility_;  // The max utility of game, which is used in backpropagation.
 
  protected:
+  int total_num_player_;                             // Number of total player in the game
   int64_t tree_handle_;                              // The tree handle which is used to create the node.
   int state_size_;                                   // Number of element of state
   int64_t placeholder_handle_ = -1;                  // A dummy handle.

@@ -18,19 +18,22 @@
 #include <algorithm>
 
 MonteCarloTreeNodePtr MonteCarloTreeNode::SelectChild() {
-  std::vector<float> selection_value;
+  float *selection_value = reinterpret_cast<float *>(AllocateMem(sizeof(float) * children_.size()));
+  float *uct_value = reinterpret_cast<float *>(AllocateMem(sizeof(float)));
   // For each child, use selection policy to calculate corresponding value,
   // then choose the largest one.
+  int i = 0;
   for (auto &child : children_) {
-    float uct_value;
-    bool ret = child->SelectionPolicy(&uct_value);
-    selection_value.emplace_back(uct_value);
+    bool ret = child->SelectionPolicy(uct_value);
     if (!ret) {
       return nullptr;
     }
+    Memcpy(selection_value + i, uct_value, sizeof(float));
+    i++;
   }
-  int64_t max_position = std::distance(std::begin(selection_value),
-                                       std::max_element(std::begin(selection_value), std::end(selection_value)));
+  int64_t max_position = GetMaxPosition(selection_value, children_.size());
+  Free(selection_value);
+  Free(uct_value);
   return children_[max_position];
 }
 
@@ -39,16 +42,4 @@ MonteCarloTreeNodePtr MonteCarloTreeNode::BestAction() const {
                            [](const MonteCarloTreeNodePtr node_a, const MonteCarloTreeNodePtr node_b) {
                              return node_a->BestActionPolicy(node_b);
                            });
-}
-
-bool MonteCarloTreeNode::BestActionPolicy(MonteCarloTreeNodePtr node) const {
-  float outcome_self = (outcome_.empty() ? 0 : outcome_[player_]);
-  float outcome_input = (node->outcome().empty() ? 0 : node->outcome()[node->player()]);
-  if (outcome_self != outcome_input) {
-    return outcome_self < outcome_input;
-  }
-  if (explore_count_ != node->explore_count()) {
-    return explore_count_ < node->explore_count();
-  }
-  return total_reward_ < node->total_reward();
 }
