@@ -14,10 +14,39 @@
 # limitations under the License.
 # ============================================================================
 
+export ENABLE_GPU="off"
+export DEBUG_MODE="off"
+while getopts 'e:d:e' opt
+do
+    OPTARG=$(echo ${OPTARG} | tr '[A-Z]' '[a-z]')
+    case "${opt}" in
+    d)
+        DEBUG_MODE="on" ;;
+    e)
+        export DEVICE=$OPTARG ;;
+    *)
+        echo "Unknown opt ${opt}!"
+        echo "Usage:" 
+        echo "bash build.sh [-d on|off] [-e gpu|cpu]"
+        echo ""
+        echo "Options:"
+        echo "    -d Debug mode"
+        echo "    -e Use cpu or gpu"
+        exit 1
+    esac
+done
+if [[ "X$DEVICE" == "Xgpu" ]]; then
+    export ENABLE_GPU="on"
+fi
+
+if [[ "X$ENABLE_GPU" = "Xon" ]]; then
+    CMAKE_ARGS="${CMAKE_ARGS} -DENABLE_GPU=ON"
+fi
+
 echo "---------------- Reinforcement: build start ----------------"
 BASEPATH=$(cd "$(dirname $0)"; pwd)
 BUILD_PATH="${BASEPATH}/build"
-CMAKE_ARGS="${CMAKE_ARGS} -DCMAKE_INSTALL_PREFIX=${BUILD_PATH}"
+CMAKE_ARGS="${CMAKE_ARGS} -DCMAKE_INSTALL_PREFIX=${BUILD_PATH} -DDEBUG_MODE=$DEBUG_MODE"
 mkdir ${BUILD_PATH}
 cd ${BUILD_PATH}
 cmake ${CMAKE_ARGS} ${BASEPATH}

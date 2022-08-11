@@ -18,6 +18,7 @@
 #include <utils/mcts/mcts_tree.h>
 #include <utils/mcts/mcts_tree_node.h>
 #include <utils/mcts/custom_aot_extra.h>
+#include <cuda_runtime_api.h>
 #include <cstdint>
 #include <iostream>
 
@@ -69,9 +70,11 @@ extern "C" int MctsCreation(int nparam, void **params, int *ndims, int64_t **sha
   // is shared by all the node in this monte carlo tree. These variable will be saved in a std::vector with void* type.
   // User can call MonteCarloTreeFactory::GetInstance().GetTreeVariableByHandle(tree_handle_) to obtain the variable
   // vector and select the corresponding variable by index.
-  float *input_global_variable = new float[nparam - 1];
+  void *device_state_ptr = nullptr;
+  cudaMalloc(&device_state_ptr, sizeof(float) * (nparam - 1));
+  float *input_global_variable = static_cast<float *>(device_state_ptr);
   for (int i = 0; i < nparam - 1; i++) {
-    input_global_variable[i] = static_cast<float *>(params[i])[0];
+    cudaMemcpy(input_global_variable + i, params[i], sizeof(float), cudaMemcpyDeviceToDevice);
   }
   // Output value
   // The output value of MctsCreation is the unique handle of this new monte carlo tree.
@@ -133,7 +136,7 @@ extern "C" int MctsSelection(int nparam, void **params, int *ndims, int64_t **sh
   }
   int *action_list = reinterpret_cast<int *>(tree->AllocateMem(size_of_action * sizeof(int)));
   tree->Memset(action_list, -1, sizeof(int) * size_of_action);
-  auto ret = tree->Selection(action_list, max_action, nullptr);
+  auto ret = tree->Selection(action_list, max_action, stream);
   if (!ret) {
     return kErrorCode;
   }
@@ -230,8 +233,9 @@ extern "C" int MctsBackpropagation(int nparam, void **params, int *ndims, int64_
   if (tree == nullptr) {
     return kErrorCode;
   }
-  bool ret = tree->Backpropagation(returns, nullptr);
-  tree->Memcpy(output, &ret, sizeof(bool));
+  bool ret = tree->Backpropagation(returns, stream);
+  // tree->Memcpy(output, &ret, sizeof(bool));
+  cudaMemcpy(output, &ret, sizeof(bool), cudaMemcpyHostToDevice);
   return 0;
 }
 
@@ -292,14 +296,16 @@ extern "C" int UpdateLeafNodeOutcome(int nparam, void **params, int *ndims, int6
   // 1. A dummy handle, it is not used.
   // 2. The outcome of terminal state.
   float *outcome = static_cast<float *>(params[1]);
+  int num_element = shapes[kInputIndex][0];
+  float *outcome_host = new float[sizeof(float) * num_element];
+  cudaMemcpy(outcome_host, outcome, sizeof(float) * num_element, cudaMemcpyDeviceToHost);
   // Output value
   // Whether update executes successfully.
   bool *output = static_cast<bool *>(params[2]);
 
-  int num_element = shapes[kInputIndex][0];
   std::vector<float> return_value;
   for (int i = 0; i < num_element; i++) {
-    return_value.emplace_back(outcome[i]);
+    return_value.emplace_back(outcome_host[i]);
   }
   auto tree = MonteCarloTreeFactory::GetInstance().GetTreeByHandle(tree_handle);
   if (tree == nullptr) {
@@ -336,6 +342,8 @@ extern "C" int UpdateLeafNodeTerminal(int nparam, void **params, int *ndims, int
   // 1. A dummy handle, it is not used.
   // 2. The terminal state.
   bool *terminal = static_cast<bool *>(params[1]);
+  bool *terminal_host = new bool[sizeof(bool)];
+  cudaMemcpy(terminal_host, terminal, sizeof(bool), cudaMemcpyDeviceToHost);
   // Output value
   // Whether update executes successfully.
   bool *output = static_cast<bool *>(params[2]);
@@ -345,7 +353,7 @@ extern "C" int UpdateLeafNodeTerminal(int nparam, void **params, int *ndims, int
     return kErrorCode;
   }
   int index = tree->visited_path().size() - 1;
-  bool ret = tree->UpdateTerminal(*terminal, index);
+  bool ret = tree->UpdateTerminal(*terminal_host, index);
   tree->Memcpy(output, &ret, sizeof(bool));
   return 0;
 }
@@ -422,7 +430,8 @@ extern "C" int UpdateRootState(int nparam, void **params, int *ndims, int64_t **
     return kErrorCode;
   }
   tree->root()->set_state(state, tree->state_size());
-  output[0] = true;
+  bool ret = true;
+  tree->Memcpy(output, &ret, sizeof(bool));
   return 0;
 }
 

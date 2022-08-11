@@ -37,16 +37,16 @@ class MonteCarloTreeNode {
   virtual void InitNode(int state_size, float *init_reward, int *action, float *prior) = 0;
 
   // It will select the child whose value of SelectionPolicy is the highest.
-  std::shared_ptr<MonteCarloTreeNode> SelectChild();
+  std::shared_ptr<MonteCarloTreeNode> SelectChild(void *device_stream);
 
   // The virtual function of SelectionPolicy. In this function, user needs to implement the rule to select
   // child node, such as UCT(UCB) function, RAVE, AMAF, etc.
-  virtual bool SelectionPolicy(float *uct_value) const = 0;
-  virtual int GetMaxPosition(float *selection_value, int num_items) = 0;
+  virtual bool SelectionPolicy(float *uct_value, void *device_stream) const = 0;
+  virtual int GetMaxPosition(float *selection_value, int num_items, void *device_stream) = 0;
 
   // The virtual function of Update. It is invoked during backpropagation. User needs implement how to update
   // the local value according to the input returns.
-  virtual bool Update(float *returns, int total_num_player) = 0;
+  virtual bool Update(float *returns, int total_num_player, void *device_stream) = 0;
 
   // After the whole tree finished, use BestAction to obtain the best action for the root.
   std::shared_ptr<MonteCarloTreeNode> BestAction() const;
@@ -64,6 +64,7 @@ class MonteCarloTreeNode {
 
   virtual void *AllocateMem(size_t size) = 0;
   virtual bool Memcpy(void *dst_ptr, void *src_ptr, size_t size) = 0;
+  virtual bool MemcpyAsync(void *dst_ptr, void *src_ptr, size_t size, void *device_stream) = 0;
   virtual bool Memset(void *dst_ptr, int value, size_t size) = 0;
   virtual bool Free(void *ptr) = 0;
 
