@@ -28,6 +28,8 @@
     .. py:method:: action_space
         :property:
 
+        **返回：**
+
         Space，环境的动作空间。
 
     .. py:method:: config
@@ -38,15 +40,21 @@
     .. py:method:: done_space
         :property:
 
+        **返回：**
+
         Space，返回环境的终止空间。
 
     .. py:method:: observation_space
         :property:
 
+        **返回：**
+
         Space，返回环境的状态空间。
 
     .. py:method:: reward_space
         :property:
+
+        **返回：**
 
         Space，返回环境的奖励空间。
 
