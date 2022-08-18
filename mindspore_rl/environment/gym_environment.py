@@ -84,6 +84,15 @@ class GymEnvironment(Environment):
         self.action_dtype = self._action_space.ms_dtype
         self.cast = P.Cast()
 
+    def render(self):
+        """
+        Render the game. Only support on PyNative mode.
+        """
+        try:
+            self._env.render()
+        except:
+            raise RuntimeError("Failed to render, run in PyNative mode and comment the ms_function.")
+
     def reset(self):
         """
         Reset the environment to the initial state. It is always used at the beginning of each

@@ -20,10 +20,10 @@ Components for MindSpore Reinforcement Learning Framework.
 import time
 from mindspore_rl.core import MSRL
 from mindspore_rl.core import Session
-from mindspore_rl.core import ReplayBuffer
+from mindspore_rl.core import UniformReplayBuffer
 from mindspore_rl.version import __version__
 
-__all__ = ["MSRL", "Session", "ReplayBuffer"]
+__all__ = ["MSRL", "Session", "UniformReplayBuffer"]
 __all__.extend(__version__)
 
 

@@ -137,17 +137,16 @@ class PPOPolicy():
                                           params['hidden_size1'],
                                           params['hidden_size2'],
                                           params['action_space_dim'],
-                                          params['sigma_init_std'],
-                                          params['compute_type'])
+                                          params['sigma_init_std'])
         self.critic_net = self.PPOCriticNet(params['state_space_dim'],
                                             params['hidden_size1'],
-                                            params['hidden_size2'], 1,
-                                            params['compute_type'])
+                                            params['hidden_size2'], 1)
 
         self.collect_policy = self.CollectPolicy(self.actor_net)
         self.eval_policy = self.EvalPolicy(self.actor_net)
 
 
+#pylint: disable=W0223
 class PPOActor(Actor):
     """This is an actor class of PPO algorithm, which is used to interact with environment, and
     generate/insert experience (data) """

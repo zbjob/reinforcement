@@ -19,7 +19,7 @@ import sys
 import argparse
 import mindspore
 from mindspore import context
-from mindspore_rl.core import ReplayBuffer
+from mindspore_rl.core import UniformReplayBuffer
 from mindspore_rl.environment import GymEnvironment
 from mindspore_rl.core import Session
 #pylint: disable=C0413
@@ -94,7 +94,7 @@ ppo_algorithm_config = {
         'params': policy_params
     },
     'replay_buffer': {
-        'type': ReplayBuffer,
+        'type': UniformReplayBuffer,
         'capacity': DURATION,
         'data_shape': [(COLLECT_ENV_NUM, 17), (COLLECT_ENV_NUM, 6), (COLLECT_ENV_NUM, 1),
                        (COLLECT_ENV_NUM, 17), (COLLECT_ENV_NUM, 6), (COLLECT_ENV_NUM, 6)],

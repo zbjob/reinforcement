@@ -17,7 +17,7 @@ DDPG config.
 """
 
 from mindspore_rl.environment import GymEnvironment
-from mindspore_rl.core.replay_buffer import ReplayBuffer
+from mindspore_rl.core.uniform_replay_buffer import UniformReplayBuffer
 from .ddpg import DDPGActor, DDPGLearner, DDPGPolicy
 
 env_params = {'name': 'HalfCheetah-v2'}
@@ -85,7 +85,7 @@ algorithm_config = {
     },
     'replay_buffer': {
         'number': 1,
-        'type': ReplayBuffer,
+        'type': UniformReplayBuffer,
         'capacity': 100000,
         'sample_size': 64
     }
