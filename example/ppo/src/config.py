@@ -18,7 +18,7 @@ PPO config.
 
 import mindspore
 from mindspore_rl.environment import GymEnvironment
-from mindspore_rl.core.replay_buffer import ReplayBuffer
+from mindspore_rl.core.uniform_replay_buffer import UniformReplayBuffer
 from .ppo import PPOActor, PPOLearner, PPOPolicy
 
 env_params = {'name': 'HalfCheetah-v2'}
@@ -78,7 +78,7 @@ algorithm_config = {
     },
     'replay_buffer': {
         'number': 1,
-        'type': ReplayBuffer,
+        'type': UniformReplayBuffer,
         'capacity': 1000,
         'data_shape': [(30, 17), (30, 6), (30, 1), (30, 17), (30, 6), (30, 6)],
         'data_type': [

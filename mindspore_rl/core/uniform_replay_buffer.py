@@ -43,12 +43,12 @@ def _create_tensor(capacity, shapes, types):
     return buffer
 
 
-class ReplayBuffer(nn.Cell):
+class UniformReplayBuffer(nn.Cell):
     """
     The replay buffer class.
     The replay buffer will store the experience from environment. In replay
     buffer, each element is a list of tensors. Therefore, the constructor of the
-    ReplayBuffer class takes the shape and type of each tensor as an argument.
+    UniformReplayBuffer class takes the shape and type of each tensor as an argument.
 
     Args:
         batch_size (int): size for sampling from the buffer.
@@ -61,9 +61,9 @@ class ReplayBuffer(nn.Cell):
         >>> capacity = 10000
         >>> shapes = [(4,), (1,), (1,), (4,)]
         >>> types = [ms.float32, ms.int32, ms.float32, ms.float32]
-        >>> replaybuffer = ReplayBuffer(batch_size, capacity, shapes, types)
+        >>> replaybuffer = UniformReplayBuffer(batch_size, capacity, shapes, types)
         >>> print(replaybuffer)
-        ReplayBuffer<>
+        UniformReplayBuffer<>
     """
 
     def __init__(self, batch_size, capacity, shapes, types):

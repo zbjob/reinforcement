@@ -101,6 +101,15 @@ class MultiEnvironmentWrapper(nn.Cell):
                 self.mpe_env_procs.append(env_proc)
                 env_proc.start()
 
+    def render(self):
+        """
+        Render the game. Only support on PyNative mode.
+        """
+        try:
+            self._envs[0].render()
+        except:
+            raise RuntimeError("Failed to render, run in PyNative mode and comment the ms_function.")
+
     def reset(self):
         """
         Reset the environment to the initial state. It is always used at the beginning of each

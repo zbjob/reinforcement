@@ -18,7 +18,7 @@ DQN config.
 
 import mindspore as ms
 from mindspore_rl.environment import GymEnvironment
-from mindspore_rl.core.replay_buffer import ReplayBuffer
+from mindspore_rl.core.uniform_replay_buffer import UniformReplayBuffer
 from .dqn import DQNActor, DQNLearner, DQNPolicy
 
 learner_params = {'gamma': 0.99, 'lr': 0.001}
@@ -66,7 +66,7 @@ algorithm_config = {
         'params': eval_env_params
     },
     'replay_buffer': {'number': 1,
-                      'type': ReplayBuffer,
+                      'type': UniformReplayBuffer,
                       'capacity': 100000,
                       'data_shape': [(4,), (1,), (1,), (4,)],
                       'data_type': [ms.float32, ms.int32, ms.float32, ms.float32],

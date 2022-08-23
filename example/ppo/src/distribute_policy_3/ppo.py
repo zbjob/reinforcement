@@ -34,7 +34,7 @@ from mindspore.communication.management import init
 from mindspore_rl.agent.actor import Actor
 from mindspore_rl.agent.learner import Learner
 from mindspore_rl.agent.trainer import Trainer
-from mindspore_rl.core import ReplayBuffer
+from mindspore_rl.core import UniformReplayBuffer
 from mindspore_rl.environment import GymEnvironment
 from mindspore_rl.core import Session
 
@@ -540,7 +540,7 @@ ppo_algorithm_config = {
         'networks': ['critic_net', 'ppo_net_train']
     },
     'replay_buffer': {
-        'type': ReplayBuffer,
+        'type': UniformReplayBuffer,
         'number': 1,
         'capacity': DURATION,
         'data_shape': [(environment_number, 17), (environment_number, 6), (environment_number, 1),

@@ -18,7 +18,7 @@ SAC config.
 
 import mindspore
 from mindspore_rl.environment import GymEnvironment
-from mindspore_rl.core.replay_buffer import ReplayBuffer
+from mindspore_rl.core.uniform_replay_buffer import UniformReplayBuffer
 from src.sac import SACActor, SACLearner, SACPolicy
 
 env_params = {'name': 'HalfCheetah-v2'}
@@ -84,7 +84,7 @@ algorithm_config = {
     },
     'replay_buffer': {
         'number': 1,
-        'type': ReplayBuffer,
+        'type': UniformReplayBuffer,
         'capacity': 1000000,
         'data_shape': [(17,), (6,), (1,), (17,)],
         'data_type': [

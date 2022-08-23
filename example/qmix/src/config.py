@@ -19,7 +19,7 @@ QMIX config.
 # pylint: disable=E0402
 import mindspore as ms
 from mindspore_rl.environment import StarCraft2Environment
-from mindspore_rl.core.replay_buffer import ReplayBuffer
+from mindspore_rl.core.uniform_replay_buffer import UniformReplayBuffer
 from .qmix import QMIXActor, QMIXLearner, QMIXPolicy
 
 BATCH_SIZE = 32
@@ -82,7 +82,7 @@ algorithm_config = {
     },
     'replay_buffer': {
         'number': 1,
-        'type': ReplayBuffer,
+        'type': UniformReplayBuffer,
         'capacity': 5000,
         'data_shape': [(121, 5, 96), (121, 120), (121, 5, 1), (121, 5, 11), (121, 1), (121, 1), (121, 1), (121, 5, 64)],
         'data_type': [

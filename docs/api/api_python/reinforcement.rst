@@ -28,7 +28,7 @@ mindspore_rl.core
 
 .. include:: core/mindspore_rl.core.Session.rst
 
-.. include:: core/mindspore_rl.core.ReplayBuffer.rst
+.. include:: core/mindspore_rl.core.UniformReplayBuffer.rst
 
 .. include:: core/mindspore_rl.core.PriorityReplayBuffer.rst
 
