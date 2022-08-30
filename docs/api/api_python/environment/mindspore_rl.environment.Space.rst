@@ -44,16 +44,16 @@
 
         当前空间可选动作的数量。
 
-    .. py:method:: sample()
-
-        从当前Space里随机采样一个合法动作。
-
-        返回：
-        一个合法动作的Tensor。
-
     .. py:method:: shape
         :property:
 
         **返回：**
 
         批处理后的Space的Shape。
+
+    .. py:method:: sample()
+
+        从当前Space里随机采样一个合法动作。
+
+        返回：
+            - **action** (Tensor) - 一个合法动作的Tensor。

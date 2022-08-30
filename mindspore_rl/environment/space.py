@@ -68,27 +68,52 @@ class Space:
 
     @property
     def shape(self):
-        '''Space shape after batching.'''
+        '''
+        Space shape after batching.
+
+        Returns:
+            The shape of current space.
+        '''
         return self._batch_shape + self._feature_shape
 
     @property
     def np_dtype(self):
-        '''Numpy data type of current Space.'''
+        '''
+        Numpy data type of current Space.
+
+        Returns:
+            The numpy dtype of current space.
+        '''
         return self._dtype
 
     @property
     def ms_dtype(self):
-        '''MindSpore data type or current Space.'''
+        '''
+        MindSpore data type of current Space.
+
+        Returns:
+            The mindspore data type of current space.
+        '''
         return mstype.pytype_to_dtype(self._dtype)
 
     @property
     def is_discrete(self):
-        '''Is discrete space.'''
+        '''
+        Is discrete space.
+
+        Returns:
+            Whether the current space is discrete or continuous.
+        '''
         return issubclass(self._dtype, np.integer) or self._dtype == np.bool_
 
     @property
     def num_values(self):
-        '''available action number of current Space.'''
+        '''
+        available action number of current Space.
+
+        Returns:
+            The available action of current space.
+        '''
         if not self.is_discrete:
             return self.shape[-1]
 
@@ -103,7 +128,12 @@ class Space:
 
     @property
     def boundary(self):
-        '''The space boundary of current Space.'''
+        '''
+        The space boundary of current Space.
+
+        Returns:
+            Uppoer and lower boundary of current space.
+        '''
         return self._low, self._high
 
     def _range(self, low, high):
