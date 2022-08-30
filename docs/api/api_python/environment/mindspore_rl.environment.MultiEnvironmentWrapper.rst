@@ -35,6 +35,8 @@
     .. py:method:: config
         :property:
 
+        **返回：**
+
         dict，一个包含环境信息的字典。
 
     .. py:method:: done_space

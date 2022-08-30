@@ -133,25 +133,50 @@ class MsEnvironment(Environment):
 
     @property
     def action_space(self):
-        r"""Get the valid action space of the environment."""
+        r"""
+        Get the valid action space of the environment.
+
+        Returns:
+            The action space of environment.
+        """
         return self.env.action_space
 
     @property
     def observation_space(self):
-        r"""Get the valid observation space of the environment."""
+        r"""
+        Get the valid observation space of the environment.
+
+        Returns:
+            The state space of environment.
+        """
         return self.env.observation_space
 
     @property
     def reward_space(self):
-        r"""Get the valid reward space of the environment."""
+        r"""
+        Get the valid reward space of the environment.
+
+        Returns:
+            The reward space of environment.
+        """
         return self.env.reward_space
 
     @property
     def done_space(self):
-        r"""Get the valid done space of the environment."""
+        r"""
+        Get the valid done space of the environment.
+
+        Returns:
+            The done space of environment.
+        """
         return self.env.done_space
 
     @property
     def config(self):
-        r"""Get environment configuration."""
+        r"""
+        Get environment configuration.
+
+        Returns:
+            The configuration of environment.
+        """
         return self.env.config
