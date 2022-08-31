@@ -75,7 +75,7 @@ class MSRL(nn.Cell):
         self.learner = None
         self.envs = []
         self.agent = []
-        self.buffers = []
+        self.buffers = None
         self.collect_environment = None
         self.eval_environment = None
         self.num_collect_env = None
@@ -225,15 +225,9 @@ class MSRL(nn.Cell):
 
         """
 
-        expected = config[target][attribute]
         for attr in inspect.getmembers(obj):
             if attr[0] in config[target][attribute]:
-                expected.remove(attr[0])
                 config[target]['params'][attr[0]] = attr[1]
-        if expected:
-            remained = ','.join(expected)
-            raise ValueError(f"{remained} in {attribute} of {target} can not be found in {obj}. Please choose \
-                             the same variable name in {obj}, and fill it in {attribute}.")
 
     def __create_replay_buffer(self, replay_buffer_config):
         """
@@ -382,24 +376,20 @@ class MSRL(nn.Cell):
             config (dict): algorithm configuration file.
         """
         # ---------------------- ReplayBuffer ----------------------
-        replay_buffer_config = config.get('replay_buffer')
-        replay_buffer_global_config = config.get('replay_buffer_global')
-
-        if replay_buffer_config:
-            self.buffers = self.__create_replay_buffer(replay_buffer_config)
-            replay_buffer_num = replay_buffer_config.get('number')
-            if replay_buffer_num is not None and replay_buffer_config.get('number') > 1:
-                def replay_buffer_insert(agent_id):
-                    return self.buffers[agent_id]
-                self.replay_buffer_insert = replay_buffer_insert
+        replay_buffer = config.get('replay_buffer')
+        if replay_buffer:
+            if replay_buffer.get("multi_type_replaybuffer"):
+                self.buffers = {}
+                for key, item in replay_buffer.items():
+                    if key != "multi_type_replaybuffer":
+                        self.buffers[key] = self.__create_replay_buffer(item)
             else:
-                self.replay_buffer_sample = self.buffers.sample
-                self.replay_buffer_insert = self.buffers.insert
-                self.replay_buffer_full = self.buffers.full
-                self.replay_buffer_reset = self.buffers.reset
-
-        if replay_buffer_global_config:
-            self.buffers_global = self.__create_replay_buffer(replay_buffer_global_config)
+                self.buffers = self.__create_replay_buffer(replay_buffer)
+                if replay_buffer.get('number') <= 1:
+                    self.replay_buffer_sample = self.buffers.sample
+                    self.replay_buffer_insert = self.buffers.insert
+                    self.replay_buffer_full = self.buffers.full
+                    self.replay_buffer_reset = self.buffers.reset
 
         # ---------------------- Agent ----------------------
         agent_config = config.get('agent')
@@ -443,8 +433,24 @@ class MSRL(nn.Cell):
                 else:
                     raise ValueError("The number of actors should >= 1, but get ", num_actors)
         else:
-            raise ValueError(
-                "Sorry, the current does not support multi-agent yet")
+            compulsory_items = ['number', 'type']
+            self._compulsory_items_check(agent_config, compulsory_items, 'agent')
+            agent_type = agent_config['type']
+            self.num_agent = agent_config['number']
+            params = agent_config.get('params')
+            if not params:
+                config['agent']['params'] = {}
+
+            config['agent']['params']['num_agent'] = self.num_agent
+            # ---------------------- Environment ----------------------
+            self.collect_environment, self.eval_environment = self.__create_environments(
+                config, self.num_agent)
+            # ---------------------------------------------------------
+            for i in range(self.num_agent):
+                policy_and_network = self.__create_policy_and_network(config)
+                self.agent.append(agent_type(self.__create_actor(config, policy_and_network),
+                                             self.__create_learner(config, policy_and_network)))
+            self.agent = nn.CellList(self.agent)
 
     def get_replay_buffer(self):
         """
