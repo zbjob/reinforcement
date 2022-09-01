@@ -24,7 +24,7 @@ from mindspore import context
 from mindspore_rl.core import Session
 
 parser = argparse.ArgumentParser(description='MindSpore Reinforcement A3C')
-parser.add_argument('--episode', type=int, default=10000, help='total episode numbers.')
+parser.add_argument('--episode', type=int, default=1000, help='total episode numbers.')
 parser.add_argument('--device_target', type=str, default='Auto', choices=['CPU', 'GPU', 'Auto'],
                     help='Choose a device to run the ac example(Default: Auto).')
 options, _ = parser.parse_known_args()

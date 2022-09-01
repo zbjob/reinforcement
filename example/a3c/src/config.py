@@ -23,7 +23,7 @@ env_params = {'name': 'CartPole-v0', 'seed': 42,}
 policy_params = {
     'state_space_dim': 4,
     'action_space_dim': 2,
-    'hidden_size': 128,
+    'hidden_size': 256,
     'gamma': 0.99,
 }
 learner_params = {

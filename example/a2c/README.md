@@ -8,7 +8,7 @@
 
 A2C use  an open source reinforcement learning environment library called  [Gym](https://github.com/openai/gym) which is developed by OpenAI.
 
-The game solved in A2C from Gym is [**CartPole-v0**](https://gym.openai.com/envs/CartPole-v0/). "A pole is attached by an un-actuated joint to a cart, which moves along a frictionless track. The system is controlled by applying a force of +1 or -1 to the cart. The pendulum starts upright, and the goal is to prevent it from falling over."[1](https://gym.openai.com/envs/CartPole-v0/)
+The game solved in A2C from Gym is [**CartPole-v0**](https://www.gymlibrary.dev/environments/classic_control/cart_pole/). "A pole is attached by an un-actuated joint to a cart, which moves along a frictionless track. The system is controlled by applying a force of +1 or -1 to the cart. The pendulum starts upright, and the goal is to prevent it from falling over."[1](https://www.gymlibrary.dev/environments/classic_control/cart_pole/)
 
 ## How to run A2C
 
@@ -42,4 +42,4 @@ training end
 
 ## Supported Platform
 
-A2C algorithm supports  GPU and CPU platform.
+A2C algorithm supports GPU and CPU platform.

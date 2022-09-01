@@ -1,4 +1,4 @@
-# Copyright 2021 Huawei Technologies Co., Ltd
+# Copyright 2021-2022 Huawei Technologies Co., Ltd
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -42,7 +42,7 @@ def test_priority_replay_buffer():
     action_shape, action_dtype = (6,), mindspore.int32
     shapes = (state_shape, action_shape)
     dtypes = (state_dtype, action_dtype)
-    prb = PriorityReplayBuffer(1., 1., capacity, batch_size, shapes, dtypes, seed0=0, seed1=42)
+    prb = PriorityReplayBuffer(1., capacity, batch_size, shapes, dtypes, seed0=0, seed1=42)
 
     # Push 100 timestep transitions to priority replay buffer.
     for i in range(100):
@@ -51,7 +51,7 @@ def test_priority_replay_buffer():
         prb.push(state, action)
 
     # Sample a batch of transitions, the indices should be consist with transition.
-    indices, weights, states, actions = prb.sample()
+    indices, weights, states, actions = prb.sample(1.)
     assert np.all(indices.asnumpy() < 100)
     states_expect = np.broadcast_to(indices.asnumpy().reshape(-1, 1), states.shape)
     actions_expect = np.broadcast_to(indices.asnumpy().reshape(-1, 1), actions.shape)
@@ -62,7 +62,7 @@ def test_priority_replay_buffer():
     priorities = Tensor(np.ones(weights.shape) * 1e-7, mindspore.float32)
     prb.update_priorities(indices, priorities)
 
-    indices_new, _, states_new, actions_new = prb.sample()
+    indices_new, _, states_new, actions_new = prb.sample(1.)
     assert np.all(indices_new.asnumpy() < 100)
     assert np.all(indices.asnumpy() != indices_new.asnumpy())
     states_expect = np.broadcast_to(indices_new.asnumpy().reshape(-1, 1), states.shape)

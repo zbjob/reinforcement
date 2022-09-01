@@ -13,17 +13,19 @@
 # limitations under the License.
 # ============================================================================
 """A3C Trainer"""
-import collections
-import statistics
-import tqdm
-
 from mindspore_rl.agent.trainer import Trainer
 from mindspore_rl.agent import trainer
 import mindspore
 import mindspore.nn as nn
-from mindspore.nn.reinforcement._tensors_queue import TensorsQueue
+from mindspore.ops.operations._rl_inner_ops import MuxSend, MuxReceive
+from mindspore.nn.reinforcement._batch_read_write import  BatchWrite
+from mindspore.communication.management import init, NCCL_WORLD_COMM_GROUP, get_rank, get_group_size
 from mindspore.ops import operations as ops
 from mindspore import ms_function
+
+init()
+rank_id = get_rank()
+rank_size = get_group_size()
 
 
 class A3CTrainer(Trainer):
@@ -32,45 +34,57 @@ class A3CTrainer(Trainer):
         nn.Cell.__init__(self, auto_prefix=False)
         self.reduce_sum = ops.ReduceSum()
         self.actor_nums = msrl.actors.__len__()
-        self.weight_copy = msrl.learner.weight_copy
+        self.learner_rank = self.actor_nums
+        self.weight_copy = msrl.learner.global_weight
         shapes = []
         for i in self.weight_copy:
             shapes.append(i.shape)
-        self.grads_queue = TensorsQueue(dtype=mindspore.float32, shapes=shapes, size=10, name="grads_q")
         self.zero = mindspore.Tensor(0, mindspore.float32)
+
+        # For actors.
+        # Create a shared send op, each actor will send the grads to the same target.
+        # Create receive op for each actor which will receive the updated weights from learner.
+        self.send_actor = MuxSend(dest_rank=self.learner_rank, group=NCCL_WORLD_COMM_GROUP)
+        self.recv_actor = MuxReceive(shape=shapes, dtype=mindspore.float32, group=NCCL_WORLD_COMM_GROUP)
+
+        # For learner.
+        # There is only one learner for A3C, the recv op will receive the grads form actors.
+        # The learner will update the specific actor, depending on which actor the gradient comes from.
+        self.recv_learner = MuxReceive(shape=shapes, dtype=mindspore.float32, group=NCCL_WORLD_COMM_GROUP)
+        self.send_learner = MuxSend(dest_rank=-1, group=NCCL_WORLD_COMM_GROUP)
+
+        self.depend = ops.Depend
+        self.update = BatchWrite()
         super(A3CTrainer, self).__init__(msrl)
 
     #pylint: disable=W0613
     def train(self, episodes, callbacks=None, ckpt_path=None):
         '''Train A3C'''
-        running_reward = 0
-        episode_reward: collections.deque = collections.deque(maxlen=100)
-        with tqdm.trange(episodes) as t:
-            for i in t:
-                loss, reward = self.train_one_episode()
-                episode_reward.append(reward.asnumpy().tolist())
-                running_reward = statistics.mean(episode_reward)
-                t.set_description(f'Episode {i}')
-                t.set_postfix(episode_reward=reward.asnumpy(), loss=loss.asnumpy(), running_reward=running_reward)
-                if running_reward > 195 and i >= 100:
-                    print(f'\nSolved at episode {i}: average reward: {running_reward:.2f}.')
-                    break
-                if i == episodes - 1:
-                    print(f'\nFailed to solved this problem after running {episodes} episodes.')
+        # For episode in learner, it is triggered by each actor, so there is a acotor_num-fold expansion
+        if rank_id == self.learner_rank:
+            episodes *= self.actor_nums
+        for i in range(episodes):
+            one_step = self.train_one_episode()
+            if rank_id != self.learner_rank:
+                print(f"Train in actor {rank_id}, episode {i}, rewards {one_step[0].asnumpy()}, "
+                      f"loss {one_step[2].asnumpy()}")
 
     @ms_function
     def train_one_episode(self):
         '''Train one episode'''
-        a3c_loss = self.zero
-        episode_reward = self.zero
-        for i in range(self.actor_nums):
-            rewards_i, grads_i, loss_i = self.msrl.actors[i].act(trainer.COLLECT, actor_id=0,
-                                                                 weight_copy=self.weight_copy)
-            self.grads_queue.put(grads_i)
-            a3c_loss += loss_i
-            episode_reward += rewards_i
-            self.msrl.agent_learn(self.grads_queue.pop()) # side effect
-        return a3c_loss / self.actor_nums, episode_reward / self.actor_nums
+        # actors
+        result = (self.zero, self.zero, self.zero)  # rewards, grads, loss
+        if rank_id == self.learner_rank:# learner
+            grads = self.recv_learner()
+            self.msrl.agent_learn(grads)
+            self.send_learner(self.msrl.learner.global_params)
+        elif rank_id != self.learner_rank:
+            result = self.msrl.actors[rank_id].act(trainer.COLLECT, actor_id=rank_id,
+                                                   weight_copy=self.weight_copy)
+            self.send_actor(result[1])
+            weight = self.recv_actor()
+            self.update(self.weight_copy, weight)
+        return result
 
     def evaluate(self):
         '''Default evaluate'''

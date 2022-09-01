@@ -32,8 +32,6 @@ class PriorityReplayBuffer(nn.Cell):
     Args:
         alpha (float): parameter to control degree of prioritization.
             0 means the uniform sampling, 1 means priority sampling.
-        beta (float): parameter to control degree of sampling correction.
-            0 means the no correction, 1 means full correction.
         capacity (int): the capacity of the buffer.
         sample_size (int): size for sampling from the buffer.
         shapes (List[int]): the shape of each tensor in a buffer element.
@@ -47,17 +45,16 @@ class PriorityReplayBuffer(nn.Cell):
         >>> from mindspore_rl.core.priority_replay_buffer import PriorityReplayBuffer
         >>> capacity = 10000
         >>> batch_size = 10
-        >>> alpha, beta = 1., 1.
         >>> shapes = [(4,), (1,), (1,), (4,)]
         >>> dtypes = [ms.float32, ms.int32, ms.float32, ms.float32]
-        >>> replaybuffer = PriorityReplayBuffer(alpha, beta, capacity, batch_size, shapes, dtypes)
+        >>> replaybuffer = PriorityReplayBuffer(alpha, capacity, batch_size, shapes, dtypes)
         >>> print(replaybuffer)
         PriorityReplayBuffer<>
     """
 
-    def __init__(self, alpha, beta, capacity, sample_size, shapes, dtypes, seed0=0, seed1=0):
+    def __init__(self, alpha, capacity, sample_size, shapes, dtypes, seed0=0, seed1=0):
         super(PriorityReplayBuffer, self).__init__()
-        handle = PriorityReplayBufferCreate(capacity, alpha, beta, shapes, dtypes, seed0, seed1)().asnumpy().item()
+        handle = PriorityReplayBufferCreate(capacity, alpha, shapes, dtypes, seed0, seed1)().asnumpy().item()
         self.push_op = PriorityReplayBufferPush(handle).add_prim_attr('side_effect_io', True)
         self.sample_op = PriorityReplayBufferSample(handle, sample_size, shapes, dtypes)
         self.update_op = PriorityReplayBufferUpdate(handle).add_prim_attr('side_effect_io', True)
@@ -77,9 +74,13 @@ class PriorityReplayBuffer(nn.Cell):
 
         return self.push_op(transition)
 
-    def sample(self):
+    def sample(self, beta):
         """
         Samples a batch of transitions from the replay buffer.
+
+        Args:
+            beta (float): parameter to control degree of sampling correction.
+                0 means the no correction, 1 means full correction.
 
         Returns:
             indices (Tensor), the transition indices in the replay buffer.
@@ -87,7 +88,7 @@ class PriorityReplayBuffer(nn.Cell):
             transitions (tuple(Tensor)), transitions with variable-length tensors.
         """
 
-        return self.sample_op()
+        return self.sample_op(beta)
 
     def update_priorities(self, indices, priorities):
         """

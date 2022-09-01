@@ -22,7 +22,7 @@ import mindspore.nn as nn
 from mindspore import Tensor
 from mindspore.common.parameter import ParameterTuple
 import mindspore.ops as ops
-from mindspore.nn.reinforcement._batch_read_write import BatchRead, BatchWrite
+from mindspore.nn.reinforcement._batch_read_write import BatchRead
 import mindspore.nn.probability.distribution as msd
 from mindspore.ops import operations as P
 from mindspore.ops import composite as C
@@ -189,16 +189,11 @@ class A3CLearner(Learner):
         super(A3CLearner, self).__init__()
         self.a3c_net_learn = params['a3c_net_learn']
         self.weight_copy = params['a3c_net_copy']
-        global_weight = self.a3c_net_learn.trainable_params()
-        self.global_params = ParameterTuple(global_weight)
-
-        self.optimizer = nn.Adam(global_weight, learning_rate=params['lr'])
-        self.depend = ops.Depend()
-        # (dst, src) overwrite dst by src
-        self.update = BatchWrite()
+        self.global_weight = self.a3c_net_learn.trainable_params()
+        self.global_params = ParameterTuple(self.global_weight)
+        self.optimizer = nn.Adam(self.global_weight, learning_rate=params['lr'])
 
     def learn(self, grads):
         '''update'''
         success = self.optimizer(grads)
-        success = self.depend(self.update(self.global_params, self.weight_copy), success)
         return success
