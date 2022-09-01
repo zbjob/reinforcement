@@ -23,9 +23,25 @@ A3C使用了OpenAI开发的一个强化学习环境库叫做[Gym](https://github
 
 ### 训练
 
+### 单机训练
+
+以单机4卡(1 learner + 3 actors)为例：
+
 ```shell
 > cd example/a3c/
-> bash run.sh
+> bash run_standalone.sh 4
+```
+
+### 多机训练
+
+以双机4卡(1 learner + 3 actors)为例，首先在node1 上启动scheduler，用于组网管理。需要设置该scheduler的ip和port。
+然后在node1, node2 分别启动2个worker,设置对应scheduler的ip和port。
+
+```shell
+> cd example/a3c/
+> bash run_distribute.sh scheduler 4 [ip] [port] # on node1
+> bash run_distribute.sh worker 4 2 [ip] [port] # on node1
+> bash run_distribute.sh worker 4 2 [ip] [port] # on node2
 ```
 
 你会在`example/a3c/worker_0.txt`中获得和下面内容相似的输出

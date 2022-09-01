@@ -23,9 +23,25 @@ After installation, you can directly use the following command to run the A3C al
 
 ### Train
 
+### Standalone Training
+
+Take the single node with 4 GPUs (1 learner + 3 actors) as an example:
+
 ```shell
 > cd example/a3c/
-> bash run.sh
+> bash run_standalone.sh 4
+```
+
+### Distribute Training
+
+Take the dual computer with 4 GPUs (1 learner + 3 actors) as an example, first launch the scheduler on node1 for network management. You need to set the IP and port of the scheduler.
+Then, launch two workers in node1 and node2 respectively, and set the IP and port of the corresponding scheduler.
+
+```shell
+> cd example/a3c/
+> bash run_distribute.sh scheduler 4 [ip] [port] # on node1
+> bash run_distribute.sh worker 4 2 [ip] [port] # on node1
+> bash run_distribute.sh worker 4 2 [ip] [port] # on node2
 ```
 
 You will obtain outputs which is similar with the things below in `a3c/worker_0.txt`.
