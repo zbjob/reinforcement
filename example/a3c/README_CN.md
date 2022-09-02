@@ -4,11 +4,17 @@
 
 1. Mnih V,  Badia A P,  Mirza M, et al. [Asynchronous Methods for Deep Reinforcement Learning](https://arxiv.org/abs/1602.01783?context=cs)
 
+A3C算法是一种支持异步更新的Actor-Critic算法，它通过多个actor和环境交互生成经验数据，并通过这些经验数据计算每个actor网络的梯度。这些梯度将异步地传至唯一的一个learner进行weight的更新，更新后最新的weight将覆盖该actor的网络。由于异步的机制，每个actor在更新时都是全局最新的weight，这样保证了算法在不断的往好的方向发展，使更新效率更高。
+
+![A3C](../../docs/images/a3c_algo_arch.png)
+
 ## 使用的游戏
 
 A3C使用了OpenAI开发的一个强化学习环境库叫做[Gym](https://github.com/openai/gym)，来作为算法的游戏环境。相比于A2C的单actor结构，A3C引入了多个actor异步执行的方式来提高采样效率。
 
 在A3C中，解决了倒立摆（[**CartPole-v0**](https://www.gymlibrary.dev/environments/classic_control/cart_pole/)）游戏。“一根杆子通过一个关节连接在一个小车上，这个小车可以沿着没有摩擦的轨道上左右移动。系统会对这个小车施加+1或者-1的力。这个游戏的目标是防止这根杆子从车上倒下。“[1](https://www.gymlibrary.dev/environments/classic_control/cart_pole/)
+
+![A3C](../../docs/images/cartpole.gif)
 
 ## 如何运行A3C
 
