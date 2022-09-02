@@ -10,12 +10,12 @@ In MAPPO, we use `simple spread` in [Multi-Agent Particle Environment(MPE)](http
 
 ## How to run MAPPO
 
-First, user needs to download MPE environment [here](https://github.com/marlbenchmark/on-policy/tree/main/onpolicy), and copy the `mpe` folder from `onpolicy/onpolicy/envs/` to `mindspore_rl/environment`。After copy success, user needs to enter `environment` to patch the mpe folder. The detail commands are shown below.
+First, user needs to download MPE environment [here](https://github.com/marlbenchmark/on-policy/tree/main/onpolicy), and copy the `mpe` folder from `onpolicy/onpolicy/envs/` to current folder. After copy success, user needs to patch the mpe folder. The detail commands are shown below.
 
 ```shell
 git clone https://github.com/marlbenchmark/on-policy/tree/main/onpolicy
-cp -r onpolicy/onpolicy/envs/mpe reinforcement/mindspore_rl/environment
-cd reinforcement/mindspore_rl/environment
+cp -r onpolicy/onpolicy/envs/mpe reinforcement/example/mappo
+cd reinforcement/example/mappo
 patch -p0 < mpe_environment.patch
 ```
 

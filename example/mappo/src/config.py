@@ -18,7 +18,7 @@ MAPPO config.
 
 from example.mappo.src.mappo import MAPPOAgent, MAPPOActor, MAPPOLearner, MAPPOPolicy
 from example.mappo.src.mappo_replaybuffer import MAPPOReplayBuffer
-from mindspore_rl.environment.mpe_environment import MPEMultiEnvironment
+from example.mappo.mpe_environment import MPEMultiEnvironment
 import mindspore as ms
 
 env_params = {'name': 'simple_spread', 'proc_num': 32, 'num': 128}

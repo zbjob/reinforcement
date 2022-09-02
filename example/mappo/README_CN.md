@@ -10,12 +10,12 @@
 
 ## 如何运行MAPPO
 
-首先需要从[此处](https://github.com/marlbenchmark/on-policy/tree/main/onpolicy)下载MPE环境，并拷贝`onpolicy/onpolicy/envs/mpe`到`mindspore_rl/environment`文件夹下。当成功拷贝环境后，需要进入environment目录下，对mpe环境打上patch。
+首先需要从[此处](https://github.com/marlbenchmark/on-policy/tree/main/onpolicy)下载MPE环境，并拷贝`onpolicy/onpolicy/envs/mpe`到当前文件夹下。当成功拷贝环境后，需要对mpe环境打上patch。
 
 ```shell
 git clone https://github.com/marlbenchmark/on-policy/tree/main/onpolicy
-cp -r onpolicy/onpolicy/envs/mpe reinforcement/mindspore_rl/environment
-cd reinforcement/mindspore_rl/environment
+cp -r onpolicy/onpolicy/envs/mpe reinforcement/example/mappo
+cd reinforcement/example/mappo
 patch -p0 < mpe_environment.patch
 ```
 
