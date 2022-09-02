@@ -10,6 +10,8 @@ PPO算法使用了OpenAI开发的一个强化学习环境库叫做[Gym](https://
 
 在PPO中，解决了[**HalfCheetah-v2**](https://www.gymlibrary.ml/environments/mujoco/half_cheetah/)这个来自Gym库的游戏。与于其他游戏如CartPole不同的是，这个游戏还依赖[MuJoCo](https://github.com/openai/mujoco-py)这个库。
 
+<img src="../../docs/images/half-cheetah.gif" alt="half-cheetah" style="zoom:67%;" />
+
 ## 如何运行PPO
 
 在运行PPO前，首先需要安装[MindSpore](https://www.mindspore.cn/install)和MindSpore-Reinforcement。除此之外，还需要安装以下依赖。请根据官网的教程安装。
