@@ -8,6 +8,8 @@
 
 在MAPPO中，我们使用了MAPPO原作者修改后的[Multi-Agent Particle Environment(MPE)](https://github.com/marlbenchmark/on-policy/tree/main/onpolicy/envs/mpe)中的`simple spread`环境，他在接口和具体算法逻辑上与openai版本的[MPE](https://github.com/openai/multiagent-particle-envs)有一定差异。MPE是一个简单的多智能体粒子环境，具有连续的观测和离散的动作空间，以及一些基本的物理属性模拟。
 
+<img src="../../docs/images/mpe_simple_spread.gif" alt="mpe_simple_spread" style="zoom: 67%;" />
+
 ## 如何运行MAPPO
 
 首先需要从[此处](https://github.com/marlbenchmark/on-policy/tree/main/onpolicy)下载MPE环境，并拷贝`onpolicy/onpolicy/envs/mpe`到当前文件夹下。当成功拷贝环境后，需要对mpe环境打上patch。

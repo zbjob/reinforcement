@@ -10,6 +10,8 @@ PPO uses  an open source reinforcement learning environment library called [Gym]
 
 The game solved in PPO is called [**HalfCheetah-v2**](https://www.gymlibrary.ml/environments/mujoco/half_cheetah/), it is from Gym, but this game depends on an advanced physics simulation called [MuJoCo](https://github.com/openai/mujoco-py).
 
+<img src="../../docs/images/half-cheetah.gif" alt="half-cheetah" style="zoom:67%;" />
+
 ## How to run PPO
 
 Before running PPO, you should first install [MindSpore](https://www.mindspore.cn/install) and MindSpore-Reinforcement. Besides, you should also install following dependencies. Please follow the instruction on the official website.
