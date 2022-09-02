@@ -264,6 +264,13 @@ Evaluate for episode 10 total rewards is 9.600
         <td align="center">✔️ </td>
         <td align="center">✔️ </td>
     </tr>
+    <tr>
+        <td align="center"><a href="https://gitee.com/mindspore/reinforcement/blob/master/mindspore_rl/core/reservoir_replay_buffer.py#L24">ReservoirReplayBuffer</a></td>
+        <td align="left">采用无偏采样</a></td>
+        <td align="center">✔️ </td>
+        <td align="center">✔️ </td>
+        <td align="center">✔️ </td>
+    </tr>
 </table>
 
 ## 未来路标
