@@ -28,8 +28,8 @@ from mindspore_rl.environment.env_process import EnvironmentProcess
 
 class MPEMultiEnvironment(nn.Cell):
     """
-    This is the wrapper of Multi-Agent Particle Environment(MPE) from
-    (https://github.com/openai/multiagent-particle-envs). A simple multi-agent particle world with
+    This is the wrapper of Multi-Agent Particle Environment(MPE) which is modified by MAPPO author from
+    (https://github.com/marlbenchmark/on-policy/tree/main/onpolicy). A simple multi-agent particle world with
     a continuous observation and discrete action space, along with some basic simulated physics.
     Used in the paper Multi-Agent Actor-Critic for Mixed Cooperative-Competitive Environments.
 
@@ -68,7 +68,7 @@ class MPEMultiEnvironment(nn.Cell):
         self._envs = []
         self.env_id = env_id
 
-        mpe_env_creator = importlib.import_module('mindspore_rl.environment.mpe.MPE_env')
+        mpe_env_creator = importlib.import_module('example.mappo.mpe.MPE_env')
 
         class AllArgs:
             def __init__(self, env_name, episode, num_agent, num_landmark):
