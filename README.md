@@ -263,6 +263,13 @@ In general, researchers use native Python data structures or numpy data structur
         <td align="center">✔️ </td>
         <td align="center">✔️ </td>
     </tr>
+    <tr>
+        <td align="center"><a href="https://gitee.com/mindspore/reinforcement/blob/master/mindspore_rl/core/reservoir_replay_buffer.py#L24">ReservoirReplayBuffer</a></td>
+        <td align="left">keeps an 'unbiased' sample of previous iterations.</a></td>
+        <td align="center">✔️ </td>
+        <td align="center">✔️ </td>
+        <td align="center">✔️ </td>
+    </tr>
 </table>
 
 ## Future Roadmap
