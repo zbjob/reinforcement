@@ -4,11 +4,17 @@
 
 1. Mnih V,  Badia A P,  Mirza M, et al. [Asynchronous Methods for Deep Reinforcement Learning](https://arxiv.org/abs/1602.01783?context=cs)
 
+A3C algorithm is an actor critical algorithm that supports asynchronous update. It generates experience data through the interaction of multiple actors with multi environments, and calculates the gradients of each actor's network through these experience data. These gradients will be asynchronously send to the learner to update the weight, and latest weight will cover the network of the actor. Due to the asynchronous mechanism, each actor has the global latest weight when updating, which ensures that the algorithm continues to develop in a good direction and makes the update more efficient.
+
+![A3C](../../docs/images/a3c_algo_arch.png)
+
 ## Game that this algorithm used
 
 A3C use  an open source reinforcement learning environment library called  [Gym](https://github.com/openai/gym) which is developed by OpenAI. Compared with the single actor structure of A2C, A3C introduces the asynchronous execution of multiple actors to improve the sampling efficiency.
 
 The game solved in A3C from Gym is [**CartPole-v0**](https://www.gymlibrary.dev/environments/classic_control/cart_pole/). "A pole is attached by an un-actuated joint to a cart, which moves along a frictionless track. The system is controlled by applying a force of +1 or -1 to the cart. The pendulum starts upright, and the goal is to prevent it from falling over."[1](https://www.gymlibrary.dev/environments/classic_control/cart_pole/)
+
+![A3C](../../docs/images/cartpole.gif)
 
 ## How to run A3C
 
