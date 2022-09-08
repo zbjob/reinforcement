@@ -137,10 +137,12 @@ class PPOPolicy():
                                           params['hidden_size1'],
                                           params['hidden_size2'],
                                           params['action_space_dim'],
-                                          params['sigma_init_std'])
+                                          params['sigma_init_std'],
+                                          params['compute_type'])
         self.critic_net = self.PPOCriticNet(params['state_space_dim'],
                                             params['hidden_size1'],
-                                            params['hidden_size2'], 1)
+                                            params['hidden_size2'], 1,
+                                            params['compute_type'])
 
         self.collect_policy = self.CollectPolicy(self.actor_net)
         self.eval_policy = self.EvalPolicy(self.actor_net)

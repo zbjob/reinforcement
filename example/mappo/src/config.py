@@ -15,11 +15,12 @@
 """
 MAPPO config.
 """
-
-from example.mappo.src.mappo import MAPPOAgent, MAPPOActor, MAPPOLearner, MAPPOPolicy
-from example.mappo.src.mappo_replaybuffer import MAPPOReplayBuffer
-from example.mappo.mpe_environment import MPEMultiEnvironment
+#pylint: disable=E0402
 import mindspore as ms
+
+from .mappo import MAPPOAgent, MAPPOActor, MAPPOLearner, MAPPOPolicy
+from .mappo_replaybuffer import MAPPOReplayBuffer
+from .mpe_environment import MPEMultiEnvironment
 
 env_params = {'name': 'simple_spread', 'proc_num': 32, 'num': 128}
 eval_env_params = {'name': 'simple_spread', 'proc_num': 1, 'num': 1}
