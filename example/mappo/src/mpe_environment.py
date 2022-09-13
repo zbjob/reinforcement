@@ -13,8 +13,7 @@
 # limitations under the License.
 # ============================================================================
 """MPEMultiEnvironment class."""
-
-import importlib
+#pylint: disable=E0402
 from multiprocessing import Queue
 import numpy as np
 from gym import spaces
@@ -24,6 +23,8 @@ from mindspore.ops import operations as P
 
 from mindspore_rl.environment.space import Space
 from mindspore_rl.environment.env_process import EnvironmentProcess
+
+from .mpe.MPE_env import MPEEnv
 
 
 class MPEMultiEnvironment(nn.Cell):
@@ -68,8 +69,6 @@ class MPEMultiEnvironment(nn.Cell):
         self._envs = []
         self.env_id = env_id
 
-        mpe_env_creator = importlib.import_module('example.mappo.mpe.MPE_env')
-
         class AllArgs:
             def __init__(self, env_name, episode, num_agent, num_landmark):
                 self.episode_length = episode
@@ -80,7 +79,7 @@ class MPEMultiEnvironment(nn.Cell):
         all_args = AllArgs(self._env_name, 25, self._num_agent, self._num_agent)
 
         for i in range(self._nums):
-            mpe_env = mpe_env_creator.MPEEnv(all_args)
+            mpe_env = MPEEnv(all_args)
             mpe_env.seed(1 + i * 1000)
             self._envs.append(mpe_env)
 

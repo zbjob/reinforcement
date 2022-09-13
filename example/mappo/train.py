@@ -22,8 +22,8 @@ from mindspore import context
 
 from mindspore_rl.core import Session
 from mindspore_rl.utils.callback import LossCallback
-from example.mappo.src.mappo_trainer import MAPPOTrainer
-import example.mappo.src.config as config
+from src import config
+from src.mappo_trainer import MAPPOTrainer
 
 
 parser = argparse.ArgumentParser(description='MindSpore Reinforcement MAPPO')
