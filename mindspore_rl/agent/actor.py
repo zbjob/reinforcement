@@ -60,7 +60,7 @@ class Actor(nn.Cell):
             params (tuple(Tensor)): A tuple of tensor as input, which is used to calculate action
 
         Returns:
-            action (tuple(Tensor)): A tuple of tensor as output, containing actions and other data.
+            tuple(Tensor), a tuple of tensor as output, containing actions and other data.
         """
 
         raise NotImplementedError("Method should be overridden by subclass.")
@@ -76,7 +76,7 @@ class Actor(nn.Cell):
             params (tuple(Tensor)): A tuple of tensor as input, which is used to calculate action
 
         Returns:
-            observation (tuple(Tensor)): A tuple of tensor as output, which states for experience data.
+            tuple(Tensor), a tuple of tensor as output, which states for experience data.
         """
 
         raise NotImplementedError("Method should be overridden by subclass.")
@@ -90,9 +90,9 @@ class Actor(nn.Cell):
             state (Tensor): the output state from the environment.
 
         Returns:
-            - done (Tensor): whether the simulation is finished or not.
-            - reward (Tensor): simulation reward.
-            - state (Tensor): simulation state.
+            - Tensor， whether the simulation is finished or not.
+            - Tensor， simulation reward.
+            - Tensor， simulation state.
         """
         raise NotImplementedError("Method should be overridden by subclass.")
 
@@ -105,8 +105,8 @@ class Actor(nn.Cell):
             state (Tensor): the output state from the environment.
 
         Returns:
-            - done (Tensor): whether the simulation is finished or not.
-            - reward (Tensor): simulation reward.
-            - state (Tensor): simulation state.
+            - Tensor， whether the simulation is finished or not.
+            - Tensor， simulation reward.
+            - Tensor， simulation state.
         """
         raise NotImplementedError("Method should be overridden by subclass.")

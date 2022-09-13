@@ -53,7 +53,7 @@ class Learner(nn.Cell):
             experience(tuple(Tensor)): Sampling from the buffer.
 
         Returns:
-            results (tuple(Tensor)): Result which outputs after updating weights
+            tuple(Tensor), result which outputs after updating weights
         """
 
         raise NotImplementedError("Method should be overridden by subclass.")

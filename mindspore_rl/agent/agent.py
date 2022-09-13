@@ -59,7 +59,7 @@ class Agent(nn.Cell):
             params (tuple(Tensor)): A tuple of tensor as input, which is used to calculate action
 
         Returns:
-            atcion (tuple(Tensor)): A tuple of tensor as output, containing actions and other data.
+            tuple(Tensor), a tuple of tensor as output, containing actions and other data.
         """
 
         raise NotImplementedError("Method should be overridden by subclass.")
@@ -75,7 +75,7 @@ class Agent(nn.Cell):
             params (tuple(Tensor)): A tuple of tensor as input, which is used to calculate action
 
         Returns:
-            observation (tuple(Tensor)): A tuple of tensor as output, which states for experience
+            tuple(Tensor), a tuple of tensor as output, which states for experience
         """
 
         raise NotImplementedError("Method should be overridden by subclass.")
@@ -89,7 +89,7 @@ class Agent(nn.Cell):
             experience (tuple(Tensor)): A tuple of tensor states for experience
 
         Returns:
-            results (tuple(Tensor)): Result which outputs after updating weights
+            tuple(Tensor), result which outputs after updating weights
         """
 
         raise NotImplementedError("Method should be overridden by subclass.")
