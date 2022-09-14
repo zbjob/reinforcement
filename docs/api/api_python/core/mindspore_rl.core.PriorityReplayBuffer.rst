@@ -7,7 +7,6 @@
 
     参数：
         - **alpha** (float) - 控制优先级程度的参数。0表示均匀采样，1表示优先级采样。
-        - **beta** (float) - 控制采样校正程度的参数。0表示不校正，1表示完全校正。
         - **capacity** (int) - 缓存的容量。
         - **sample_size** (int) - 从缓存采样的大小
         - **shapes** (list[int]) - 缓存区中张量维度列表。
@@ -26,9 +25,12 @@
             - **handle** (Tensor) - 优先级经验回放缓存句柄，数据和维度分别是int64和（1,）。
 
 
-    .. py:method:: sample()
+    .. py:method:: sample(beta)
 
         从缓存区中采样一批transition。
+
+        参数：
+            - **beta** (float) - 控制采样校正程度的参数。0表示不校正，1表示完全校正。
 
         返回：
             - **indices** (Tensor) - transition在缓存区中的索引。

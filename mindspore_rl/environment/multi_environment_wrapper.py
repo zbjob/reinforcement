@@ -33,7 +33,7 @@ class MultiEnvironmentWrapper(nn.Cell):
         env_instance (list(Class)): A list that contains instance of environment (subclass of Environment).
         num_proc (int): Number of processing uses during interacting with environment. Default: None.
 
-    Supported Plantforms:
+    Supported Platforms:
         ``Ascend`` ``GPU`` ``CPU``
 
     Examples:
