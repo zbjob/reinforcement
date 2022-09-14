@@ -15,6 +15,13 @@
 
         - **env_id** (int) - 环境id，用于设置环境内种子。
 
+    .. py:method:: render()
+
+        渲染环境，仅支持PyNative模式。
+
+        返回：
+            无。
+
     .. py:method:: reset()
 
         将环境重置为初始状态。reset方法一般在每一局游戏开始时使用，并返回环境的初始状态值。

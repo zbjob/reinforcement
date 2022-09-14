@@ -6,6 +6,13 @@
         - **env_instance** (list(Environment)) - 包含环境实例（继承Environment类）的List。
         - **num_proc** (int) - 在和环境交互时使用的进程数量。默认值： None。
 
+    .. py:method:: render()
+
+        渲染环境，仅支持PyNative模式。
+
+        返回：
+            无。
+
     .. py:method:: reset()
 
         将环境重置为初始状态。reset方法一般在每一局游戏开始时使用，并返回环境的初始状态值。

@@ -70,6 +70,8 @@
     .. py:method:: reward_space
         :property:
 
+        **返回：**
+
         Space，获取环境的奖励空间。
 
     .. py:method:: step(action)

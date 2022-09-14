@@ -108,6 +108,13 @@
         返回：
             Tensor，表示最大收益。
 
+    .. py:method:: total_num_player()
+
+        返回总玩家数量。
+
+        返回：
+            Tensor，表示总玩家数量。
+
     .. py:method:: current_player()
 
         返回当前状态下，轮到哪个玩家。
