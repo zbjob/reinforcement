@@ -46,14 +46,16 @@ class MonteCarloTreeFactory {
   std::tuple<int64_t, MonteCarloTreePtr> CreateTree(const std::string &tree_name, const std::string &node_name,
                                                     int player, float max_utility, int state_size, int total_num_player,
                                                     float *input_global_variable);
+  void InsertGlobalVariable(int64_t tree_handle, float *global_variable);
   // Insert the node_creator to a map (key: node_name, value: node_creator).
-  void RegisterNode(const std::string& node_name, NodeCreator&& node_creator);
+  void RegisterNode(const std::string &node_name, NodeCreator &&node_creator);
   // Insert the tree_creator to a map (key: tree_name, value: tree_creator).
   void RegisterTree(const std::string& tree_name, TreeCreator&& tree_creator);
   // Get the tree instance by the unique handle.
   MonteCarloTreePtr GetTreeByHandle(int64_t handle);
   // Get the global variable by the unique handle.
   float *GetTreeVariableByHandle(int64_t handle);
+  float *GetTreeConstByHandle(int64_t handle);
 
   // Erase the tree and all the nodes which matches the input handle.
   void DeleteTree(int64_t handle);
@@ -68,6 +70,7 @@ class MonteCarloTreeFactory {
   std::map<std::string, TreeCreator> map_tree_name_to_tree_creator_;
   std::map<int64_t, MonteCarloTreePtr> map_handle_to_tree_ptr_;
   std::map<int64_t, float *> map_handle_to_tree_variable_;
+  std::map<int64_t, float *> map_handle_to_tree_const_;
   int64_t handle_ = kInvalidHandle;
 };
 

@@ -41,7 +41,8 @@ class VanillaMCTSWithTicTacToe(nn.Cell):
         max_action = -1.0
         root_player = 1.0
         self.mcts = MCTS(self.env, "{}Common".format(device), "{}Vanilla".format(device), root_player,
-                         max_action, max_iteration, self.env.observation_space.shape, vanilla_func, device, uct)
+                         max_action, max_iteration, self.env.observation_space.shape, vanilla_func, False,
+                         device, uct)
 
         self.false = Tensor(False, ms.bool_)
 
@@ -63,7 +64,8 @@ class VanillaMCTSWithTicTacToe(nn.Cell):
             _, _, done = self.env.step(legal_action[opponent_action])
             if not done:
                 ckpt = self.env.save()
-                action = self.mcts.mcts_search()
+                action, handle = self.mcts.mcts_search()
+                self.mcts.restore_tree_data(handle)
                 self.env.load(ckpt)
                 _, _, done = self.env.step(action[0])
         self.mcts.destroy()

@@ -70,8 +70,12 @@ std::tuple<int64_t, MonteCarloTreePtr> MonteCarloTreeFactory::CreateTree(const s
       std::shared_ptr<MonteCarloTree>(tree_creator->second(root, max_utility, handle_, state_size, total_num_player));
 
     map_handle_to_tree_ptr_.insert(std::make_pair(handle_, tree));
-    map_handle_to_tree_variable_.insert(std::make_pair(handle_, input_global_variable));
+    map_handle_to_tree_const_.insert(std::make_pair(handle_, input_global_variable));
     return std::make_tuple(handle_, tree);
+}
+
+void MonteCarloTreeFactory::InsertGlobalVariable(int64_t tree_handle, float *global_variable) {
+  map_handle_to_tree_variable_.insert(std::make_pair(handle_, global_variable));
 }
 
 void MonteCarloTreeFactory::RegisterNode(const std::string& node_name, NodeCreator&& node_creator) {
@@ -106,6 +110,24 @@ float *MonteCarloTreeFactory::GetTreeVariableByHandle(int64_t handle) {
     oss << "[Error]The input handle " << handle << " in GetTreeVariableByHandle does not exist.\n";
     oss << "Handle register: [";
     for (auto pairs = map_handle_to_tree_variable_.begin(); pairs != map_handle_to_tree_variable_.end(); pairs++) {
+      oss << pairs->first << " ";
+    }
+    oss << "]";
+    std::cout << oss.str() << std::endl;
+    // Return nullptr to catch the exception outside.
+    float *null_vector = nullptr;
+    return null_vector;
+  }
+  return iter->second;
+}
+
+float *MonteCarloTreeFactory::GetTreeConstByHandle(int64_t handle) {
+  auto iter = map_handle_to_tree_const_.find(handle);
+  if (iter == map_handle_to_tree_const_.end()) {
+    std::ostringstream oss;
+    oss << "[Error]The input handle " << handle << " in GetTreeVariableByHandle does not exist.\n";
+    oss << "Handle register: [";
+    for (auto pairs = map_handle_to_tree_const_.begin(); pairs != map_handle_to_tree_const_.end(); pairs++) {
       oss << pairs->first << " ";
     }
     oss << "]";

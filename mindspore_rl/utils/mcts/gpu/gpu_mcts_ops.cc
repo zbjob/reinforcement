@@ -72,9 +72,9 @@ extern "C" int MctsCreation(int nparam, void **params, int *ndims, int64_t **sha
   // vector and select the corresponding variable by index.
   void *device_state_ptr = nullptr;
   cudaMalloc(&device_state_ptr, sizeof(float) * (nparam - 1));
-  float *input_global_variable = static_cast<float *>(device_state_ptr);
+  float *input_global_const = static_cast<float *>(device_state_ptr);
   for (int i = 0; i < nparam - 1; i++) {
-    cudaMemcpy(input_global_variable + i, params[i], sizeof(float), cudaMemcpyDeviceToDevice);
+    cudaMemcpy(input_global_const + i, params[i], sizeof(float), cudaMemcpyDeviceToDevice);
   }
   // Output value
   // The output value of MctsCreation is the unique handle of this new monte carlo tree.
@@ -83,7 +83,7 @@ extern "C" int MctsCreation(int nparam, void **params, int *ndims, int64_t **sha
   int64_t tree_handle;
   MonteCarloTreePtr tree;
   std::tie(tree_handle, tree) = MonteCarloTreeFactory::GetInstance().CreateTree(
-    tree_name, node_name, player, max_utility, state_size, total_num_player, input_global_variable);
+    tree_name, node_name, player, max_utility, state_size, total_num_player, input_global_const);
   if (tree == nullptr) {
     return kErrorCode;
   }
@@ -539,4 +539,59 @@ extern "C" int RestoreTree(int nparam, void **params, int *ndims, int64_t **shap
   tree->Restore();
   bool ret = true;
   tree->Memcpy(output, &ret, sizeof(bool));
+}
+
+class UpdateGlobalVariableAttr : public AotKernelData {
+ public:
+  float tree_handle;
+};
+
+extern "C" int UpdateGlobalVariableInit(int *ndims, int64_t **shapes, const char **dtypes, AotExtra *extra) {
+  UpdateGlobalVariableAttr *kernel_ptr = new UpdateGlobalVariableAttr;
+  kernel_ptr->tree_handle = extra->Attr<float>("tree_handle");
+  extra->SetKernelData(kernel_ptr);
+  return 0;
+}
+
+extern "C" int UpdateGlobalVariable(int nparam, void **params, int *ndims, int64_t **shapes, const char **dtypes,
+                                    void *stream, void *extra) {
+  // Input Attr
+  // UpdateRootState has 1 input attr
+  // 1. The unique tree handle
+  AotExtra *extra_aot = static_cast<AotExtra *>(extra);
+  auto kernel_ptr = static_cast<UpdateGlobalVariableAttr *>(extra_aot->KernelData());
+  int64_t tree_handle = static_cast<int64_t>(kernel_ptr->tree_handle);
+
+  void *device_state_ptr = nullptr;
+  cudaMalloc(&device_state_ptr, sizeof(float) * (nparam - 1));
+  float *input_global_variable = static_cast<float *>(device_state_ptr);
+  for (int i = 0; i < nparam - 1; i++) {
+    cudaMemcpy(input_global_variable + i, params[i], sizeof(float), cudaMemcpyDeviceToDevice);
+  }
+
+  bool *output = static_cast<bool *>(params[nparam - 1]);
+  MonteCarloTreeFactory::GetInstance().InsertGlobalVariable(tree_handle, input_global_variable);
+
+  bool ret = true;
+  cudaMemcpy(output, &ret, sizeof(bool), cudaMemcpyDeviceToDevice);
+  return 0;
+}
+
+
+class GetRootInfoAttr : public AotKernelData {
+ public:
+  float tree_handle;
+};
+
+extern "C" int GetRootInfoInit(int *ndims, int64_t **shapes, const char **dtypes, AotExtra *extra) {
+  GetRootInfoAttr *kernel_ptr = new GetRootInfoAttr;
+  kernel_ptr->tree_handle = extra->Attr<float>("tree_handle");
+  extra->SetKernelData(kernel_ptr);
+  return 0;
+}
+
+extern "C" int GetRootInfo(int nparam, void **params, int *ndims, int64_t **shapes, const char **dtypes, void *stream,
+                           void *extra) {
+  std::cout << "[ERROR] GPU does not support this function yet" << std::endl;
+  return kErrorCode;
 }

@@ -42,11 +42,19 @@ class CPUMonteCarloTreeNode : public MonteCarloTreeNode {
   int GetMaxPosition(float *selection_value, int num_items, void *device_stream) override;
   bool BestActionPolicy(std::shared_ptr<MonteCarloTreeNode> child_node) const override;
   virtual void SetInitReward(float *init_reward) { Memcpy(total_reward_, init_reward + player_, sizeof(float)); }
+  std::shared_ptr<MonteCarloTreeNode> BestAction() const override;
 
   std::string DebugString() override {
+    int *action_value;
+    if (action_ != nullptr) {
+      action_value = action_;
+    } else {
+      int temp = -1;
+      action_value = &temp;
+    }
     std::ostringstream oss;
     oss << tree_handle_ << "_" << name_ << "_row_" << row_ << "_player_" << player_;
-    oss << "_action_" << *action_ << "_terminal_" << terminal_;
+    oss << "_action_" << *action_value << "_terminal_" << terminal_;
     return oss.str();
   }
 

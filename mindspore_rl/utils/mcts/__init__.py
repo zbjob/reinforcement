@@ -17,6 +17,6 @@
 Network component used to implement polices.
 """
 
-from .mcts import MCTS, VanillaFunc, AlgorithmFunc
+from .mcts import MCTS, VanillaFunc, AlgorithmFunc, MuzeroFunc
 
-__all__ = ["MCTS", "VanillaFunc", "AlgorithmFunc"]
+__all__ = ["MCTS", "VanillaFunc", "AlgorithmFunc", "MuzeroFunc"]

@@ -69,9 +69,9 @@ extern "C" int MctsCreation(int nparam, void **params, int *ndims, int64_t **sha
   // is shared by all the node in this monte carlo tree. These variable will be saved in a std::vector with void* type.
   // User can call MonteCarloTreeFactory::GetInstance().GetTreeVariableByHandle(tree_handle_) to obtain the variable
   // vector and select the corresponding variable by index.
-  float *input_global_variable = new float[nparam - 1];
+  float *input_global_const = new float[nparam - 1];
   for (int i = 0; i < nparam - 1; i++) {
-    input_global_variable[i] = static_cast<float *>(params[i])[0];
+    input_global_const[i] = static_cast<float *>(params[i])[0];
   }
   // Output value
   // The output value of MctsCreation is the unique handle of this new monte carlo tree.
@@ -80,7 +80,7 @@ extern "C" int MctsCreation(int nparam, void **params, int *ndims, int64_t **sha
   int64_t tree_handle;
   MonteCarloTreePtr tree;
   std::tie(tree_handle, tree) = MonteCarloTreeFactory::GetInstance().CreateTree(
-    tree_name, node_name, player, max_utility, state_size, total_num_player, input_global_variable);
+    tree_name, node_name, player, max_utility, state_size, total_num_player, input_global_const);
   if (tree == nullptr) {
     return kErrorCode;
   }
@@ -192,6 +192,7 @@ extern "C" int MctsExpansion(int nparam, void **params, int *ndims, int64_t **sh
     init_reward = nullptr;
   }
   bool ret = tree->Expansion(node_name, action, prior, init_reward, shapes[kInputIndex][0], tree->state_size());
+
   tree->Memcpy(output, &ret, sizeof(bool));
   return 0;
 }
@@ -530,4 +531,79 @@ extern "C" int RestoreTree(int nparam, void **params, int *ndims, int64_t **shap
   tree->Restore();
   bool ret = true;
   tree->Memcpy(output, &ret, sizeof(bool));
+}
+
+class UpdateGlobalVariableAttr : public AotKernelData {
+ public:
+  float tree_handle;
+};
+
+extern "C" int UpdateGlobalVariableInit(int *ndims, int64_t **shapes, const char **dtypes, AotExtra *extra) {
+  UpdateGlobalVariableAttr *kernel_ptr = new UpdateGlobalVariableAttr;
+  kernel_ptr->tree_handle = extra->Attr<float>("tree_handle");
+  extra->SetKernelData(kernel_ptr);
+  return 0;
+}
+
+extern "C" int UpdateGlobalVariable(int nparam, void **params, int *ndims, int64_t **shapes, const char **dtypes,
+                                    void *stream, void *extra) {
+  // Input Attr
+  // UpdateRootState has 1 input attr
+  // 1. The unique tree handle
+  AotExtra *extra_aot = static_cast<AotExtra *>(extra);
+  auto kernel_ptr = static_cast<UpdateGlobalVariableAttr *>(extra_aot->KernelData());
+  int64_t tree_handle = static_cast<int64_t>(kernel_ptr->tree_handle);
+
+  float *input_global_variable = new float[nparam - 1];
+  for (int i = 0; i < nparam - 1; i++) {
+    input_global_variable[i] = static_cast<float *>(params[i])[0];
+  }
+  bool *output = static_cast<bool *>(params[nparam - 1]);
+  MonteCarloTreeFactory::GetInstance().InsertGlobalVariable(tree_handle, input_global_variable);
+
+  output[0] = true;
+  return 0;
+}
+
+class GetRootInfoAttr : public AotKernelData {
+ public:
+  float tree_handle;
+};
+
+extern "C" int GetRootInfoInit(int *ndims, int64_t **shapes, const char **dtypes, AotExtra *extra) {
+  GetRootInfoAttr *kernel_ptr = new GetRootInfoAttr;
+  kernel_ptr->tree_handle = extra->Attr<float>("tree_handle");
+  extra->SetKernelData(kernel_ptr);
+  return 0;
+}
+
+extern "C" int GetRootInfo(int nparam, void **params, int *ndims, int64_t **shapes, const char **dtypes, void *stream,
+                           void *extra) {
+  // Input Attr
+  // GetLastState has 1 input attr
+  // 1. The unique tree handle
+  AotExtra *extra_aot = static_cast<AotExtra *>(extra);
+  auto kernel_ptr = static_cast<GetRootInfoAttr *>(extra_aot->KernelData());
+  int64_t tree_handle = static_cast<int64_t>(kernel_ptr->tree_handle);
+  // Input value
+  // GetState has 1 input values:
+  // 1. A dummy handle, it is not used.
+  // Output value
+  // The state of the node that user specifies
+  float *out_value = static_cast<float *>(params[1]);
+  float *out_explore_count = static_cast<float *>(params[2]);
+
+  auto tree = MonteCarloTreeFactory::GetInstance().GetTreeByHandle(tree_handle);
+  auto root = tree->root();
+  float value = *root->total_reward() / *root->explore_count();
+  int sum_explore_count = 0;
+  for (auto &child : root->children()) {
+    sum_explore_count += *child->explore_count();
+  }
+  for (int i = 0; i < root->children().size(); i++) {
+    float norm_count = static_cast<float>(*(root->children()[i]->explore_count())) / sum_explore_count;
+    tree->Memcpy(out_explore_count + i, &norm_count, sizeof(float));
+  }
+  tree->Memcpy(out_value, &value, sizeof(float));
+  return 0;
 }

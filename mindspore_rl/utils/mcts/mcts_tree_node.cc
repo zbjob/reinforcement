@@ -36,10 +36,3 @@ MonteCarloTreeNodePtr MonteCarloTreeNode::SelectChild(void *device_stream) {
   Free(uct_value);
   return children_[max_position];
 }
-
-MonteCarloTreeNodePtr MonteCarloTreeNode::BestAction() const {
-  return *std::max_element(children_.begin(), children_.end(),
-                           [](const MonteCarloTreeNodePtr node_a, const MonteCarloTreeNodePtr node_b) {
-                             return node_a->BestActionPolicy(node_b);
-                           });
-}

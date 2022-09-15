@@ -47,9 +47,10 @@ class MonteCarloTreeNode {
   // The virtual function of Update. It is invoked during backpropagation. User needs implement how to update
   // the local value according to the input returns.
   virtual bool Update(float *returns, int total_num_player, void *device_stream) = 0;
+  virtual void SetInitReward(float *reward) = 0;
 
   // After the whole tree finished, use BestAction to obtain the best action for the root.
-  std::shared_ptr<MonteCarloTreeNode> BestAction() const;
+  virtual std::shared_ptr<MonteCarloTreeNode> BestAction() const = 0;
 
   // The policy to choose BestAction
   // The default policy is that:

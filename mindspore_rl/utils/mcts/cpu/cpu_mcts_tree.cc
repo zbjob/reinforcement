@@ -20,6 +20,9 @@ bool CPUMonteCarloTree::Expansion(std::string node_name, int *action, float *pri
                                   int state_size) {
   // Expand the last node of visited_path.
   auto leaf_node = visited_path_.at(visited_path_.size() - 1);
+  if (init_reward != nullptr) {
+    leaf_node->SetInitReward(init_reward);
+  }
   int player =
     (leaf_node->action() == nullptr) ? (leaf_node->player()) : ((leaf_node->player() + 1) % total_num_player_);
   for (int i = 0; i < num_action; i++) {

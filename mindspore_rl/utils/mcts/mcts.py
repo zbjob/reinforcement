@@ -17,7 +17,7 @@
 # pylint: disable=W0235
 import os
 import mindspore as ms
-from mindspore import Tensor
+from mindspore import Tensor, Parameter
 import mindspore.ops as ops
 from mindspore.ops import CustomRegOp, DataType
 import mindspore.nn as nn
@@ -70,7 +70,7 @@ class MCTS(nn.Cell):
     """
 
     def __init__(self, env, tree_type, node_type, root_plyaer, max_action, max_iteration,
-                 state_shape, customized_func, device, *args):
+                 state_shape, customized_func, has_init_reward, device, *args):
         super().__init__()
         current_path = os.path.dirname(os.path.normpath(os.path.realpath(__file__)))
         if device == "Ascend":
@@ -96,7 +96,7 @@ class MCTS(nn.Cell):
 
         mcts_creation = ops.Custom("{}:MctsCreation".format(so_path), (1,),
                                    ms.int64, "aot", reg_info=mcts_creation_info)
-        self.tree_handle = mcts_creation(args)
+        self.tree_handle = mcts_creation(*args)
         tree_handle_numpy = float(self.tree_handle.astype(ms.float32).asnumpy()[0])
 
         mcts_selection_info = CustomRegOp("add_with_attr_kernel") \
@@ -125,7 +125,7 @@ class MCTS(nn.Cell):
             .dtype_format(DataType.None_None, DataType.None_None, DataType.None_None,
                           DataType.None_None, DataType.None_None) \
             .attr("node_type", "required", "all", value=node_type) \
-            .attr("has_init_reward", "required", "all", value=False) \
+            .attr("has_init_reward", "required", "all", value=has_init_reward) \
             .attr("tree_handle", "required", "all", value=tree_handle_numpy) \
             .target(device) \
             .get_op_info()
@@ -209,6 +209,15 @@ class MCTS(nn.Cell):
         self.get_last_state = ops.Custom("{}:GetLastState".format(so_path), state_shape,
                                          (ms.float32), "aot", reg_info=mcts_getlast_info)
 
+        mcts_globalvar_info = CustomRegOp("add_with_attr_kernel") \
+            .output(0, "success") \
+            .dtype_format(DataType.None_None) \
+            .attr("tree_handle", "required", "all", value=tree_handle_numpy) \
+            .target(device) \
+            .get_op_info()
+        self.update_global_variable = ops.Custom("{}:UpdateGlobalVariable".format(so_path), (1,),
+                                                 (ms.bool_), "aot", reg_info=mcts_globalvar_info)
+
         mcts_destroy_info = CustomRegOp("add_with_attr_kernel") \
             .output(0, "success") \
             .dtype_format(DataType.None_None) \
@@ -227,6 +236,18 @@ class MCTS(nn.Cell):
             .get_op_info()
         self.restore_tree = ops.Custom("{}:RestoreTree".format(so_path),
                                        (1,), (ms.bool_), "aot", reg_info=mcts_restore_info)
+
+        mcts_get_value_info = CustomRegOp("add_with_attr_kernel") \
+            .input(0, "dummy_handle") \
+            .output(0, "value") \
+            .output(1, 'norm_explore_count') \
+            .dtype_format(DataType.None_None, DataType.None_None, DataType.None_None) \
+            .attr("tree_handle", "required", "all", value=tree_handle_numpy) \
+            .target(device) \
+            .get_op_info()
+        self.get_root_info = ops.Custom("{}:GetRootInfo".format(so_path),
+                                        ((1,), (len(env.legal_action()),)), (ms.float32, ms.float32), "aot", \
+                                        reg_info=mcts_get_value_info)
         self.depend = P.Depend()
 
         # Add side effect annotation
@@ -238,6 +259,7 @@ class MCTS(nn.Cell):
         self.update_root_state.add_prim_attr("side_effect_mem", True)
         self.destroy_tree.add_prim_attr("side_effect_mem", True)
         self.restore_tree.add_prim_attr("side_effect_mem", True)
+        self.update_global_variable.add_prim_attr("side_effect_mem", True)
 
         self.zero = Tensor(0, ms.int32)
         self.zero_float = Tensor(0, ms.float32)
@@ -252,7 +274,7 @@ class MCTS(nn.Cell):
         self.customized_func = customized_func
 
     @ms_function
-    def mcts_search(self):
+    def mcts_search(self, *args):
         """
         mcts_search is the main function of MCTS. Invoke this function will return the best
         action of current state.
@@ -267,6 +289,7 @@ class MCTS(nn.Cell):
         # Create a replica of environment
         new_state = self.env.save()
         self.update_root_state(new_state)
+        self.update_global_variable(*args)
         i = self.zero
         while i < self.max_iteration:
             # 1. Interact with the replica of environment, and update the latest state
@@ -298,9 +321,15 @@ class MCTS(nn.Cell):
                 break
             i += 1
         action = self.best_action()
-        handle = self.depend(self.tree_handle, action)
-        self.restore_tree(handle)
-        return action
+        return action, self.tree_handle
+
+    @ms_function
+    def get_root_information(self, dummpy_handle):
+        return self.get_root_info(dummpy_handle)
+
+    @ms_function
+    def restore_tree_data(self, handle):
+        return self.restore_tree(handle)
 
     @ms_function
     def destroy(self):
@@ -384,14 +413,13 @@ class VanillaFunc(AlgorithmFunc):
 
     def simulation(self, new_state):
         """
-        The functionality of calculate_prior is to calculate prior of the input legal actions.
+        The functionality of simulation is to calculate reward of the input state.
 
         Args:
             new_state (mindspore.float32): The state of environment.
-            legal_action (mindspore.int32): The legal action of environment
 
         Returns:
-            prior (mindspore.float32): The probability (or prior) of all the input legal actions.
+            rewards (mindspore.float32): The results of simulation.
         """
         _, reward, done = self.env.load(new_state)
         while not done:
@@ -404,3 +432,71 @@ class VanillaFunc(AlgorithmFunc):
             action = self.categorical.sample((), prob)
             new_state, reward, done = self.env.step(legal_action[action])
         return reward
+
+
+class _SupportToScalar(nn.Cell):
+    """
+    Support to scalar is used in Muzero, it will decompressed an Tensor to scalar.
+    """
+    def __init__(self, value_min: float, value_max: float, eps: float = 0.001):
+        super().__init__()
+        self.eps = eps
+        self.support = nn.Range(value_min, value_max + 1)()
+        self.reduce_sum = P.ReduceSum()
+        self.sign = P.Sign()
+        self.sqrt = P.Sqrt()
+        self.absolute = P.Abs()
+
+    def construct(self, logits):
+        """Calculate the decompressed value"""
+        probabilities = nn.Softmax()(logits)
+        v = self.reduce_sum(probabilities * self.support, -1)
+
+        # Inverting the value scaling (defined in https://arxiv.org/abs/1805.11593)
+        decompressed_value = self.sign(v) * (
+            ((self.sqrt(1 + 4 * self.eps * (self.absolute(v) + 1 + self.eps)) - 1) / (2 * self.eps))
+            ** 2 - 1)
+
+        return decompressed_value
+
+
+class MuzeroFunc(AlgorithmFunc):
+    """
+    This is the customized algorithm for MuzeroCTS. The prior of each legal action and predicted value
+    are calculated by neural network.
+    """
+
+    def __init__(self, net):
+        super().__init__()
+        self.predict_net = net
+        self.decompressed_value = _SupportToScalar(-300, 300)
+        self.value = Parameter(Tensor([0], ms.float32), requires_grad=False, name="value")
+
+        self.false = Tensor(False, ms.bool_)
+
+    def calculate_prior(self, new_state, legal_action):
+        """
+        The functionality of calculate_prior is to calculate prior of the input legal actions.
+
+        Args:
+            new_state (mindspore.float32): The state of environment.
+            legal_action (mindspore.int32): The legal action of environment
+
+        Returns:
+            prior (mindspore.float32): The probability (or prior) of all the input legal actions.
+        """
+        policy, value = self.predict_net(new_state)
+        self.value = self.decompressed_value(value)
+        return policy
+
+    def simulation(self, new_state):
+        """
+        The functionality of simulation is to calculate reward of the input state.
+
+        Args:
+            new_state (mindspore.float32): The state of environment.
+
+        Returns:
+            rewards (mindspore.float32): The results of simulation.
+        """
+        return self.value
