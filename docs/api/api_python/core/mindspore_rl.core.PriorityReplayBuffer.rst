@@ -1,5 +1,5 @@
 
-.. py:class:: mindspore_rl.core.PriorityReplayBuffer(alpha, beta, capacity, sample_size, shapes, dtypes, seed0=0, seed1=0)
+.. py:class:: mindspore_rl.core.PriorityReplayBuffer(alpha, capacity, sample_size, shapes, dtypes, seed0=0, seed1=0)
 
     优先级经验回放缓存，用于深度Q学习存储经验数据。
     该算法在 `Prioritized Experience Replay <https://arxiv.org/abs/1511.05952>`_ 中提出。
