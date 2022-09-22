@@ -27,6 +27,7 @@ parser = argparse.ArgumentParser(description='MindSpore Reinforcement A3C')
 parser.add_argument('--episode', type=int, default=1000, help='total episode numbers.')
 parser.add_argument('--device_target', type=str, default='Auto', choices=['CPU', 'GPU', 'Auto'],
                     help='Choose a device to run the ac example(Default: Auto).')
+parser.add_argument('--actor_num', type=int, default=3, help='actor number')
 options, _ = parser.parse_known_args()
 
 
@@ -34,6 +35,7 @@ def train(episode=options.episode):
     if options.device_target != 'Auto':
         context.set_context(device_target=options.device_target)
     context.set_context(mode=context.GRAPH_MODE)
+    config.algorithm_config['actor']['number'] = options.actor_num
     ac_session = Session(config.algorithm_config)
     ac_session.run(class_type=A3CTrainer, episode=episode)
 
