@@ -3,7 +3,7 @@
     MultiEnvironmentWrapper是多环境场景下的包装器。用户实现自己的单环境类，并在配置文件中设置环境数量大于1时，框架将自动调用此类创建多环境。
 
     参数：
-        - **env_instance** (list(Environment)) - 包含环境实例（继承Environment类）的List。
+        - **env_instance** (list[Environment]) - 包含环境实例（继承Environment类）的List。
         - **num_proc** (int) - 在和环境交互时使用的进程数量。默认值： None。
 
     .. py:method:: render()

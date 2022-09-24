@@ -5,7 +5,7 @@
 
     参数：
         - **actors** (Actor) - Actor 实例。
-        - **learner** (learner) - learner 实例。
+        - **learner** (Learner) - learner 实例。
 
     .. py:method:: act(phase, params)
 

@@ -34,8 +34,8 @@ class PriorityReplayBuffer(nn.Cell):
             0 means the uniform sampling, 1 means priority sampling.
         capacity (int): the capacity of the buffer.
         sample_size (int): size for sampling from the buffer.
-        shapes (List[int]): the shape of each tensor in a buffer element.
-        types (List[mindspore.dtype]): the data type of each tensor in a buffer element.
+        shapes (list[int]): the shape of each tensor in a buffer element.
+        types (list[mindspore.dtype]): the data type of each tensor in a buffer element.
         seed0 (int): Seed0 value for random generating. Default: 0.
         seed1 (int): Seed1 value for random generating. Default: 0.
 

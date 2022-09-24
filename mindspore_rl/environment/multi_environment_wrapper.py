@@ -30,7 +30,7 @@ class MultiEnvironmentWrapper(nn.Cell):
     file, framework will automatically invoke this class to create a multi environment class.
 
     Args:
-        env_instance (list(Class)): A list that contains instance of environment (subclass of Environment).
+        env_instance (list[Environment]): A list that contains instance of environment (subclass of Environment).
         num_proc (int): Number of processing uses during interacting with environment. Default: None.
 
     Supported Platforms:
