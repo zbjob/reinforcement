@@ -53,8 +53,8 @@ class UniformReplayBuffer(nn.Cell):
     Args:
         batch_size (int): size for sampling from the buffer.
         capacity (int): the capacity of the buffer.
-        shapes (List[int]): the shape of each tensor in a buffer element.
-        types (List[mindspore.dtype]): the data type of each tensor in a buffer element.
+        shapes (list[int]): the shape of each tensor in a buffer element.
+        types (list[mindspore.dtype]): the data type of each tensor in a buffer element.
 
     Examples:
         >>> batch_size = 10
@@ -104,11 +104,11 @@ class UniformReplayBuffer(nn.Cell):
         replace the element in the buffer.
 
         Args:
-            exp (List[Tensor]): insert a list of tensor which matches with the initialized shape
+            exp (list[Tensor]): insert a list of tensor which matches with the initialized shape
                 and type into the buffer.
 
         Returns:
-             element (List[Tensor]), return the whole buffer after insertion
+             element (list[Tensor]), return the whole buffer after insertion
 
         """
         self.buffer_append(self.buffer, exp, self.count, self.head)

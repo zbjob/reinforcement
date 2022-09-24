@@ -19,7 +19,7 @@
         将transition推送到缓存区。如果缓存区已满，则覆盖最早的数据。
 
         参数：
-            - **transition** (List(Tensor)) - 与初始化的shapes和dtypes匹配的张量列表。
+            - **transition** (List[Tensor]) - 与初始化的shapes和dtypes匹配的张量列表。
 
         返回：
             - **handle** (Tensor) - 优先级经验回放缓存句柄，数据和维度分别是int64和（1,）。

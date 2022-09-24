@@ -141,7 +141,7 @@ class MSRL(nn.Cell):
             proc_num (int): the process for environment.
 
         Returns:
-            - batch_env (object), the created batch-environment object.
+            batch_env (object), the created batch-environment object.
         """
         env_list = []
         for i in range(env_num):
@@ -215,7 +215,7 @@ class MSRL(nn.Cell):
     def __params_generate(self, config, obj, target, attribute):
         """
         Parse the input object to generate parameters, then store the parameters into
-        the dictionary of configuration
+        the dictionary of configuration.
 
         Args:
             config (dict): the algorithm configuration.
@@ -273,10 +273,10 @@ class MSRL(nn.Cell):
         and eval policy of algorithm.
 
         Args:
-            config (dict): A dictionary of configuration
+            config (dict): A dictionary of configuration.
 
         Returns:
-            policy_and_network (object): The instance of policy and network
+            policy_and_network (object): The instance of policy and network.
         """
         policy_and_network_config = config['policy_and_network']
         compulsory_items = ['type']
@@ -301,11 +301,11 @@ class MSRL(nn.Cell):
 
     def __create_actor(self, config, policy_and_network, actor_id=None):
         """
-        Create an instance of actor or a list of instances of actor
+        Create an instance of actor or a list of instances of actor.
 
         Args:
-            config (dict): A dictionary of configuration
-            policy_and_network (object): The instance of policy_and_network
+            config (dict): A dictionary of configuration.
+            policy_and_network (object): The instance of policy_and_network.
             actor_id (int): The number of the actors. Default: None.
 
         Returns:
@@ -338,14 +338,14 @@ class MSRL(nn.Cell):
 
     def __create_learner(self, config, policy_and_network):
         """
-        Create an instance of learner or a list of instances of learner
+        Create an instance of learner or a list of instances of learner.
 
         Args:
-            config (dict): A dictionary of configuration
-            policy_and_network (object): The instance of policy_and_network
+            config (dict): A dictionary of configuration.
+            policy_and_network (object): The instance of policy_and_network.
 
         Returns:
-            actor (object or List(object)): An instance of learner a list of instances of learner
+            actor (object or List(object)): An instance of learner a list of instances of learner.
         """
         compulsory_items = ['type', 'networks']
         self._compulsory_items_check(config['learner'], compulsory_items,
@@ -469,11 +469,11 @@ class MSRL(nn.Cell):
 
         Args:
             transpose (bool): whether the output element needs to be transpose,
-                if transpose is true, shape will also need to be filled. Default: False
-            shape (Tuple[int]): the shape used in transpose. Default: None
+                if transpose is true, shape will also need to be filled. Default: False.
+            shape (tuple[int]): the shape used in transpose. Default: None.
 
         Returns:
-            elements (List[Tensor]), A set of tensor contains all the elements in the replay buffer
+            elements (List[Tensor]), A set of tensor contains all the elements in the replay buffer.
         """
 
         transpose_op = P.Transpose()
