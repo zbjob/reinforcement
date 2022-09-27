@@ -182,20 +182,18 @@ class PPOActor(Actor):
         self._params_config = params
         self._environment = params['collect_environment']
         self._eval_env = params['eval_environment']
-        self._buffer = params['replay_buffer']
         self._actor_net = params['actor_net']
         self.norm_dist = msd.Normal()
         self.expand_dims = P.ExpandDims()
 
-    def act(self, state):
+    def act(self, phase, state):
         """collect experience and insert to replay buffer (used during training)"""
-        miu, sigma = self._actor_net(state)
-        action = self.norm_dist.sample((), miu, sigma)
-        new_state, reward, _ = self._environment.step(action)
-        return reward, new_state, action, miu, sigma
+        if phase != 3:
+            miu, sigma = self._actor_net(state)
+            action = self.norm_dist.sample((), miu, sigma)
+            new_state, reward, _ = self._environment.step(action)
+            return reward, new_state, action, miu, sigma
 
-    def evaluate(self, state):
-        """collect experience (used during evaluation)"""
         action, _ = self._actor_net(state)
         new_state, reward, _ = self._eval_env.step(action)
         return reward, new_state
@@ -396,7 +394,7 @@ class PPOTrainer(Trainer):
             state, _ = self.msrl.agent_reset_eval()
             j = self.zero
             while self.less(j, self.duration):
-                reward, state = self.msrl.agent_evaluate(state)
+                reward, state = self.msrl.agent_act(state)
                 reward = self.msrl.reduce_mean(reward)
                 eval_reward += reward
                 j += 1
