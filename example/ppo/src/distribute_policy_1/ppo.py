@@ -95,7 +95,7 @@ ppo_algorithm_config = {
         'params': policy_params
     },
     'replay_buffer': {
-        'number':1,
+        'number': 1,
         'type': UniformReplayBuffer,
         'capacity': DURATION,
         'data_shape': [(ACT_NUM, COLLECT_ENV_NUM, 17), (ACT_NUM, COLLECT_ENV_NUM, 6), (ACT_NUM, COLLECT_ENV_NUM, 1),
