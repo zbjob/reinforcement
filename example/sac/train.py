@@ -18,11 +18,11 @@ SAC training example.
 
 #pylint: disable=C0413
 import argparse
-from src import config
-from src.sac_trainer import SACTrainer
+from sac_trainer import SACTrainer
 from mindspore import context
 from mindspore import dtype as mstype
 from mindspore_rl.core import Session
+from mindspore_rl.agent import SACConfig as config
 from mindspore_rl.utils.callback import CheckpointCallback, LossCallback, EvaluateCallback
 
 parser = argparse.ArgumentParser(description='MindSpore Reinforcement SAC')
@@ -43,6 +43,9 @@ def train(episode=options.episode):
         context.set_context(enable_graph_kernel=True)
 
     compute_type = mstype.float32 if options.precision_mode == 'fp32' else mstype.float16
+    if 'policy_and_network' not in config.algorithm_config or \
+       'params' not in config.algorithm_config.get('policy_and_network'):
+        raise ValueError("'policy_and_network' config not exist.")
     config.algorithm_config['policy_and_network']['params']['compute_type'] = compute_type
     if compute_type == mstype.float16 and device in ['CPU']:
         raise ValueError("Fp16 mode is supported by Ascend and GPU backend.")
@@ -50,7 +53,7 @@ def train(episode=options.episode):
     context.set_context(mode=context.GRAPH_MODE, max_call_depth=100000)
     sac_session = Session(config.algorithm_config)
     loss_cb = LossCallback()
-    ckpt_cb = CheckpointCallback(100, config.trainer_params['ckpt_path'])
+    ckpt_cb = CheckpointCallback(100, config.trainer_params.get('ckpt_path'))
     eval_cb = EvaluateCallback(30)
     cbs = [loss_cb, ckpt_cb, eval_cb]
     sac_session.run(class_type=SACTrainer, episode=episode, params=config.trainer_params, callbacks=cbs)

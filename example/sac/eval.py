@@ -17,7 +17,7 @@ SAC eval example.
 """
 import argparse
 from src.sac_trainer import SACTrainer
-from src import config
+from mindspore_rl.agent.sac import SACConfig as config
 from mindspore_rl.core import Session
 from mindspore import context
 

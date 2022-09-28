@@ -408,8 +408,6 @@ class MSRL(nn.Cell):
                 self.actors = self.__create_actor(config, self.policy_and_network)
                 self.learner = self.__create_learner(config, self.policy_and_network)
                 self.agent_act = self.actors.act
-                self.agent_evaluate = self.actors.evaluate
-                self.agent_act_init = self.actors.act_init
                 self.agent_learn = self.learner.learn
             else:
                 if num_actors == 1:

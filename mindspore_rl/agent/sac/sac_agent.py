@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # ============================================================================
-"""SAC"""
+"""SAC Agent"""
 import mindspore
 from mindspore import Tensor
 import mindspore.nn as nn
@@ -22,7 +22,7 @@ from mindspore.common.parameter import Parameter
 from mindspore_rl.agent.actor import Actor
 from mindspore_rl.agent.learner import Learner
 from mindspore_rl.utils import SoftUpdate
-from src.tanh_normal import TanhMultivariateNormalDiag
+from mindspore_rl.agent.sac.tanh_normal import TanhMultivariateNormalDiag
 
 
 class SACPolicy():
@@ -195,6 +195,12 @@ class SACActor(Actor):
             return reward, new_state
         self.print("Phase is incorrect")
         return 0
+
+    def get_action(self, phase, params):
+        """get action"""
+        obs = self.expand_dims(params, 0)
+        action = self.eval_policy(obs)
+        return action
 
 
 class SACLearner(Learner):

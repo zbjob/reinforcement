@@ -21,5 +21,6 @@ from mindspore_rl.agent.actor import Actor
 from mindspore_rl.agent.learner import Learner
 from mindspore_rl.agent.trainer import Trainer
 from mindspore_rl.agent.agent import Agent
+from mindspore_rl.agent.sac import config as SACConfig
 
-__all__ = ["Actor", "Learner", "Trainer", "Agent"]
+__all__ = ["Actor", "Learner", "Trainer", "Agent", "SACConfig"]

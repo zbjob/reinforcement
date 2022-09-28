@@ -80,33 +80,3 @@ class Actor(nn.Cell):
         """
 
         raise NotImplementedError("Method should be overridden by subclass.")
-
-    def act_init(self, state):
-        """
-        The interface of the act initialisation function by get the state as input.
-        User will needd to overload this function according to the algothrim.
-
-        Args:
-            state (Tensor): the output state from the environment.
-
-        Returns:
-            - Tensor， whether the simulation is finished or not.
-            - Tensor， simulation reward.
-            - Tensor， simulation state.
-        """
-        raise NotImplementedError("Method should be overridden by subclass.")
-
-    def evaluate(self, state):
-        """
-        The interface of the evaluate function by get the state as input.
-        User will needd to overload this function according to the algothrim.
-
-        Args:
-            state (Tensor): the output state from the environment.
-
-        Returns:
-            - Tensor， whether the simulation is finished or not.
-            - Tensor， simulation reward.
-            - Tensor， simulation state.
-        """
-        raise NotImplementedError("Method should be overridden by subclass.")

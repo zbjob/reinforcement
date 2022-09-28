@@ -19,7 +19,7 @@ SAC config.
 import mindspore
 from mindspore_rl.environment import GymEnvironment
 from mindspore_rl.core.uniform_replay_buffer import UniformReplayBuffer
-from src.sac import SACActor, SACLearner, SACPolicy
+from mindspore_rl.agent.sac.sac_agent import SACActor, SACLearner, SACPolicy
 
 env_params = {'name': 'HalfCheetah-v2'}
 eval_env_params = {'name': 'HalfCheetah-v2'}
