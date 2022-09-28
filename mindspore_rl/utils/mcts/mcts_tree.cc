@@ -48,8 +48,7 @@ bool MonteCarloTree::Selection(int *action_list, int max_action, void *device_st
 
 bool MonteCarloTree::Backpropagation(float *returns, void *device_stream) {
   // Reverse the visited path, update from the bottom to the top.
-  std::reverse(visited_path_.begin(), visited_path_.end());
-  auto leaf_node = visited_path_[0];
+  auto leaf_node = visited_path_[visited_path_.size() - 1];
   bool solved = false;
   // If the leaf node is terminal, which means that this branch is solved.
   if (leaf_node->terminal()) {
@@ -57,7 +56,9 @@ bool MonteCarloTree::Backpropagation(float *returns, void *device_stream) {
   }
   // For each node in visited path, call the Update() to update the value.
   // If current branch is solved, backprop the best outcome from the bottom to top.
-  for (auto &node : visited_path_) {
+  // for (auto &node : visited_path_) {
+  for (int i = visited_path_.size() - 1; i >= 0; i--) {
+    auto node = visited_path_[i];
     node->Update(returns, total_num_player_, device_stream);
     if (solved && !node->IsLeafNode()) {
       MonteCarloTreeNodePtr best = nullptr;

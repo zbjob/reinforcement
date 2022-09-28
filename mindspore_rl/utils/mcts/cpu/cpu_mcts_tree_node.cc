@@ -25,11 +25,7 @@ void CPUMonteCarloTreeNode::InitNode(int state_size, float *init_reward, int *ac
   action_ = reinterpret_cast<int *>(AllocateMem(sizeof(int)));
   prior_ = reinterpret_cast<float *>(AllocateMem(sizeof(float)));
   // Set init value
-  if (init_reward == nullptr) {
-    Memset(total_reward_, 0, sizeof(float));
-  } else {
-    SetInitReward(init_reward);
-  }
+  Memset(total_reward_, 0, sizeof(float));
   Memset(explore_count_, 0, sizeof(int));
   if (action != nullptr) {
     Memcpy(action_, action, sizeof(int));
@@ -53,6 +49,13 @@ int CPUMonteCarloTreeNode::GetMaxPosition(float *selection_value, int num_items,
     }
   }
   return max_index;
+}
+
+MonteCarloTreeNodePtr CPUMonteCarloTreeNode::BestAction() const {
+  return *std::max_element(children_.begin(), children_.end(),
+                           [](const MonteCarloTreeNodePtr node_a, const MonteCarloTreeNodePtr node_b) {
+                             return node_a->BestActionPolicy(node_b);
+                           });
 }
 
 bool CPUMonteCarloTreeNode::BestActionPolicy(MonteCarloTreeNodePtr node) const {

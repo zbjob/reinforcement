@@ -29,7 +29,7 @@ bool CPUVanillaTreeNode::SelectionPolicy(float *uct_value, void *device_stream) 
     return true;
   }
 
-  auto global_variable_vector = MonteCarloTreeFactory::GetInstance().GetTreeVariableByHandle(tree_handle_);
+  auto global_variable_vector = MonteCarloTreeFactory::GetInstance().GetTreeConstByHandle(tree_handle_);
   auto uct_ptr = global_variable_vector[0];
   *uct_value =
     *total_reward_ / *explore_count_ + uct_ptr * std::sqrt(std::log(*(parent_->explore_count())) / *explore_count_);
