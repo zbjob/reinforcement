@@ -489,7 +489,7 @@ extern "C" int DestroyTree(int nparam, void **params, int *ndims, int64_t **shap
   int64_t tree_handle = static_cast<int64_t>(kernel_ptr->tree_handle);
   // Output value
   // Whether the destroy executes successfully.
-  bool *output = static_cast<bool *>(params[0]);
+  bool *output = static_cast<bool *>(params[1]);
   auto tree = MonteCarloTreeFactory::GetInstance().GetTreeByHandle(tree_handle);
   if (tree == nullptr) {
     return kErrorCode;

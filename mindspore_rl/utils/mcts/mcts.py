@@ -45,23 +45,21 @@ class MCTS(nn.Cell):
         env (Environment): It must be the subclass of Environment.
         tree_type (string): The name of tree type.
         node_type (string): The name of node type.
-        max_action (int): The max action this game can perform. When the visited node in selection is less than
-             max action, the remained place will be filled as -1. For example, in tic-tac-toe is 9. User can also
-             set max_action = -1, then the selection ops will only return the last action performed. It depends on
-             how user implements the environment.
-        max_iteration (int): The max training iteration of MCTS.
-        state_shape (tuple): A tuple which states for the shape of state.
         customized_func (nn.Cell): Some algorithm specific codes. For more detail, please have a look at
             documentation of AlgorithmBasedFunc.
-        device (string): The device type in ["CPU"], Ascend and GPU is not support yet.
-        *args (Tensor): any values which will be the input of MctsCreation. Please following the table below
-            to provide the input value.
+        device (string): The device type in ["CPU", "GPU"], Ascend is not support yet.
+        args (Tensor): any values which will be the input of MctsCreation. Please following the table below
+            to provide the input value. These value will not be reset after invoke 'restore_tree_data'.
+        has_init_reward (bool): Whether pass the reward to each node during the node initialization. Default: False.
+        max_action (int): The max number of action in environment. If the max_action is -1, the step in Environment
+            will accept the last action. Otherwise, it will accept max_action number of action. Default: -1.
+        max_iteration (int): The max training iteration of MCTS. Default: 1000.
 
             +------------------------------+-----------------+--------------------------------------------------------+
             |  MCTS Tree Type              |  MCTS Node Type |  Configuration Parameter    |  Notices                 |
             +==============================+=================+========================================================+
             |  CPUCommon                   |  CPUVanilla     |  UCT const                  |  UCT const is used to    |
-            |                              |                 |                             |  calculate UCT value in  |
+            |  GPUCommon                   |  GPUVanilla     |                             |  calculate UCT value in  |
             |                              |                 |                             |  Selection phase         |
             +------------------------------+-----------------+--------------------------------------------------------+
 
@@ -69,15 +67,23 @@ class MCTS(nn.Cell):
         >>> mcts = MCTS()
     """
 
-    def __init__(self, env, tree_type, node_type, root_plyaer, max_action, max_iteration,
-                 state_shape, customized_func, has_init_reward, device, *args):
+    def __init__(self, env, tree_type, node_type, root_player, customized_func, device,
+                 args, has_init_reward=False, max_action=-1.0, max_iteration=1000):
         super().__init__()
+        if device.upper() not in ["GPU", "CPU"]:
+            raise ValueError("Device {} is illegal, it must in ['GPU','CPU'].".format(device))
+        if (root_player > env.total_num_player() or root_player < 0):
+            raise ValueError("root_player {} is illegal, it needs to in range [0, {})".format(
+                root_player, env.total_num_player()))
+        if not (isinstance(max_action, float) and isinstance(root_player, float)):
+            raise ValueError(
+                "max action/root player must be float, but got {} and {}".format(type(max_action), type(root_player)))
+        if (max_action != -1) and (max_action != len(env.legal_action())):
+            raise ValueError("max_action must be -1 or the largest legal action of environment, but got ", max_action)
         current_path = os.path.dirname(os.path.normpath(os.path.realpath(__file__)))
-        if device == "Ascend":
-            raise ValueError("MCTS does not support Ascend")
         so_path = current_path + "/libmcts_{}.so".format(device.lower())
-
         state_size = 1.0
+        state_shape = env.observation_space.shape
         for shape in state_shape:
             state_size *= shape
 
@@ -89,7 +95,7 @@ class MCTS(nn.Cell):
             .attr("node_type", "required", "all", value=node_type) \
             .attr("max_utility", "required", "all", value=env.max_utility()) \
             .attr("state_size", "required", "all", value=state_size) \
-            .attr("player", "required", "all", value=root_plyaer) \
+            .attr("player", "required", "all", value=root_player) \
             .attr("total_num_player", "required", "all", value=env.total_num_player()) \
             .target(device) \
             .get_op_info()
@@ -246,7 +252,7 @@ class MCTS(nn.Cell):
             .target(device) \
             .get_op_info()
         self.get_root_info = ops.Custom("{}:GetRootInfo".format(so_path),
-                                        ((1,), (len(env.legal_action()),)), (ms.float32, ms.float32), "aot", \
+                                        ((1,), (len(env.legal_action()),)), (ms.float32, ms.float32), "aot",
                                         reg_info=mcts_get_value_info)
         self.depend = P.Depend()
 
@@ -279,8 +285,14 @@ class MCTS(nn.Cell):
         mcts_search is the main function of MCTS. Invoke this function will return the best
         action of current state.
 
+        Args:
+            *args (Tensor): The variable which updates during each iteration. They will be restored
+                            after invoking 'restore_tree_data'. The input value needs to match provied
+                            algorithm.
+
         Returns:
             action (mindspore.int32): The action which is returned by monte carlo tree search.
+            handle (mindspore.int64): The unique handle of mcts tree.
         """
 
         expanded = self.false
@@ -324,23 +336,36 @@ class MCTS(nn.Cell):
         return action, self.tree_handle
 
     @ms_function
-    def get_root_information(self, dummpy_handle):
-        return self.get_root_info(dummpy_handle)
-
-    @ms_function
     def restore_tree_data(self, handle):
-        return self.restore_tree(handle)
-
-    @ms_function
-    def destroy(self):
         """
-        destroy will destroy current tree. Please call this function ONLY when
-        do not use this tree any more.
+        restore_tree_data will restore all the data in the tree.
+
+        Args:
+            handle (mindspore.int64): The unique handle of mcts tree.
 
         Returns:
             success (mindspore.bool_): Whether restore is successful.
         """
-        return self.destroy_tree()
+        return self.restore_tree(handle)
+
+    @ms_function
+    def destroy(self, handle):
+        """
+        destroy will destroy current tree. Please call this function ONLY when
+        do not use this tree any more.
+
+        Args:
+            handle (mindspore.int64): The unique handle of mcts tree.
+
+        Returns:
+            success (mindspore.bool_): Whether destroy is successful.
+        """
+        return self.destroy_tree(handle)
+
+    @ms_function
+    def _get_root_information(self, dummpy_handle):
+        """Does not support yet"""
+        return self.get_root_info(dummpy_handle)
 
 
 class AlgorithmFunc(nn.Cell):
@@ -438,6 +463,7 @@ class _SupportToScalar(nn.Cell):
     """
     Support to scalar is used in Muzero, it will decompressed an Tensor to scalar.
     """
+
     def __init__(self, value_min: float, value_max: float, eps: float = 0.001):
         super().__init__()
         self.eps = eps
