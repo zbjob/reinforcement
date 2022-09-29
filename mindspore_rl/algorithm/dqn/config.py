@@ -1,4 +1,4 @@
-# Copyright 2021 Huawei Technologies Co., Ltd
+# Copyright 2021-2022 Huawei Technologies Co., Ltd
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -15,8 +15,6 @@
 """
 DQN config.
 """
-
-import mindspore as ms
 from mindspore_rl.environment import GymEnvironment
 from mindspore_rl.core.uniform_replay_buffer import UniformReplayBuffer
 from .dqn import DQNActor, DQNLearner, DQNPolicy
@@ -25,6 +23,8 @@ learner_params = {'gamma': 0.99, 'lr': 0.001}
 trainer_params = {
     'num_evaluate_episode': 10,
     'ckpt_path': './ckpt',
+    'save_per_episode': 50,
+    'eval_per_episode': 10,
 }
 
 collect_env_params = {'name': 'CartPole-v0'}
@@ -68,7 +68,5 @@ algorithm_config = {
     'replay_buffer': {'number': 1,
                       'type': UniformReplayBuffer,
                       'capacity': 100000,
-                      'data_shape': [(4,), (1,), (1,), (4,)],
-                      'data_type': [ms.float32, ms.int32, ms.float32, ms.float32],
                       'sample_size': 64},
 }

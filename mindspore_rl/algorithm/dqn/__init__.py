@@ -1,4 +1,4 @@
-# Copyright 2021 Huawei Technologies Co., Ltd
+# Copyright 2022 Huawei Technologies Co., Ltd
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -12,3 +12,14 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # ============================================================================
+
+"""
+    Components for dqn.
+"""
+
+from mindspore_rl.algorithm.dqn import config
+from mindspore_rl.algorithm.dqn.dqn_session import DQNSession
+from mindspore_rl.algorithm.dqn.dqn_trainer import DQNTrainer
+from mindspore_rl.algorithm.dqn.dqn import DQNActor, DQNLearner, DQNPolicy
+
+__all__ = ["config", "DQNSession", "DQNActor", "DQNLearner", "DQNPolicy", "DQNTrainer"]

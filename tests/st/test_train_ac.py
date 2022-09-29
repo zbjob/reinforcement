@@ -43,6 +43,6 @@ def test_train_ac():
     '''
     context.set_context(mode=context.GRAPH_MODE)
     loss_cb = LossCallback()
-    ac_session = Session(config.algorithm_config)
-    ac_session.run(class_type=ACTrainer, episode=5, params=config.trainer_params, callbacks=[loss_cb])
+    ac_session = Session(alg_config=config.algorithm_config, params=config.trainer_params, callbacks=[loss_cb])
+    ac_session.run(class_type=ACTrainer, episode=5)
     assert True

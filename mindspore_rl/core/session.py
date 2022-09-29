@@ -48,11 +48,15 @@ class Session():
         alg_config (dict): the algorithm configuration or the deployment configuration of the algorithm.
         deploy_config (dict): the deployment configuration for distribution. Default: None.
             For more details of configuration of algorithm, please have a look at
-            https://www.mindspore.cn/reinforcement/docs/zh-CN/master/custom_config_info.html
+            `<https://www.mindspore.cn/reinforcement/docs/zh-CN/master/custom_config_info.html>`
+        params (dict): The algorithm specific training parameters. Default: None.
+        callbacks (list[Callback]): The callback list. Default: None.
     """
 
-    def __init__(self, alg_config, deploy_config=None):
+    def __init__(self, alg_config, deploy_config=None, params=None, callbacks=None):
         self.msrl = MSRL(alg_config, deploy_config)
+        self.params = params
+        self.callbacks = callbacks
         self.dist = False
         if deploy_config:
             if deploy_config['distributed']:
@@ -60,7 +64,7 @@ class Session():
                 self.worker_num = deploy_config['worker_num']
                 self.config = deploy_config['config']
 
-    def run(self, class_type=None, is_train=True, episode=0, duration=0, params=None, callbacks=None):
+    def run(self, class_type=None, is_train=True, episode=0, duration=0):
         """
         Execute the reinforcement learning algorithm.
 
@@ -69,8 +73,6 @@ class Session():
             is_train (bool): Run the algorithm in train mode or eval mode. Default: True
             episode (int): The number of episode of the training. Default: 0.
             duration (int): The number of duration of the training. Default: 0.
-            params (dict): The algorithm specific training parameters. Default: None.
-            callbacks (list[Callback]): The callback list. Default: None.
         """
 
         if self.dist:
@@ -80,15 +82,15 @@ class Session():
             workers = _Workers(self.msrl, fragment_list, duration, episode)
             workers.run()
         else:
-            if params is None:
+            if self.params is None:
                 trainer = class_type(self.msrl)
             else:
-                trainer = class_type(self.msrl, params)
+                trainer = class_type(self.msrl, self.params)
             ckpt_path = None
-            if params and 'ckpt_path' in params:
-                ckpt_path = params['ckpt_path']
+            if self.params and 'ckpt_path' in self.params:
+                ckpt_path = self.params['ckpt_path']
             if is_train:
-                trainer.train(episode, callbacks, ckpt_path)
+                trainer.train(episode, self.callbacks, ckpt_path)
                 print('training end')
             else:
                 if ckpt_path:

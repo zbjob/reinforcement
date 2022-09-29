@@ -16,11 +16,10 @@
 DQN eval example.
 """
 import argparse
-from src.dqn_trainer import DQNTrainer
-from src import config
-from mindspore_rl.core import Session
+from mindspore_rl.algorithm.dqn.dqn_trainer import DQNTrainer
+from mindspore_rl.algorithm.dqn import config
+from mindspore_rl.algorithm.dqn import DQNSession
 from mindspore import context
-from mindspore import dtype as mstype
 
 parser = argparse.ArgumentParser(description='MindSpore Reinforcement DQN')
 parser.add_argument('--device_target', type=str, default='Auto', choices=['Ascend', 'CPU', 'GPU', 'Auto'],
@@ -28,18 +27,15 @@ parser.add_argument('--device_target', type=str, default='Auto', choices=['Ascen
 parser.add_argument('--ckpt_path', type=str, default=None, help='The ckpt file in eval.')
 args = parser.parse_args()
 
+
 def dqn_eval():
     '''DQN evaluation entry'''
     if args.device_target != 'Auto':
         context.set_context(device_target=args.device_target)
-
-    compute_type = mstype.float16 if context.get_context('device_target') in ['Ascend'] else mstype.float32
-    config.algorithm_config['policy_and_network']['params']['compute_type'] = compute_type
-
     context.set_context(mode=context.GRAPH_MODE)
     config.trainer_params.update({'ckpt_path': args.ckpt_path})
-    dqn_session = Session(config.algorithm_config)
-    dqn_session.run(class_type=DQNTrainer, is_train=False, params=config.trainer_params)
+    dqn_session = DQNSession()
+    dqn_session.run(class_type=DQNTrainer, is_train=False)
 
 if __name__ == "__main__":
     dqn_eval()
