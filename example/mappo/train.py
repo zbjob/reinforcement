@@ -29,16 +29,19 @@ from src.mappo_trainer import MAPPOTrainer
 parser = argparse.ArgumentParser(description='MindSpore Reinforcement MAPPO')
 parser.add_argument('--episode', type=int, default=1500,
                     help='total episode numbers.')
-parser.add_argument('--device_target', type=str, default='GPU', choices=['GPU'],
+parser.add_argument('--device_target', type=str, default='Auto', choices=['Auto', 'GPU', 'CPU'],
                     help='Choose a device to run the mappo example(Default: GPU).')
 options, _ = parser.parse_known_args()
 
 
 def train(episode=options.episode):
     '''MAPPO train entry.'''
-    context.set_context(device_target=options.device_target)
+    if options.device_target != 'Auto':
+        context.set_context(device_target=options.device_target)
+    if context.get_context('device_target') in ['GPU']:
+        context.set_context(enable_graph_kernel=True)
 
-    context.set_context(mode=context.GRAPH_MODE, max_call_depth=100000, enable_graph_kernel=True)
+    context.set_context(mode=context.GRAPH_MODE, max_call_depth=100000)
     mappo_session = Session(config.algorithm_config)
     loss_cb = LossCallback()
     cbs = [loss_cb]

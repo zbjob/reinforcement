@@ -33,16 +33,14 @@ class VanillaMCTSWithTicTacToe(nn.Cell):
     A VanillaMCTS demo. In this demo, MCTS plays with a random player in the Tic-Tac-Toe.
     """
 
-    def __init__(self, max_iteration, uct, device):
+    def __init__(self, uct, device):
         super().__init__()
         self.env = TicTacToeEnvironment(None)
         vanilla_func = VanillaFunc(self.env)
-        uct = Tensor(uct, ms.float32)
-        max_action = -1.0
+        uct = (Tensor(uct, ms.float32),)
         root_player = 1.0
-        self.mcts = MCTS(self.env, "{}Common".format(device), "{}Vanilla".format(device), root_player,
-                         max_action, max_iteration, self.env.observation_space.shape, vanilla_func, False,
-                         device, uct)
+        self.mcts = MCTS(self.env, "{}Common".format(device), "{}Vanilla".format(device), root_player, vanilla_func,
+                         device, args=uct)
 
         self.false = Tensor(False, ms.bool_)
 
@@ -68,7 +66,7 @@ class VanillaMCTSWithTicTacToe(nn.Cell):
                 self.mcts.restore_tree_data(handle)
                 self.env.load(ckpt)
                 _, _, done = self.env.step(action[0])
-        self.mcts.destroy()
+        self.mcts.destroy(handle)
 
 
 @pytest.mark.level0
@@ -81,5 +79,5 @@ def test_mcts_cpu():
     Expectation: success.
     '''
 
-    vanilla_mcts = VanillaMCTSWithTicTacToe(1000, 2, "CPU")
+    vanilla_mcts = VanillaMCTSWithTicTacToe(2, "CPU")
     vanilla_mcts.run()

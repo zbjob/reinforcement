@@ -30,17 +30,14 @@ class VanillaMCTSWithTicTacToe(nn.Cell):
     A VanillaMCTS demo. In this demo, MCTS plays with a random player in the Tic-Tac-Toe.
     """
 
-    def __init__(self, max_iteration, uct, device):
+    def __init__(self, uct, device):
         super().__init__()
         self.env = TicTacToeEnvironment(None)
         vanilla_func = VanillaFunc(self.env)
-        uct = Tensor(uct, ms.float32)
-        max_action = -1.0
+        uct = (Tensor(uct, ms.float32),)
         root_player = 1.0
-        has_init_reward = False
-        self.mcts = MCTS(self.env, "{}Common".format(device), "{}Vanilla".format(device), root_player,
-                         max_action, max_iteration, self.env.observation_space.shape, vanilla_func,
-                         has_init_reward, device, uct)
+        self.mcts = MCTS(self.env, "{}Common".format(device), "{}Vanilla".format(device), root_player, vanilla_func,
+                         device, args=uct)
 
         self.false = Tensor(False, ms.bool_)
 
@@ -70,7 +67,7 @@ class VanillaMCTSWithTicTacToe(nn.Cell):
                 new_state, reward, done = self.env.step(action[0])
                 print("player 2 acts")
                 print(new_state)
-        self.mcts.destroy()
+        self.mcts.destroy(handle)
         if reward[0] == 0:
             print("Draw")
         elif reward[0] == 1:
@@ -82,5 +79,5 @@ class VanillaMCTSWithTicTacToe(nn.Cell):
 if __name__ == "__main__":
     DEVICE_TARGET = "CPU"
     context.set_context(mode=GRAPH_MODE, device_target=DEVICE_TARGET)
-    vanilla_mcts = VanillaMCTSWithTicTacToe(1000, 2, DEVICE_TARGET)
+    vanilla_mcts = VanillaMCTSWithTicTacToe(2, DEVICE_TARGET)
     vanilla_mcts.run()
