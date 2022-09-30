@@ -27,8 +27,8 @@ eval_env_params = {'name': 'HalfCheetah-v2'}
 policy_params = {
     'state_space_dim': 0,
     'action_space_dim': 0,
-    'hidden_size1': 256,
-    'hidden_size2': 256,
+    'hidden_sizes': [256, 256],
+    'conditioned_std': True
 }
 
 learner_params = {
