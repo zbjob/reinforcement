@@ -87,6 +87,7 @@ class DQNActor(Actor):
         self.print = P.Print()
 
     def act(self, phase, params):
+        '''act func'''
         if phase == 1:
             # Fill the replay buffer
             action = self.init_policy()
