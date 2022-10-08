@@ -13,8 +13,9 @@
 # limitations under the License.
 # ============================================================================
 """SAC Agent"""
+import numpy as np
 import mindspore
-from mindspore import Tensor
+from mindspore import Tensor, ops
 import mindspore.nn as nn
 from mindspore.ops import operations as P
 from mindspore.common.parameter import Parameter
@@ -36,60 +37,70 @@ class SACPolicy():
         SACActorNet is the actor network of SAC algorithm. It takes a set of state as input
         and outputs miu, sigma of a normal distribution
         """
-        def __init__(self, input_size, hidden_size1, hidden_size2, output_size, compute_type=mindspore.float32):
+        def __init__(self, input_size, hidden_sizes, output_size, hidden_act=nn.ReLU,
+                     conditioned_std=False, compute_type=mindspore.float32):
             super(SACPolicy.SACActorNet, self).__init__()
-            self.fc1 = nn.Dense(input_size,
-                                hidden_size1,
-                                weight_init='XavierUniform',
-                                activation='relu').to_float(compute_type)
-            self.fc2 = nn.Dense(hidden_size1,
-                                hidden_size2,
-                                weight_init='XavierUniform',
-                                activation='relu').to_float(compute_type)
-            self.fc3 = nn.Dense(hidden_size2,
-                                output_size * 2,
-                                weight_init='XavierUniform').to_float(compute_type)
-            self.split = P.Split(axis=-1, output_num=2)
-            self.exp = P.Exp()
-            self.max = P.Maximum()
+            in_size = input_size
+            model_list = []
+            for _, out_size in enumerate(hidden_sizes):
+                model_list.append(nn.Dense(in_size, out_size, weight_init='XavierUniform').to_float(compute_type))
+                model_list.append(hidden_act())
+                in_size = out_size
+            self.model = nn.SequentialCell(model_list)
+            self.last_fc = nn.Dense(in_size, output_size)
 
-        def construct(self, x):
+            self.conditioned_std = conditioned_std
+            if self.conditioned_std:
+                self.last_fc_log_std = nn.Dense(in_size,
+                                                output_size,
+                                                weight_init='XavierUniform').to_float(compute_type)
+            else:
+                self.action_log_std = Parameter(Tensor(np.zeros(1, output_size), mindspore.float32),
+                                                name="action_log_std",
+                                                requires_grad=True)
+            self.exp = ops.Exp()
+            self.tanh = ops.Tanh()
+
+
+        def construct(self, obs):
             """calculate miu and sigma"""
-            x = self.fc1(x)
-            x = self.fc2(x)
-            x = self.fc3(x)
-            means, stds = self.split(x)
-            # Clip stds to improve numeric stable
-            stds = self.max(stds, -5.0)
-            stds = self.exp(stds)
-            return means, stds
+            h = self.model(obs)
+            mean = self.last_fc(h)
+
+            if self.conditioned_std:
+                log_std = self.last_fc_log_std(h)
+                log_std = log_std.clip(-20, 2)
+            else:
+                log_std = self.action_log_std.broadcast_to(mean.shape)
+            std = self.exp(log_std)
+
+            action = self.tanh(mean)
+            return mean, std, action
 
     class SACCriticNet(nn.Cell):
         """
         SACCriticNet is the critic network of SAC algorithm. It takes a set of states as input
         and outputs the value of input state
         """
-        def __init__(self, obs_size, action_size, hidden_size1, hidden_size2,
-                     output_size, compute_type=mindspore.float32):
+        def __init__(self, obs_size, action_size, hidden_sizes, output_size,
+                     hidden_act=nn.ReLU, compute_type=mindspore.float32):
             super(SACPolicy.SACCriticNet, self).__init__()
             self.concat = P.Concat(axis=1)
-            self.fc1 = nn.Dense(obs_size + action_size,
-                                hidden_size1,
-                                weight_init='XavierUniform',
-                                activation='relu').to_float(compute_type)
-            self.fc2 = nn.Dense(hidden_size1,
-                                hidden_size2,
-                                weight_init='XavierUniform',
-                                activation='relu').to_float(compute_type)
-            self.fc3 = nn.Dense(hidden_size2, output_size, weight_init='XavierUniform').to_float(compute_type)
+            in_size = obs_size + action_size
+            model_list = []
+            for _, out_size in enumerate(hidden_sizes):
+                model_list.append(nn.Dense(in_size, out_size, weight_init='XavierUniform').to_float(compute_type))
+                model_list.append(hidden_act)
+                in_size = out_size
+            self.model = nn.SequentialCell(model_list)
+            self.last_fc = nn.Dense(in_size, output_size)
+
 
         def construct(self, obs, action):
             """predict value"""
             x = self.concat((obs, action))
-            x = self.fc1(x)
-            x = self.fc2(x)
-            x = self.fc3(x)
-            return x
+            y = self.model(x)
+            return y
 
     class RandomPolicy(nn.Cell):
         def __init__(self, action_space_dim):
@@ -108,7 +119,7 @@ class SACPolicy():
             self.dist = TanhMultivariateNormalDiag(reduce_axis=-1)
 
         def construct(self, obs):
-            means, stds = self.actor_net(obs)
+            means, stds, _ = self.actor_net(obs)
             actions = self.dist.sample((), means, stds)
             return actions
 
@@ -120,39 +131,35 @@ class SACPolicy():
             self.actor_net = actor_net
 
         def construct(self, obs):
-            means, _ = self.actor_net(obs)
-            return means
+            action, _, _ = self.actor_net(obs)
+            return action
 
     def __init__(self, params):
-        self.actor_net = self.SACActorNet(params['state_space_dim'],
-                                          params['hidden_size1'],
-                                          params['hidden_size2'],
-                                          params['action_space_dim'],
-                                          params['compute_type'])
-        self.critic_net1 = self.SACCriticNet(params['state_space_dim'],
-                                             params['action_space_dim'],
-                                             params['hidden_size1'],
-                                             params['hidden_size2'],
-                                             1,
-                                             params['compute_type'])
-        self.critic_net2 = self.SACCriticNet(params['state_space_dim'],
-                                             params['action_space_dim'],
-                                             params['hidden_size1'],
-                                             params['hidden_size2'],
-                                             1,
-                                             params['compute_type'])
-        self.target_critic_net1 = self.SACCriticNet(params['state_space_dim'],
-                                                    params['action_space_dim'],
-                                                    params['hidden_size1'],
-                                                    params['hidden_size2'],
-                                                    1,
-                                                    params['compute_type'])
-        self.target_critic_net2 = self.SACCriticNet(params['state_space_dim'],
-                                                    params['action_space_dim'],
-                                                    params['hidden_size1'],
-                                                    params['hidden_size2'],
-                                                    1,
-                                                    params['compute_type'])
+        self.actor_net = self.SACActorNet(input_size=params['state_space_dim'],
+                                          hidden_sizes=params['hidden_sizes'],
+                                          output_size=params['action_space_dim'],
+                                          conditioned_std=params['conditioned_std'],
+                                          compute_type=params['compute_type'])
+        self.critic_net1 = self.SACCriticNet(obs_size=params['state_space_dim'],
+                                             action_size=params['action_space_dim'],
+                                             hidden_sizes=params['hidden_sizes'],
+                                             output_size=1,
+                                             compute_type=params['compute_type'])
+        self.critic_net2 = self.SACCriticNet(obs_size=params['state_space_dim'],
+                                             action_size=params['action_space_dim'],
+                                             hidden_sizes=params['hidden_sizes'],
+                                             output_size=1,
+                                             compute_type=params['compute_type'])
+        self.target_critic_net1 = self.SACCriticNet(obs_size=params['state_space_dim'],
+                                                    action_size=params['action_space_dim'],
+                                                    hidden_sizes=params['hidden_sizes'],
+                                                    output_size=1,
+                                                    compute_type=params['compute_type'])
+        self.target_critic_net2 = self.SACCriticNet(obs_size=params['state_space_dim'],
+                                                    action_size=params['action_space_dim'],
+                                                    hidden_sizes=params['hidden_sizes'],
+                                                    output_size=1,
+                                                    compute_type=params['compute_type'])
 
         self.init_policy = self.RandomPolicy(params['action_space_dim'])
         self.collect_policy = self.CollectPolicy(self.actor_net)
@@ -227,7 +234,7 @@ class SACLearner(Learner):
 
         def construct(self, next_state, reward, state, action):
             """Calculate critic loss"""
-            next_means, next_stds = self.actor_net(next_state)
+            next_means, next_stds, _ = self.actor_net(next_state)
             next_action, next_log_prob = self.dist.sample_and_log_prob((), next_means, next_stds)
 
             target_q_value1 = self.target_critic_net1(next_state, next_action).squeeze(axis=-1)
@@ -257,7 +264,7 @@ class SACLearner(Learner):
             self.exp = P.Exp()
 
         def construct(self, state):
-            means, stds = self.actor_net(state)
+            means, stds, _ = self.actor_net(state)
             action, log_prob = self.dist.sample_and_log_prob((), means, stds)
 
             target_q_value1 = self.critic_net1(state, action)
@@ -277,7 +284,7 @@ class SACLearner(Learner):
             self.dist = TanhMultivariateNormalDiag(reduce_axis=-1)
 
         def construct(self, state_list):
-            means, stds = self.actor_net(state_list)
+            means, stds, _ = self.actor_net(state_list)
             _, log_prob = self.dist.sample_and_log_prob((), means, stds)
             entropy_diff = -log_prob - self.target_entropy
             alpha_loss = self.alpha * entropy_diff
