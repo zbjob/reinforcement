@@ -18,16 +18,21 @@ A3C training example.
 
 #pylint: disable=C0413
 import argparse
-from src import config
-from src.a3c_trainer import A3CTrainer
+from mindspore_rl.algorithm.a3c import config
+from mindspore_rl.algorithm.a3c.a3c_trainer import A3CTrainer
+from mindspore_rl.algorithm.a3c.a3c_session import A3CSession
 from mindspore import context
-from mindspore_rl.core import Session
+
 
 parser = argparse.ArgumentParser(description='MindSpore Reinforcement A3C')
 parser.add_argument('--episode', type=int, default=1000, help='total episode numbers.')
 parser.add_argument('--device_target', type=str, default='Auto', choices=['CPU', 'GPU', 'Auto'],
-                    help='Choose a device to run the ac example(Default: Auto).')
+                    help='Choose a device to run the a3c example(Default: Auto).')
 parser.add_argument('--actor_num', type=int, default=3, help='actor number')
+parser.add_argument('--env_yaml', type=str, default='../env_yaml/CartPole-v0.yaml',
+                    help='Choose an environment yaml to update the a3c example(Default: CartPole-v0.yaml).')
+parser.add_argument('--algo_yaml', type=str, default=None,
+                    help='Choose an algo yaml to update the a3c example(Default: None).')
 options, _ = parser.parse_known_args()
 
 
@@ -36,7 +41,7 @@ def train(episode=options.episode):
         context.set_context(device_target=options.device_target)
     context.set_context(mode=context.GRAPH_MODE)
     config.algorithm_config['actor']['number'] = options.actor_num
-    ac_session = Session(config.algorithm_config)
+    ac_session = A3CSession(options.env_yaml, options.algo_yaml)
     ac_session.run(class_type=A3CTrainer, episode=episode)
 
 if __name__ == "__main__":

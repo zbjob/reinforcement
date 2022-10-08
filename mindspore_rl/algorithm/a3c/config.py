@@ -19,7 +19,8 @@ A3C config.
 from mindspore_rl.environment import GymEnvironment
 from .a3c import A3CPolicyAndNetwork, A3CLearner, A3CActor
 
-env_params = {'name': 'CartPole-v0', 'seed': 42,}
+collect_env_params = {'name': 'CartPole-v0', 'seed': 42,}
+eval_env_params = {'name': 'CartPole-v0'}
 policy_params = {
     'state_space_dim': 4,
     'action_space_dim': 2,
@@ -54,13 +55,13 @@ algorithm_config = {
     'collect_environment': {
         'number': 1,
         'type': GymEnvironment,
-        'params': env_params,
+        'params': collect_env_params,
         'share_env': False,
     },
     'eval_environment': {
         'number': 1,
         'type': GymEnvironment,
-        'params': env_params,
+        'params': collect_env_params,
         'share_env': True,
     },
 }
