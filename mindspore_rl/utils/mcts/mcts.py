@@ -70,16 +70,11 @@ class MCTS(nn.Cell):
     def __init__(self, env, tree_type, node_type, root_player, customized_func, device,
                  args, has_init_reward=False, max_action=-1.0, max_iteration=1000):
         super().__init__()
-        if device.upper() not in ["GPU", "CPU"]:
+        if not isinstance(device, str) or device.upper() not in ["GPU", "CPU"]:
             raise ValueError("Device {} is illegal, it must in ['GPU','CPU'].".format(device))
-        if (root_player > env.total_num_player() or root_player < 0):
-            raise ValueError("root_player {} is illegal, it needs to in range [0, {})".format(
-                root_player, env.total_num_player()))
-        if not (isinstance(max_action, float) and isinstance(root_player, float)):
-            raise ValueError(
-                "max action/root player must be float, but got {} and {}".format(type(max_action), type(root_player)))
-        if (max_action != -1) and (max_action != len(env.legal_action())):
-            raise ValueError("max_action must be -1 or the largest legal action of environment, but got ", max_action)
+        self._check_params(AlgorithmFunc, customized_func, "customized_func")
+        self._check_params(int, max_iteration, "max_iteration")
+
         current_path = os.path.dirname(os.path.normpath(os.path.realpath(__file__)))
         so_path = current_path + "/libmcts_{}.so".format(device.lower())
         state_size = 1.0
@@ -91,14 +86,19 @@ class MCTS(nn.Cell):
             .input(0, "uct_value") \
             .output(0, "tree_handle") \
             .dtype_format(DataType.None_None, DataType.None_None) \
-            .attr("tree_type", "required", "all", value=tree_type) \
-            .attr("node_type", "required", "all", value=node_type) \
-            .attr("max_utility", "required", "all", value=env.max_utility()) \
-            .attr("state_size", "required", "all", value=state_size) \
-            .attr("player", "required", "all", value=root_player) \
-            .attr("total_num_player", "required", "all", value=env.total_num_player()) \
+            .attr("tree_type", "required", "all", value=self._check_params(str, tree_type, "tree_type")) \
+            .attr("node_type", "required", "all", value=self._check_params(str, node_type, "node_type")) \
+            .attr("max_utility", "required", "all", value=self._check_params(float, env.max_utility(), "max_utility")) \
+            .attr("state_size", "required", "all", value=self._check_params(float, state_size, "state_size")) \
+            .attr("player", "required", "all", value=self._check_params(float, root_player, "root_player")) \
+            .attr("total_num_player", "required", "all", value=self._check_params(float,
+                                                                                  env.total_num_player(),
+                                                                                  "total_num_player")) \
             .target(device) \
             .get_op_info()
+        if (root_player > env.total_num_player() or root_player < 0):
+            raise ValueError("root_player {} is illegal, it needs to in range [0, {})".format(
+                root_player, env.total_num_player()))
 
         mcts_creation = ops.Custom("{}:MctsCreation".format(so_path), (1,),
                                    ms.int64, "aot", reg_info=mcts_creation_info)
@@ -109,10 +109,12 @@ class MCTS(nn.Cell):
             .output(0, "visited_node") \
             .output(1, "last_action") \
             .dtype_format(DataType.None_None, DataType.None_None) \
-            .attr("max_action", "required", "all", value=max_action) \
-            .attr("tree_handle", "required", "all", value=tree_handle_numpy) \
+            .attr("max_action", "required", "all", value=self._check_params(float, max_action, "max_action")) \
+            .attr("tree_handle", "required", "all", value=self._check_params(float, tree_handle_numpy, "tree_handle")) \
             .target(device) \
             .get_op_info()
+        if (max_action != -1) and (max_action != len(env.legal_action())):
+            raise ValueError("max_action must be -1 or the largest legal action of environment, but got ", max_action)
         if max_action != -1:
             self.mcts_selection = ops.Custom("{}:MctsSelection".format(so_path),
                                              ((1,), (max_action,)), (ms.int64, ms.int32),
@@ -130,9 +132,10 @@ class MCTS(nn.Cell):
             .output(0, "success") \
             .dtype_format(DataType.None_None, DataType.None_None, DataType.None_None,
                           DataType.None_None, DataType.None_None) \
-            .attr("node_type", "required", "all", value=node_type) \
-            .attr("has_init_reward", "required", "all", value=has_init_reward) \
-            .attr("tree_handle", "required", "all", value=tree_handle_numpy) \
+            .attr("node_type", "required", "all", value=self._check_params(str, node_type, "node_type")) \
+            .attr("has_init_reward", "required", "all",
+                  value=self._check_params(bool, has_init_reward, "has_init_reward")) \
+            .attr("tree_handle", "required", "all", value=self._check_params(float, tree_handle_numpy, "tree_handle")) \
             .target(device) \
             .get_op_info()
         self.mcts_expansion = ops.Custom("{}:MctsExpansion".format(so_path), (1,),
@@ -143,7 +146,7 @@ class MCTS(nn.Cell):
             .input(1, "returns") \
             .output(0, "solved") \
             .dtype_format(DataType.None_None, DataType.None_None, DataType.None_None) \
-            .attr("tree_handle", "required", "all", value=tree_handle_numpy) \
+            .attr("tree_handle", "required", "all", value=self._check_params(float, tree_handle_numpy, "tree_handle")) \
             .target(device) \
             .get_op_info()
         self.mcts_backpropagation = ops.Custom(
@@ -153,7 +156,7 @@ class MCTS(nn.Cell):
         mcts_bestaction_info = CustomRegOp("add_with_attr_kernel") \
             .output(0, "action") \
             .dtype_format(DataType.None_None) \
-            .attr("tree_handle", "required", "all", value=tree_handle_numpy) \
+            .attr("tree_handle", "required", "all", value=self._check_params(float, tree_handle_numpy, "tree_handle")) \
             .target(device) \
             .get_op_info()
         self.best_action = ops.Custom("{}:BestAction".format(so_path),
@@ -164,7 +167,7 @@ class MCTS(nn.Cell):
             .input(1, "reward") \
             .output(0, "success") \
             .dtype_format(DataType.None_None, DataType.None_None, DataType.None_None) \
-            .attr("tree_handle", "required", "all", value=tree_handle_numpy) \
+            .attr("tree_handle", "required", "all", value=self._check_params(float, tree_handle_numpy, "tree_handle")) \
             .target(device) \
             .get_op_info()
         self.update_leafnode_outcome = ops.Custom(
@@ -176,7 +179,7 @@ class MCTS(nn.Cell):
             .input(1, "terminal") \
             .output(0, "success") \
             .dtype_format(DataType.None_None, DataType.None_None, DataType.None_None) \
-            .attr("tree_handle", "required", "all", value=tree_handle_numpy) \
+            .attr("tree_handle", "required", "all", value=self._check_params(float, tree_handle_numpy, "tree_handle")) \
             .target(device) \
             .get_op_info()
         self.update_leafnode_terminal = ops.Custom(
@@ -188,7 +191,7 @@ class MCTS(nn.Cell):
             .input(1, "state") \
             .output(0, "success") \
             .dtype_format(DataType.None_None, DataType.None_None, DataType.None_None) \
-            .attr("tree_handle", "required", "all", value=tree_handle_numpy) \
+            .attr("tree_handle", "required", "all", value=self._check_params(float, tree_handle_numpy, "tree_handle")) \
             .target(device) \
             .get_op_info()
         self.update_leafnode_state = ops.Custom("{}:UpdateLeafNodeState".format(
@@ -198,7 +201,7 @@ class MCTS(nn.Cell):
             .input(0, "state") \
             .output(0, "success") \
             .dtype_format(DataType.None_None, DataType.None_None) \
-            .attr("tree_handle", "required", "all", value=tree_handle_numpy) \
+            .attr("tree_handle", "required", "all", value=self._check_params(float, tree_handle_numpy, "tree_handle")) \
             .target(device) \
             .get_op_info()
         self.update_root_state = ops.Custom(
@@ -209,7 +212,7 @@ class MCTS(nn.Cell):
             .input(0, "visited_node") \
             .output(0, "state") \
             .dtype_format(DataType.None_None, DataType.None_None) \
-            .attr("tree_handle", "required", "all", value=tree_handle_numpy) \
+            .attr("tree_handle", "required", "all", value=self._check_params(float, tree_handle_numpy, "tree_handle")) \
             .target(device) \
             .get_op_info()
         self.get_last_state = ops.Custom("{}:GetLastState".format(so_path), state_shape,
@@ -218,7 +221,7 @@ class MCTS(nn.Cell):
         mcts_globalvar_info = CustomRegOp("add_with_attr_kernel") \
             .output(0, "success") \
             .dtype_format(DataType.None_None) \
-            .attr("tree_handle", "required", "all", value=tree_handle_numpy) \
+            .attr("tree_handle", "required", "all", value=self._check_params(float, tree_handle_numpy, "tree_handle")) \
             .target(device) \
             .get_op_info()
         self.update_global_variable = ops.Custom("{}:UpdateGlobalVariable".format(so_path), (1,),
@@ -227,7 +230,7 @@ class MCTS(nn.Cell):
         mcts_destroy_info = CustomRegOp("add_with_attr_kernel") \
             .output(0, "success") \
             .dtype_format(DataType.None_None) \
-            .attr("tree_handle", "required", "all", value=tree_handle_numpy) \
+            .attr("tree_handle", "required", "all", value=self._check_params(float, tree_handle_numpy, "tree_handle")) \
             .target(device) \
             .get_op_info()
         self.destroy_tree = ops.Custom("{}:DestroyTree".format(so_path),
@@ -237,7 +240,7 @@ class MCTS(nn.Cell):
             .input(0, "dummy_handle") \
             .output(0, "success") \
             .dtype_format(DataType.None_None, DataType.None_None) \
-            .attr("tree_handle", "required", "all", value=tree_handle_numpy) \
+            .attr("tree_handle", "required", "all", value=self._check_params(float, tree_handle_numpy, "tree_handle")) \
             .target(device) \
             .get_op_info()
         self.restore_tree = ops.Custom("{}:RestoreTree".format(so_path),
@@ -248,7 +251,7 @@ class MCTS(nn.Cell):
             .output(0, "value") \
             .output(1, 'norm_explore_count') \
             .dtype_format(DataType.None_None, DataType.None_None, DataType.None_None) \
-            .attr("tree_handle", "required", "all", value=tree_handle_numpy) \
+            .attr("tree_handle", "required", "all", value=self._check_params(float, tree_handle_numpy, "tree_handle")) \
             .target(device) \
             .get_op_info()
         self.get_root_info = ops.Custom("{}:GetRootInfo".format(so_path),
@@ -366,6 +369,12 @@ class MCTS(nn.Cell):
     def _get_root_information(self, dummpy_handle):
         """Does not support yet"""
         return self.get_root_info(dummpy_handle)
+
+    def _check_params(self, check_type, input_value, name):
+        """Check params type for input"""
+        if not isinstance(input_value, check_type):
+            raise TypeError(f"Input value {name} must be {str(check_type)}, but got {type(input_value)}")
+        return input_value
 
 
 class AlgorithmFunc(nn.Cell):
