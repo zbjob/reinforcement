@@ -1,4 +1,4 @@
-# Copyright 2021 Huawei Technologies Co., Ltd
+# Copyright 2022 Huawei Technologies Co., Ltd
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -12,3 +12,14 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # ============================================================================
+
+"""
+    Components for a2c.
+"""
+
+from mindspore_rl.algorithm.a2c import config
+from mindspore_rl.algorithm.a2c.a2c_session import A2CSession
+from mindspore_rl.algorithm.a2c.a2c_trainer import A2CTrainer
+from mindspore_rl.algorithm.a2c.a2c import A2CActor, A2CLearner, A2CPolicyAndNetwork
+
+__all__ = ["config", "A2CSession", "A2CActor", "A2CLearner", "A2CPolicyAndNetwork", "A2CTrainer"]
