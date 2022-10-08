@@ -23,7 +23,6 @@ from mindspore_rl.algorithm.ppo.ppo_trainer import PPOTrainer
 from mindspore_rl.algorithm.ppo.ppo_session import PPOSession
 from mindspore import context
 from mindspore import dtype as mstype
-from mindspore_rl.utils.callback import CheckpointCallback, LossCallback, EvaluateCallback
 
 parser = argparse.ArgumentParser(description='MindSpore Reinforcement PPO')
 parser.add_argument('--episode', type=int, default=650, help='total episode numbers.')
@@ -36,6 +35,7 @@ parser.add_argument('--env_yaml', type=str, default='../env_yaml/HalfCheetah-v2.
 parser.add_argument('--algo_yaml', type=str, default=None,
                     help='Choose an algo yaml to update the ppo example(Default: None).')
 options, _ = parser.parse_known_args()
+
 
 def train(episode=options.episode):
     '''PPO train entry.'''
@@ -52,6 +52,7 @@ def train(episode=options.episode):
     context.set_context(mode=context.GRAPH_MODE, max_call_depth=100000)
     ppo_session = PPOSession(options.env_yaml, options.algo_yaml)
     ppo_session.run(class_type=PPOTrainer, episode=episode)
+
 
 if __name__ == "__main__":
     train()

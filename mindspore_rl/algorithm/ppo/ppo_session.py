@@ -17,7 +17,6 @@ PPO session.
 """
 from mindspore_rl.core import Session
 from mindspore_rl.utils.utils import update_config
-from mindspore_rl.core import Session
 from mindspore_rl.utils.callback import CheckpointCallback, LossCallback, EvaluateCallback
 from mindspore_rl.algorithm.ppo import config
 
@@ -26,15 +25,15 @@ class PPOSession(Session):
     '''PPO session'''
     def __init__(self, env_yaml=None, algo_yaml=None):
         update_config(config, env_yaml, algo_yaml)
-        env_config = config.algorithm_config['collect_environment']
-        env = env_config['type'](env_config['params'])
+        env_config = config.algorithm_config.get('collect_environment')
+        env = env_config.get('type')(env_config.get('params'))
         env_num = config.algorithm_config.get('collect_environment').get('number')
         obs_shape, obs_dtype = env.observation_space.shape, env.observation_space.ms_dtype
         action_shape, action_dtype = env.action_space.shape, env.action_space.ms_dtype
         reward_shape, reward_dtype = env.reward_space.shape, env.reward_space.ms_dtype
         mu_shape, mu_dtype = action_shape, action_dtype
         sigma_shape, sigma_dtype = action_shape, action_dtype
-        replay_buffer_config = config.algorithm_config['replay_buffer']
+        replay_buffer_config = config.algorithm_config.get('replay_buffer')
         replay_buffer_config['data_shape'] = [(env_num, obs_shape[-1]), (env_num, action_shape[-1]),
                                               (env_num, reward_shape[-1]), (env_num, obs_shape[-1]),
                                               (env_num, mu_shape[-1]), (env_num, sigma_shape[-1])]

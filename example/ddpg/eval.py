@@ -31,6 +31,7 @@ parser.add_argument('--algo_yaml', type=str, default=None,
                     help='Choose an algo yaml to update the ddpg example(Default: None).')
 args = parser.parse_args()
 
+
 def ddpg_eval():
     if args.device_target != 'Auto':
         context.set_context(device_target=args.device_target)

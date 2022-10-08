@@ -17,7 +17,6 @@ QMIX config.
 """
 
 # pylint: disable=E0402
-import mindspore as ms
 from mindspore_rl.environment import StarCraft2Environment
 from mindspore_rl.core.uniform_replay_buffer import UniformReplayBuffer
 from .qmix import QMIXActor, QMIXLearner, QMIXPolicy

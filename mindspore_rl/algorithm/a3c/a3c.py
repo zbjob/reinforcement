@@ -134,6 +134,7 @@ class A3CActor(Actor):
         self.print = P.Print()
         self.loss_net = self.Loss(self.a3c_net)
 
+    #pylint: disable=W0221
     def act(self, phase, actor_id=0, weight_copy=None):
         '''Store returns into TensorArrays from env'''
         if phase == 2:
@@ -193,6 +194,7 @@ class A3CLearner(Learner):
         self.global_params = ParameterTuple(self.global_weight)
         self.optimizer = nn.Adam(self.global_weight, learning_rate=params['lr'])
 
+    #pylint: disable=W0221
     def learn(self, grads):
         '''update'''
         success = self.optimizer(grads)

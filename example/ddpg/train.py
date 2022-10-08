@@ -37,6 +37,7 @@ parser.add_argument('--algo_yaml', type=str, default=None,
 
 options, _ = parser.parse_known_args()
 
+
 def train(episode=options.episode):
     '''DDPG train entry.'''
     if options.device_target != 'Auto':
@@ -50,6 +51,7 @@ def train(episode=options.episode):
         raise ValueError("Fp16 mode is supported by Ascend backend.")
     ddpg_session = DDPGSession(options.env_yaml, options.algo_yaml)
     ddpg_session.run(class_type=DDPGTrainer, episode=episode)
+
 
 if __name__ == "__main__":
     train()

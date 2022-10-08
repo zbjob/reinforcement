@@ -31,6 +31,7 @@ parser.add_argument('--algo_yaml', type=str, default=None,
                     help='Choose an algo yaml to update the qmix example(Default: None).')
 args = parser.parse_args()
 
+
 def qmix_eval():
     if args.device_target != 'Auto':
         context.set_context(device_target=args.device_target)
@@ -38,6 +39,7 @@ def qmix_eval():
     config.trainer_params.update({'ckpt_path': args.ckpt_path})
     qmix_session = QMIXSession(args.env_yaml, args.algo_yaml)
     qmix_session.run(class_type=QMIXTrainer, is_train=False)
+
 
 if __name__ == "__main__":
     qmix_eval()

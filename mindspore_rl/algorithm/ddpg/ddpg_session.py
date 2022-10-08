@@ -17,7 +17,6 @@ DDPG session.
 """
 from mindspore_rl.core import Session
 from mindspore_rl.utils.utils import update_config
-from mindspore_rl.core import Session
 from mindspore_rl.utils.callback import CheckpointCallback, LossCallback, EvaluateCallback, TimeCallback
 from mindspore_rl.algorithm.ddpg import config
 
@@ -28,14 +27,14 @@ class DDPGSession(Session):
         update_config(config, env_yaml, algo_yaml)
         # Collect environment information and update replay buffer shape/dtype.
         # So the algorithm could change the environment type without aware of replay buffer schema.
-        env_config = config.algorithm_config['collect_environment']
-        env = env_config['type'](env_config['params'])
+        env_config = config.algorithm_config.get('collect_environment')
+        env = env_config.get('type')(env_config.get('params'))
         obs_shape, obs_dtype = env.observation_space.shape, env.observation_space.ms_dtype
         action_shape, action_dtype = env.action_space.shape, env.action_space.ms_dtype
         reward_shape, reward_dtype = env.reward_space.shape, env.reward_space.ms_dtype
         done_shape, done_dtype = env.done_space.shape, env.done_space.ms_dtype
 
-        replay_buffer_config = config.algorithm_config['replay_buffer']
+        replay_buffer_config = config.algorithm_config.get('replay_buffer')
         replay_buffer_config['data_shape'] = [obs_shape, action_shape, reward_shape, obs_shape, done_shape]
         replay_buffer_config['data_type'] = [obs_dtype, action_dtype, reward_dtype, obs_dtype, done_dtype]
 

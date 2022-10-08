@@ -15,8 +15,6 @@
 """
 PPO config.
 """
-
-import mindspore
 from mindspore_rl.environment import GymEnvironment
 from mindspore_rl.core.uniform_replay_buffer import UniformReplayBuffer
 from .ppo import PPOActor, PPOLearner, PPOPolicy

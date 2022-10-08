@@ -20,10 +20,8 @@ import argparse
 
 from mindspore import context
 
-from mindspore_rl.core import Session
-from mindspore_rl.utils.callback import LossCallback
-from src import config
-from src.mappo_trainer import MAPPOTrainer
+from mindspore_rl.algorithm.mappo.mappo_session import MAPPOSession
+from mindspore_rl.algorithm.mappo.mappo_trainer import MAPPOTrainer
 
 
 parser = argparse.ArgumentParser(description='MindSpore Reinforcement MAPPO')
@@ -31,6 +29,10 @@ parser.add_argument('--episode', type=int, default=1500,
                     help='total episode numbers.')
 parser.add_argument('--device_target', type=str, default='Auto', choices=['Auto', 'GPU', 'CPU'],
                     help='Choose a device to run the mappo example(Default: GPU).')
+parser.add_argument('--env_yaml', type=str, default='../env_yaml/simple_spread.yaml',
+                    help='Choose an environment yaml to update the mappo example(Default: simple_spread.yaml).')
+parser.add_argument('--algo_yaml', type=str, default=None,
+                    help='Choose an algo yaml to update the mappo example(Default: None).')
 options, _ = parser.parse_known_args()
 
 
@@ -42,10 +44,8 @@ def train(episode=options.episode):
         context.set_context(enable_graph_kernel=True)
 
     context.set_context(mode=context.GRAPH_MODE, max_call_depth=100000)
-    mappo_session = Session(config.algorithm_config)
-    loss_cb = LossCallback()
-    cbs = [loss_cb]
-    mappo_session.run(class_type=MAPPOTrainer, episode=episode, params=config.trainer_params, callbacks=cbs)
+    mappo_session = MAPPOSession(options.env_yaml, options.algo_yaml)
+    mappo_session.run(class_type=MAPPOTrainer, episode=episode)
 
 
 if __name__ == "__main__":

@@ -24,5 +24,4 @@ class A2CSession(Session):
     '''A2C session'''
     def __init__(self, env_yaml=None, algo_yaml=None):
         update_config(config, env_yaml, algo_yaml)
-        params = config.trainer_params
-        super().__init__(config.algorithm_config, None, params=params)
+        super().__init__(config.algorithm_config)
