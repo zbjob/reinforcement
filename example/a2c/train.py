@@ -28,9 +28,9 @@ parser.add_argument('--episode', type=int, default=10000, help='total episode nu
 parser.add_argument('--device_target', type=str, default='Auto', choices=['CPU', 'GPU', 'Auto'],
                     help='Choose a device to run the ac example(Default: Auto).')
 parser.add_argument('--env_yaml', type=str, default='../env_yaml/CartPole-v0.yaml',
-                    help='Choose an environment yaml to update the dqn example(Default: CartPole-v0.yaml).')
+                    help='Choose an environment yaml to update the a2c example(Default: CartPole-v0.yaml).')
 parser.add_argument('--algo_yaml', type=str, default=None,
-                    help='Choose an algo yaml to update the dqn example(Default: None).')
+                    help='Choose an algo yaml to update the a2c example(Default: None).')
 options, _ = parser.parse_known_args()
 
 

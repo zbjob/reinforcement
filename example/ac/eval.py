@@ -16,24 +16,29 @@
 AC eval example.
 """
 import argparse
-from src import config
-from src.ac_trainer import ACTrainer
-from mindspore_rl.core import Session
+from mindspore_rl.algorithm.ac import config
+from mindspore_rl.algorithm.ac import ACTrainer
+from mindspore_rl.algorithm.ac import ACSession
 from mindspore import context
 
 parser = argparse.ArgumentParser(description='MindSpore Reinforcement AC')
 parser.add_argument('--device_target', type=str, default='Auto', choices=['Ascend', 'CPU', 'GPU', 'Auto'],
                     help='Choose a device to run the ac example(Default: Auto).')
 parser.add_argument('--ckpt_path', type=str, default=None, help='The ckpt file in eval.')
+parser.add_argument('--env_yaml', type=str, default='../env_yaml/CartPole-v0.yaml',
+                    help='Choose an environment yaml to update the ac example(Default: CartPole-v0.yaml).')
+parser.add_argument('--algo_yaml', type=str, default=None,
+                    help='Choose an algo yaml to update the ac example(Default: None).')
 args = parser.parse_args()
+
 
 def ac_eval():
     if args.device_target != 'Auto':
         context.set_context(device_target=args.device_target)
     context.set_context(mode=context.GRAPH_MODE)
     config.trainer_params.update({'ckpt_path': args.ckpt_path})
-    ac_session = Session(config.algorithm_config)
-    ac_session.run(class_type=ACTrainer, is_train=False, params=config.trainer_params)
+    ac_session = ACSession(args.env_yaml, args.algo_yaml)
+    ac_session.run(class_type=ACTrainer, is_train=False)
 
 if __name__ == "__main__":
     ac_eval()

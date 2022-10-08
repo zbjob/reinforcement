@@ -18,17 +18,20 @@ AC training example.
 
 #pylint: disable=C0413
 import argparse
-from src import config
-from src.ac_trainer import ACTrainer
+from mindspore_rl.algorithm.ac.ac_trainer import ACTrainer
+from mindspore_rl.algorithm.ac.ac_session import ACSession
 from mindspore import context
-from mindspore_rl.core import Session
-from mindspore_rl.utils.callback import LossCallback, EvaluateCallback
 
 parser = argparse.ArgumentParser(description='MindSpore Reinforcement AC')
 parser.add_argument('--episode', type=int, default=1000, help='total episode numbers.')
 parser.add_argument('--device_target', type=str, default='Auto', choices=['Ascend', 'CPU', 'GPU', 'Auto'],
                     help='Choose a device to run the ac example(Default: Auto).')
+parser.add_argument('--env_yaml', type=str, default='../env_yaml/CartPole-v0.yaml',
+                    help='Choose an environment yaml to update the ac example(Default: CartPole-v0.yaml).')
+parser.add_argument('--algo_yaml', type=str, default=None,
+                    help='Choose an algo yaml to update the ac example(Default: None).')
 options, _ = parser.parse_known_args()
+
 
 def train(episode=options.episode):
     """start to train ac algorithm"""
@@ -37,11 +40,8 @@ def train(episode=options.episode):
     if context.get_context('device_target') in ['CPU']:
         context.set_context(enable_graph_kernel=True)
     context.set_context(mode=context.GRAPH_MODE)
-    ac_session = Session(config.algorithm_config)
-    loss_cb = LossCallback()
-    eval_cb = EvaluateCallback(10)
-    cbs = [loss_cb, eval_cb]
-    ac_session.run(class_type=ACTrainer, episode=episode, params=config.trainer_params, callbacks=cbs)
+    ac_session = ACSession(options.env_yaml, options.algo_yaml)
+    ac_session.run(class_type=ACTrainer, episode=episode)
 
 
 if __name__ == "__main__":

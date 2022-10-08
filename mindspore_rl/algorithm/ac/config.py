@@ -19,7 +19,8 @@ AC config.
 from mindspore_rl.environment import GymEnvironment
 from .ac import ACPolicyAndNetwork, ACLearner, ACActor
 
-env_params = {'name': 'CartPole-v0', 'seed': 42}
+collect_env_params = {'name': 'CartPole-v0', 'seed': 42}
+eval_env_params = {'name': 'CartPole-v0'}
 policy_params = {
     'state_space_dim': 4,
     'action_space_dim': 2,
@@ -55,11 +56,11 @@ algorithm_config = {
     'collect_environment': {
         'number': 1,
         'type': GymEnvironment,
-        'params': env_params
+        'params': collect_env_params
     },
     'eval_environment': {
         'number': 1,
         'type': GymEnvironment,
-        'params': env_params
+        'params': collect_env_params
     },
 }

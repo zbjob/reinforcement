@@ -24,8 +24,9 @@ from mindspore_rl.agent.learner import Learner
 from mindspore_rl.agent.actor import Actor
 import numpy as np
 
-seed = 16
-np.random.seed(seed)
+SEED = 16
+np.random.seed(SEED)
+
 
 class ACPolicyAndNetwork():
     '''ACPolicyAndNetwork'''
@@ -66,7 +67,7 @@ class ACPolicyAndNetwork():
             super(ACPolicyAndNetwork.CollectPolicy, self).__init__()
             self.actor_net = actor_net
             self.reshape = P.Reshape()
-            self.c_dist = msd.Categorical(dtype=mindspore.float32, seed=seed)
+            self.c_dist = msd.Categorical(dtype=mindspore.float32, seed=SEED)
 
         def construct(self, params):
             action_probs_t = self.actor_net(params)

@@ -13,16 +13,20 @@
 # limitations under the License.
 # ============================================================================
 """
-A2C session.
+AC session.
 """
 from mindspore_rl.core import Session
 from mindspore_rl.utils.utils import update_config
-from mindspore_rl.algorithm.a2c import config
+from mindspore_rl.utils.callback import LossCallback, EvaluateCallback
+from mindspore_rl.algorithm.ac import config
 
 
-class A2CSession(Session):
-    '''A2C session'''
+class ACSession(Session):
+    '''AC session'''
     def __init__(self, env_yaml=None, algo_yaml=None):
         update_config(config, env_yaml, algo_yaml)
         params = config.trainer_params
-        super().__init__(config.algorithm_config, None, params=params)
+        loss_cb = LossCallback()
+        eval_cb = EvaluateCallback(10)
+        cbs = [loss_cb, eval_cb]
+        super().__init__(config.algorithm_config, None, params=params, callbacks=cbs)
