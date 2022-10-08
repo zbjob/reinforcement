@@ -51,7 +51,8 @@ learner_params = {
 
 trainer_params = {
     'batch_size': BATCH_SIZE,
-    'ckpt_path': './ckpt'
+    'ckpt_path': './ckpt',
+    'save_per_episode': 50,
 }
 
 algorithm_config = {

@@ -26,8 +26,6 @@ class DDPGSession(Session):
     '''DDPG session'''
     def __init__(self, env_yaml=None, algo_yaml=None):
         update_config(config, env_yaml, algo_yaml)
-        
-
         # Collect environment information and update replay buffer shape/dtype.
         # So the algorithm could change the environment type without aware of replay buffer schema.
         env_config = config.algorithm_config['collect_environment']
@@ -42,8 +40,9 @@ class DDPGSession(Session):
         replay_buffer_config['data_type'] = [obs_dtype, action_dtype, reward_dtype, obs_dtype, done_dtype]
 
         loss_cb = LossCallback()
-        ckpt_cb = CheckpointCallback(50, config.trainer_params['ckpt_path'])
-        eval_cb = EvaluateCallback(10)
+        ckpt_cb = CheckpointCallback(config.trainer_params.get('save_per_episode'),
+                                     config.trainer_params.get('ckpt_path'))
+        eval_cb = EvaluateCallback(config.trainer_params.get('num_eval_episode'))
         time_cb = TimeCallback()
         cbs = [loss_cb, ckpt_cb, eval_cb, time_cb]
         params = config.trainer_params

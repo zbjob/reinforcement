@@ -47,6 +47,7 @@ trainer_params = {
     'batch_size': 64,
     'ckpt_path': './ckpt',
     'num_eval_episode': 10,
+    'save_per_episode': 50,
 }
 
 actor_params = {
