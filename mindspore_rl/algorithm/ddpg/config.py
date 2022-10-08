@@ -20,7 +20,7 @@ from mindspore_rl.environment import GymEnvironment
 from mindspore_rl.core.uniform_replay_buffer import UniformReplayBuffer
 from .ddpg import DDPGActor, DDPGLearner, DDPGPolicy
 
-env_params = {'name': 'HalfCheetah-v2'}
+collect_env_params = {'name': 'HalfCheetah-v2'}
 eval_env_params = {'name': 'HalfCheetah-v2'}
 
 policy_params = {
@@ -76,7 +76,7 @@ algorithm_config = {
     'collect_environment': {
         'number': 1,
         'type': GymEnvironment,
-        'params': env_params
+        'params': collect_env_params
     },
     'eval_environment': {
         'number': 1,
