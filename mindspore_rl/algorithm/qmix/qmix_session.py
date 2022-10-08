@@ -19,8 +19,6 @@ from mindspore_rl.core import Session
 from mindspore_rl.utils.utils import update_config
 from mindspore_rl.utils.callback import CheckpointCallback, LossCallback, Callback
 from mindspore_rl.algorithm.qmix import config
-from mindspore import context
-from mindspore import dtype as mstype
 
 
 class StepInfoCollectCallback(Callback):

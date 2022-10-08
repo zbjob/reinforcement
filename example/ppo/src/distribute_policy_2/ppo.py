@@ -118,5 +118,5 @@ ppo_algorithm_config = {
 deploy_config = {'distributed': True, 'parallel': False, 'worker_num': 2,
                  'config': {'0': {'ip': 'tcp://0.0.0.0:4243', 'type': 'learner_with_action'}}}
 
-ppo_session = Session(ppo_algorithm_config, deploy_config)
-ppo_session.run(class_type=PPOTrainer, episode=EPISODE, duration=DURATION, params=trainer_params)
+ppo_session = Session(ppo_algorithm_config, deploy_config, params=trainer_params)
+ppo_session.run(class_type=PPOTrainer, episode=EPISODE, duration=DURATION)

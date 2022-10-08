@@ -16,8 +16,8 @@
 PPO eval example.
 """
 import argparse
-from src.ppo_trainer import PPOTrainer
-from src import config
+from mindspore_rl.algorithm.ppo.ppo_trainer import PPOTrainer
+from mindspore_rl.algorithm.ppo import config
 from mindspore_rl.core import Session
 from mindspore import context
 

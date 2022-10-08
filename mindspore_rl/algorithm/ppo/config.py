@@ -21,7 +21,7 @@ from mindspore_rl.environment import GymEnvironment
 from mindspore_rl.core.uniform_replay_buffer import UniformReplayBuffer
 from .ppo import PPOActor, PPOLearner, PPOPolicy
 
-env_params = {'name': 'HalfCheetah-v2'}
+collect_env_params = {'name': 'HalfCheetah-v2'}
 eval_env_params = {'name': 'HalfCheetah-v2'}
 
 policy_params = {
@@ -47,6 +47,7 @@ trainer_params = {
     'batch_size': 1,
     'ckpt_path': './ckpt',
     'num_eval_episode': 30,
+    'num_save_episode': 50,
 }
 
 algorithm_config = {
@@ -69,7 +70,7 @@ algorithm_config = {
         'number': 30,
         'num_parallel': 5,
         'type': GymEnvironment,
-        'params': env_params
+        'params': collect_env_params
     },
     'eval_environment': {
         'number': 1,
@@ -80,10 +81,5 @@ algorithm_config = {
         'number': 1,
         'type': UniformReplayBuffer,
         'capacity': 1000,
-        'data_shape': [(30, 17), (30, 6), (30, 1), (30, 17), (30, 6), (30, 6)],
-        'data_type': [
-            mindspore.float32, mindspore.float32, mindspore.float32,
-            mindspore.float32, mindspore.float32, mindspore.float32,
-        ],
     }
 }
