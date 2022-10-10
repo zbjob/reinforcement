@@ -64,7 +64,13 @@ class MCTS(nn.Cell):
             +------------------------------+-----------------+--------------------------------------------------------+
 
     Examples:
-        >>> mcts = MCTS()
+        >>> env = TicTacToeEnvironment(None)
+        >>> vanilla_func = VanillaFunc(env)
+        >>> uct = (Tensor(uct, ms.float32),)
+        >>> root_player = 0.0
+        >>> mcts = MCTS(env, "CPUCommon", "CPUVanilla", root_player, vanilla_func, device, args=uct)
+        >>> action, handle = mcts.mcts_search()
+        >>> print(action)
     """
 
     def __init__(self, env, tree_type, node_type, root_player, customized_func, device,
