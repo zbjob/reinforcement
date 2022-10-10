@@ -257,6 +257,7 @@ class MAPPOAgent(nn.Cell):
         return 0
 
 
+#pylint: disable=W0223
 class MAPPOActor(Actor):
     """This is the actor class of MAPPO, which is used to obtain the actions of each agent"""
     def __init__(self, params):
@@ -269,6 +270,7 @@ class MAPPOActor(Actor):
         self.zero_float = Tensor(0, ms.float32)
         self.one_float = Tensor(1, ms.float32)
 
+    #pylint: disable=W0221
     def act(self, inputs_data):
         """Use collect policy to calculate the action"""
         local_obs, global_obs, hn_actor, hn_critic, masks, num_agent, onehot_action, \
@@ -448,6 +450,7 @@ class MAPPOLearner(Learner):
         self.print = P.Print()
         self.slice = P.Slice()
 
+    #pylint: disable=W0221
     def learn(self, samples):
         """The learn method of MAPPO, it will calculate the loss and update the neural network"""
         local_obs, hn_actor, hn_critic, mask, actions, log_prob, value, reward, global_obs = samples

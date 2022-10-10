@@ -23,6 +23,7 @@ import mindspore.nn as nn
 from mindspore.ops import operations as ops
 from mindspore import ms_function
 
+
 class A2CTrainer(Trainer):
     '''A2CTrainer'''
     def __init__(self, msrl):
@@ -44,8 +45,9 @@ class A2CTrainer(Trainer):
                 if running_reward > 195 and i >= 100:
                     print(f'\nSolved at episode {i}: average reward: {running_reward:.2f}.')
                     break
-                if i == episodes -1:
+                if i == episodes - 1:
                     print(f'\nFailed to solved this problem after running {episodes} episodes.')
+
     @ms_function
     def train_one_episode(self):
         '''Train one episode'''

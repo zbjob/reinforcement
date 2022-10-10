@@ -13,80 +13,77 @@
 # limitations under the License.
 # ============================================================================
 """
-DDPG config.
+QMIX config.
 """
 
-from mindspore_rl.environment import GymEnvironment
+# pylint: disable=E0402
+from mindspore_rl.environment import StarCraft2Environment
 from mindspore_rl.core.uniform_replay_buffer import UniformReplayBuffer
-from .ddpg import DDPGActor, DDPGLearner, DDPGPolicy
+from .qmix import QMIXActor, QMIXLearner, QMIXPolicy
 
-env_params = {'name': 'HalfCheetah-v2'}
-eval_env_params = {'name': 'HalfCheetah-v2'}
+BATCH_SIZE = 32
+collect_env_params = {'sc2_args': {'map_name': '2s3z',
+                                   'seed': 1}}
+
+eval_env_params = {'sc2_args': {'map_name': '2s3z'}}
 
 policy_params = {
-    'epsilon': 0.2,
+    'epsi_high': 1.0,
+    'epsi_low': 0.05,
+    'decay': 200,
     'state_space_dim': 0,
     'action_space_dim': 0,
-    'hidden_size1': 400,
-    'hidden_size2': 300,
+    'hidden_size': 64,
+    'embed_dim': 32,
+    'hypernet_embed': 64,
+    'time_length': 50000,
+    'batch_size': BATCH_SIZE,
 }
 
 learner_params = {
-    'gamma': 0.995,
-    'state_space_dim': 0,
-    'action_space_dim': 0,
-    'actor_lr': 1e-4,
-    'critic_lr': 1e-3,
-    'update_factor': 0.05,
-    'update_interval': 5
+    'lr': 0.0005,
+    'gamma': 0.99,
+    'optim_alpha': 0.99,
+    'epsilon': 1e-5,
+    'batch_size': BATCH_SIZE,
 }
 
 trainer_params = {
-    'init_collect_size': 1000,
-    'duration': 1000,
-    'batch_size': 64,
+    'batch_size': BATCH_SIZE,
     'ckpt_path': './ckpt',
-    'num_eval_episode': 10,
-}
-
-actor_params = {
-    "damping": 0.15,
-    "stddev": 0.2
+    'save_per_episode': 50,
 }
 
 algorithm_config = {
     'actor': {
         'number': 1,
-        'type': DDPGActor,
-        'params': actor_params,
-        'policies': [],
-        'networks': ['actor_net'],
-
+        'type': QMIXActor,
+        'policies': ['collect_policy', 'eval_policy'],
     },
     'learner': {
         'number': 1,
-        'type': DDPGLearner,
+        'type': QMIXLearner,
         'params': learner_params,
-        'networks': ['actor_net', 'target_actor_net', 'critic_net', 'target_critic_net']
+        'networks': ['policy_net', 'mixer_net']
     },
     'policy_and_network': {
-        'type': DDPGPolicy,
+        'type': QMIXPolicy,
         'params': policy_params
     },
     'collect_environment': {
         'number': 1,
-        'type': GymEnvironment,
-        'params': env_params
+        'type': StarCraft2Environment,
+        'params': collect_env_params
     },
     'eval_environment': {
         'number': 1,
-        'type': GymEnvironment,
+        'type': StarCraft2Environment,
         'params': eval_env_params
     },
     'replay_buffer': {
         'number': 1,
         'type': UniformReplayBuffer,
-        'capacity': 100000,
-        'sample_size': 64
+        'capacity': 5000,
+        'sample_size': BATCH_SIZE,
     }
 }

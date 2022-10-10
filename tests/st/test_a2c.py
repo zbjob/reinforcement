@@ -19,17 +19,10 @@ Test case for A2C training.
 #pylint: disable=C0413
 #pylint: disable=C0411
 #pylint: disable=W0611
-import os
-import sys
-ROOT_PATH = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-MODEL_PATH = os.path.join(ROOT_PATH, 'example')
-sys.path.insert(0, MODEL_PATH)
-
 import pytest
-from a2c.src import config
-from a2c.src.a2c_trainer import A2CTrainer
 from mindspore import context
-from mindspore_rl.core import Session
+from mindspore_rl.algorithm.a2c import A2CSession
+from mindspore_rl.algorithm.a2c import A2CTrainer
 
 
 @pytest.mark.level0
@@ -43,6 +36,6 @@ def test_train_a2c():
     Expectation: success.
     '''
     context.set_context(mode=context.GRAPH_MODE)
-    ac_session = Session(config.algorithm_config)
+    ac_session = A2CSession()
     ac_session.run(class_type=A2CTrainer, episode=5)
     assert True

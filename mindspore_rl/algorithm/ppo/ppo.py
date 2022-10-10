@@ -116,6 +116,7 @@ class PPOPolicy():
             super(PPOPolicy.CollectPolicy, self).__init__()
             self.actor_net = actor_net
             self.norm_dist = msd.Normal()
+
         def construct(self, params):
             miu, sigma = self.actor_net(params)
             action = self.norm_dist.sample((), miu, sigma)
@@ -127,6 +128,7 @@ class PPOPolicy():
         def __init__(self, actor_net):
             super(PPOPolicy.EvalPolicy, self).__init__()
             self.actor_net = actor_net
+
         def construct(self, params):
             miu, _ = self.actor_net(params)
             return miu

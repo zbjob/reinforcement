@@ -25,8 +25,8 @@ import mindspore.nn.probability.distribution as msd
 from mindspore.ops import operations as P
 import numpy as np
 
-seed = 42
-np.random.seed(seed)
+SEED = 42
+np.random.seed(SEED)
 
 
 class A2CPolicyAndNetwork():
@@ -92,6 +92,7 @@ class A2CPolicyAndNetwork():
         self.a2c_net_train = nn.TrainOneStepCell(loss_net, optimizer)
         self.a2c_net_train.set_train(mode=True)
 
+
 #pylint: disable=W0223
 class A2CActor(Actor):
     '''A2C Actor'''
@@ -103,7 +104,7 @@ class A2CActor(Actor):
         self._environment = params['collect_environment']
         loop_size = 200
         self.loop_size = Tensor(loop_size, mindspore.int64)
-        self.c_dist = msd.Categorical(dtype=mindspore.float32, seed=seed)
+        self.c_dist = msd.Categorical(dtype=mindspore.float32, seed=SEED)
         self.expand_dims = P.ExpandDims()
         self.reshape = P.Reshape()
         self.cast = P.Cast()

@@ -567,5 +567,5 @@ ppo_algorithm_config = {
     }
 }
 
-ppo_session = Session(ppo_algorithm_config)
-ppo_session.run(class_type=PPOTrainer, episode=EPISODE, duration=DURATION, params=trainer_params)
+ppo_session = Session(ppo_algorithm_config, params=trainer_params)
+ppo_session.run(class_type=PPOTrainer, episode=EPISODE, duration=DURATION)

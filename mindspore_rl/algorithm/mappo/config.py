@@ -16,13 +16,11 @@
 MAPPO config.
 """
 #pylint: disable=E0402
-import mindspore as ms
-
 from .mappo import MAPPOAgent, MAPPOActor, MAPPOLearner, MAPPOPolicy
 from .mappo_replaybuffer import MAPPOReplayBuffer
 from .mpe_environment import MPEMultiEnvironment
 
-env_params = {'name': 'simple_spread', 'proc_num': 32, 'num': 128}
+collect_env_params = {'name': 'simple_spread', 'proc_num': 32, 'num': 128}
 eval_env_params = {'name': 'simple_spread', 'proc_num': 1, 'num': 1}
 
 policy_params = {
@@ -76,24 +74,18 @@ algorithm_config = {
             'number': NUM_AGENT,
             'type': MAPPOReplayBuffer,
             'capacity': 26,
-            'data_shape': [(128, NUM_AGENT * 6), (128, 1, 64), (128, 1, 64),
-                           (128, 1), (128, 1), (128, 1), (128, 1), (128, 1)],
-            'data_type': [ms.float32, ms.float32, ms.float32,
-                          ms.float32, ms.int32, ms.float32, ms.float32, ms.float32],
         },
         'global_replaybuffer': {
             'number': 1,
             'type': MAPPOReplayBuffer,
             'capacity': 26,
-            'data_shape': [(128, NUM_AGENT * NUM_AGENT * 6)],
-            'data_type': [ms.float32],
         }
 
     },
 
     'collect_environment': {
         'type': MPEMultiEnvironment,
-        'params': env_params
+        'params': collect_env_params
     },
     'eval_environment': {
         'type': MPEMultiEnvironment,

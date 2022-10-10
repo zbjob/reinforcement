@@ -1,4 +1,4 @@
-# Copyright 2022 Huawei Technologies Co., Ltd
+# Copyright 2021 Huawei Technologies Co., Ltd
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -13,82 +13,71 @@
 # limitations under the License.
 # ============================================================================
 """
-QMIX config.
+PPO config.
 """
-
-# pylint: disable=E0402
-import mindspore as ms
-from mindspore_rl.environment import StarCraft2Environment
+from mindspore_rl.environment import GymEnvironment
 from mindspore_rl.core.uniform_replay_buffer import UniformReplayBuffer
-from .qmix import QMIXActor, QMIXLearner, QMIXPolicy
+from .ppo import PPOActor, PPOLearner, PPOPolicy
 
-BATCH_SIZE = 32
-collect_env_params = {'sc2_args': {'map_name': '2s3z',
-                                   'seed': 1}}
-
-eval_env_params = {'sc2_args': {'map_name': '2s3z'}}
+collect_env_params = {'name': 'HalfCheetah-v2'}
+eval_env_params = {'name': 'HalfCheetah-v2'}
 
 policy_params = {
-    'epsi_high': 1.0,
-    'epsi_low': 0.05,
-    'decay': 200,
     'state_space_dim': 0,
     'action_space_dim': 0,
-    'hidden_size': 64,
-    'embed_dim': 32,
-    'hypernet_embed': 64,
-    'time_length': 50000,
-    'batch_size': BATCH_SIZE,
+    'hidden_size1': 200,
+    'hidden_size2': 100,
+    'sigma_init_std': 0.35,
 }
 
 learner_params = {
-    'lr': 0.0005,
     'gamma': 0.99,
-    'optim_alpha': 0.99,
-    'epsilon': 1e-5,
-    'batch_size': BATCH_SIZE,
+    'state_space_dim': 0,
+    'action_space_dim': 0,
+    'iter_times': 25,
+    'epsilon': 0.2,
+    'lr': 1e-3,
+    'critic_coef': 0.5,
 }
 
 trainer_params = {
-    'batch_size': BATCH_SIZE,
-    'ckpt_path': './ckpt'
+    'duration': 1000,
+    'batch_size': 1,
+    'ckpt_path': './ckpt',
+    'num_eval_episode': 30,
+    'num_save_episode': 50,
 }
 
 algorithm_config = {
     'actor': {
         'number': 1,
-        'type': QMIXActor,
+        'type': PPOActor,
         'policies': ['collect_policy', 'eval_policy'],
     },
     'learner': {
         'number': 1,
-        'type': QMIXLearner,
+        'type': PPOLearner,
         'params': learner_params,
-        'networks': ['policy_net', 'mixer_net']
+        'networks': ['actor_net', 'critic_net']
     },
     'policy_and_network': {
-        'type': QMIXPolicy,
+        'type': PPOPolicy,
         'params': policy_params
     },
     'collect_environment': {
-        'number': 1,
-        'type': StarCraft2Environment,
+        'number': 30,
+        'num_parallel': 5,
+        'type': GymEnvironment,
         'params': collect_env_params
     },
     'eval_environment': {
         'number': 1,
-        'type': StarCraft2Environment,
+        'type': GymEnvironment,
         'params': eval_env_params
     },
     'replay_buffer': {
         'number': 1,
         'type': UniformReplayBuffer,
-        'capacity': 5000,
-        'data_shape': [(121, 5, 96), (121, 120), (121, 5, 1), (121, 5, 11), (121, 1), (121, 1), (121, 1), (121, 5, 64)],
-        'data_type': [
-            ms.float32, ms.float32, ms.int32, ms.int32,
-            ms.float32, ms.bool_, ms.int32, ms.float32
-        ],
-        'sample_size': BATCH_SIZE,
+        'capacity': 1000,
     }
 }

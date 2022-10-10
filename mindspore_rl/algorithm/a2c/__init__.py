@@ -1,4 +1,4 @@
-# Copyright 2021-2022 Huawei Technologies Co., Ltd
+# Copyright 2022 Huawei Technologies Co., Ltd
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -12,28 +12,14 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # ============================================================================
-'''
-Test case for AC training.
-'''
 
-#pylint: disable=C0413
-#pylint: disable=C0411
-#pylint: disable=W0611
-import pytest
-from mindspore import context
-from mindspore_rl.algorithm.ac import ACSession
-from mindspore_rl.algorithm.ac import ACTrainer
+"""
+    Components for a2c.
+"""
 
+from mindspore_rl.algorithm.a2c import config
+from mindspore_rl.algorithm.a2c.a2c_session import A2CSession
+from mindspore_rl.algorithm.a2c.a2c_trainer import A2CTrainer
+from mindspore_rl.algorithm.a2c.a2c import A2CActor, A2CLearner, A2CPolicyAndNetwork
 
-@pytest.mark.level0
-@pytest.mark.platform_x86_gpu_training
-@pytest.mark.platform_x86_cpu
-@pytest.mark.env_onecard
-def test_train_ac():
-    '''
-    Train the AC.
-    '''
-    context.set_context(mode=context.GRAPH_MODE)
-    ac_session = ACSession()
-    ac_session.run(class_type=ACTrainer, episode=5)
-    assert True
+__all__ = ["config", "A2CSession", "A2CActor", "A2CLearner", "A2CPolicyAndNetwork", "A2CTrainer"]

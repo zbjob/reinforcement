@@ -1,4 +1,4 @@
-# Copyright 2021 Huawei Technologies Co., Ltd
+# Copyright 2022 Huawei Technologies Co., Ltd
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -12,3 +12,16 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # ============================================================================
+"""
+A2C session.
+"""
+from mindspore_rl.core import Session
+from mindspore_rl.utils.utils import update_config
+from mindspore_rl.algorithm.a2c import config
+
+
+class A2CSession(Session):
+    '''A2C session'''
+    def __init__(self, env_yaml=None, algo_yaml=None):
+        update_config(config, env_yaml, algo_yaml)
+        super().__init__(config.algorithm_config)

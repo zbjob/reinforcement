@@ -121,6 +121,7 @@ class DDPGPolicy():
                                                     1,
                                                     params['compute_type'])
 
+
 class DDPGActor(Actor):
     """This is an actor class of DDPG algorithm, which is used to interact with environment, and
     generate/insert experience (data) """

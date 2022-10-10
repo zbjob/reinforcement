@@ -21,6 +21,7 @@ from mindspore.ops import operations as P
 from mindspore_rl.agent.trainer import Trainer
 from mindspore_rl.agent import trainer
 
+
 #pylint: disable=W0212
 class PPOTrainer(Trainer):
     """This is the trainer class of PPO algorithm. It arranges the PPO algorithm"""
