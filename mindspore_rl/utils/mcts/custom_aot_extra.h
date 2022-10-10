@@ -24,7 +24,7 @@
 class AotKernelData {
  public:
   AotKernelData() = default;
-  virtual ~AotKernelData() = 0;
+  virtual ~AotKernelData() = default;
 };
 
 class AotExtra {
