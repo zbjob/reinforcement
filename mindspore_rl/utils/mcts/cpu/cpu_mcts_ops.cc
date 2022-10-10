@@ -481,21 +481,18 @@ extern "C" int DestroyTreeInit(int *ndims, int64_t **shapes, const char **dtypes
 
 extern "C" int DestroyTree(int nparam, void **params, int *ndims, int64_t **shapes, const char **dtypes, void *stream,
                            void *extra) {
-  // Input Attr
-  // GetLastState has 1 input attr
-  // 1. The unique tree handle
-  AotExtra *extra_aot = static_cast<AotExtra *>(extra);
-  auto kernel_ptr = static_cast<DestroyTreeAttr *>(extra_aot->KernelData());
-  int64_t tree_handle = static_cast<int64_t>(kernel_ptr->tree_handle);
+  // Input value
+  // Unique tree handle
+  int64_t *tree_handle = static_cast<int64_t *>(params[0]);
   // Output value
   // Whether the destroy executes successfully.
   bool *output = static_cast<bool *>(params[1]);
-  auto tree = MonteCarloTreeFactory::GetInstance().GetTreeByHandle(tree_handle);
+  auto tree = MonteCarloTreeFactory::GetInstance().GetTreeByHandle(*tree_handle);
   if (tree == nullptr) {
     return kErrorCode;
   }
-  MonteCarloTreeFactory::GetInstance().DeleteTree(tree_handle);
-  MonteCarloTreeFactory::GetInstance().DeleteTreeVariable(tree_handle);
+  MonteCarloTreeFactory::GetInstance().DeleteTree(*tree_handle);
+  MonteCarloTreeFactory::GetInstance().DeleteTreeVariable(*tree_handle);
   bool ret = true;
   tree->Memcpy(output, &ret, sizeof(bool));
   return 0;
@@ -515,19 +512,17 @@ extern "C" int RestoreTreeInit(int *ndims, int64_t **shapes, const char **dtypes
 
 extern "C" int RestoreTree(int nparam, void **params, int *ndims, int64_t **shapes, const char **dtypes, void *stream,
                            void *extra) {
-  // Input Attr
-  // GetLastState has 1 input attr
-  // 1. The unique tree handle
-  AotExtra *extra_aot = static_cast<AotExtra *>(extra);
-  auto kernel_ptr = static_cast<RestoreTreeAttr *>(extra_aot->KernelData());
-  int64_t tree_handle = static_cast<int64_t>(kernel_ptr->tree_handle);
+  // Input Value
+  // Unique tree handle
+  int64_t *tree_handle = static_cast<int64_t *>(params[0]);
   // Output Value
   // Whether restore success
   bool *output = static_cast<bool *>(params[1]);
-  auto tree = MonteCarloTreeFactory::GetInstance().GetTreeByHandle(tree_handle);
+  auto tree =
+      MonteCarloTreeFactory::GetInstance().GetTreeByHandle(*tree_handle);
   if (tree == nullptr) {
     return kErrorCode;
-  }
+    }
   tree->Restore();
   bool ret = true;
   tree->Memcpy(output, &ret, sizeof(bool));
