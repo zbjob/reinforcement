@@ -45,6 +45,7 @@ class MCTS(nn.Cell):
         env (Environment): It must be the subclass of Environment.
         tree_type (string): The name of tree type.
         node_type (string): The name of node type.
+        root_player (float): The root player, which should be less than the total number of player.
         customized_func (nn.Cell): Some algorithm specific codes. For more detail, please have a look at
             documentation of AlgorithmBasedFunc.
         device (string): The device type in ["CPU", "GPU"], Ascend is not support yet.
