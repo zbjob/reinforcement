@@ -234,8 +234,9 @@ class MCTS(nn.Cell):
                                                  (ms.bool_), "aot", reg_info=mcts_globalvar_info)
 
         mcts_destroy_info = CustomRegOp("add_with_attr_kernel") \
+            .input(0, "handle") \
             .output(0, "success") \
-            .dtype_format(DataType.None_None) \
+            .dtype_format(DataType.None_None, DataType.None_None) \
             .attr("tree_handle", "required", "all", value=self._check_params(float, tree_handle_numpy, "tree_handle")) \
             .target(device) \
             .get_op_info()
