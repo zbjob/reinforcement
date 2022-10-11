@@ -20,7 +20,8 @@ from .mappo import MAPPOAgent, MAPPOActor, MAPPOLearner, MAPPOPolicy
 from .mappo_replaybuffer import MAPPOReplayBuffer
 from .mpe_environment import MPEMultiEnvironment
 
-collect_env_params = {'name': 'simple_spread', 'proc_num': 32, 'num': 128}
+NUM_AGENT = 3
+collect_env_params = {'name': 'simple_spread', 'proc_num': 32, 'num': 128, 'num_agent': NUM_AGENT}
 eval_env_params = {'name': 'simple_spread', 'proc_num': 1, 'num': 1}
 
 policy_params = {
@@ -43,7 +44,6 @@ trainer_params = {
     'ckpt_path': './ckpt',
 }
 
-NUM_AGENT = 3
 algorithm_config = {
 
     'agent': {

@@ -12,16 +12,7 @@
 
 ## 如何运行MAPPO
 
-首先需要从[此处](https://github.com/marlbenchmark/on-policy/tree/main/onpolicy)下载MPE环境，并拷贝`onpolicy/onpolicy/envs/mpe`到当前文件夹下。当成功拷贝环境后，需要对mpe环境打上patch。
-
-```shell
-git clone https://github.com/marlbenchmark/on-policy.git
-cp -r on-policy/onpolicy/envs/mpe reinforcement/example/mappo/src
-cd reinforcement/example/mappo/src
-patch -p0 < mpe_environment.patch
-```
-
-初次之外还需要安装依赖：
+需要安装依赖：
 
 ```shell
 pip install seaborn

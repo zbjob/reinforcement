@@ -111,8 +111,8 @@ diff --color -uNr mpe_origin/scenarios/simple_spread.py mpe/scenarios/simple_spr
  import numpy as np
 -from onpolicy.envs.mpe.core import World, Agent, Landmark
 -from onpolicy.envs.mpe.scenario import BaseScenario
-+from src.mpe.core import World, Agent, Landmark
-+from src.mpe.scenario import BaseScenario
++from mindspore_rl.algorithm.mappo.mpe.core import World, Agent, Landmark
++from mindspore_rl.algorithm.mappo.mpe.scenario import BaseScenario
  
  
  class Scenario(BaseScenario):

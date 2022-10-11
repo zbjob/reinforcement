@@ -117,7 +117,7 @@ class QMIXSession(Session):
         done_shape, done_type = (epsode_limit + 1, env.done_space.shape[-1]), env.done_space.ms_dtype
         filled_shape, filled_type = (epsode_limit + 1, env.done_space.shape[-1]), env.action_space.ms_dtype
         hy_shape, hy_type = (epsode_limit + 1, num_agent, config.policy_params.get('hypernet_embed')),\
-             env.action_space.ms_dtype
+             env.reward_space.ms_dtype
         replay_buffer_config = config.algorithm_config.get('replay_buffer')
         replay_buffer_config['data_shape'] = [local_obs_shape, global_obs_shape, action_shape,
                                               avail_action_shape, reward_shape, done_shape, filled_shape, hy_shape]

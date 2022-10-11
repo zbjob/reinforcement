@@ -12,16 +12,7 @@ In MAPPO, we use `simple spread` in [Multi-Agent Particle Environment(MPE)](http
 
 ## How to run MAPPO
 
-First, user needs to download MPE environment [here](https://github.com/marlbenchmark/on-policy/tree/main/onpolicy), and copy the `mpe` folder from `onpolicy/onpolicy/envs/` to current folder. After copy success, user needs to patch the mpe folder. The detail commands are shown below.
-
-```shell
-git clone https://github.com/marlbenchmark/on-policy.git
-cp -r on-policy/onpolicy/envs/mpe reinforcement/example/mappo/src
-cd reinforcement/example/mappo/src
-patch -p0 < mpe_environment.patch
-```
-
-Besides, user also needs to install the dependency:
+User needs to install the dependency:
 
 ```shell
 pip install seaborn
