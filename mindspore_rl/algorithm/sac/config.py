@@ -16,12 +16,11 @@
 SAC config.
 """
 
-import mindspore
 from mindspore_rl.environment import GymEnvironment
 from mindspore_rl.core.uniform_replay_buffer import UniformReplayBuffer
-from mindspore_rl.agent.sac.sac_agent import SACActor, SACLearner, SACPolicy
+from mindspore_rl.algorithm.sac.sac import SACActor, SACLearner, SACPolicy
 
-env_params = {'name': 'HalfCheetah-v2'}
+collect_env_params = {'name': 'HalfCheetah-v2'}
 eval_env_params = {'name': 'HalfCheetah-v2'}
 
 policy_params = {
@@ -52,6 +51,7 @@ learner_params = {
 trainer_params = {
     'duration': 1000,
     'batch_size': 256,
+    'save_per_episode': 100,
     'ckpt_path': './ckpt',
     'num_eval_episode': 30,
 }
@@ -75,7 +75,7 @@ algorithm_config = {
     'collect_environment': {
         'number': 1,
         'type': GymEnvironment,
-        'params': env_params
+        'params': collect_env_params
     },
     'eval_environment': {
         'number': 1,
@@ -86,10 +86,6 @@ algorithm_config = {
         'number': 1,
         'type': UniformReplayBuffer,
         'capacity': 1000000,
-        'data_shape': [(17,), (6,), (1,), (17,)],
-        'data_type': [
-            mindspore.float32, mindspore.float32, mindspore.float32, mindspore.float32
-        ],
         'sample_size': 256
     }
 }

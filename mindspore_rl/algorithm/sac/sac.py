@@ -23,7 +23,7 @@ from mindspore.common.parameter import Parameter
 from mindspore_rl.agent.actor import Actor
 from mindspore_rl.agent.learner import Learner
 from mindspore_rl.utils import SoftUpdate
-from mindspore_rl.agent.sac.tanh_normal import TanhMultivariateNormalDiag
+from mindspore_rl.algorithm.sac.tanh_normal import TanhMultivariateNormalDiag
 
 
 class SACPolicy():
@@ -55,7 +55,7 @@ class SACPolicy():
                                                 output_size,
                                                 weight_init='XavierUniform').to_float(compute_type)
             else:
-                self.action_log_std = Parameter(Tensor(np.zeros(1, output_size), mindspore.float32),
+                self.action_log_std = Parameter(Tensor(np.zeros((1, output_size)), mindspore.float32),
                                                 name="action_log_std",
                                                 requires_grad=True)
             self.exp = ops.Exp()
@@ -90,16 +90,16 @@ class SACPolicy():
             model_list = []
             for _, out_size in enumerate(hidden_sizes):
                 model_list.append(nn.Dense(in_size, out_size, weight_init='XavierUniform').to_float(compute_type))
-                model_list.append(hidden_act)
+                model_list.append(hidden_act())
                 in_size = out_size
             self.model = nn.SequentialCell(model_list)
             self.last_fc = nn.Dense(in_size, output_size)
-
 
         def construct(self, obs, action):
             """predict value"""
             x = self.concat((obs, action))
             y = self.model(x)
+            y = self.last_fc(y)
             return y
 
     class RandomPolicy(nn.Cell):
@@ -131,35 +131,36 @@ class SACPolicy():
             self.actor_net = actor_net
 
         def construct(self, obs):
-            action, _, _ = self.actor_net(obs)
+            _, _, action = self.actor_net(obs)
             return action
 
     def __init__(self, params):
+        compute_type = params.get('compute_type', mindspore.float32)
         self.actor_net = self.SACActorNet(input_size=params['state_space_dim'],
                                           hidden_sizes=params['hidden_sizes'],
                                           output_size=params['action_space_dim'],
                                           conditioned_std=params['conditioned_std'],
-                                          compute_type=params['compute_type'])
+                                          compute_type=compute_type)
         self.critic_net1 = self.SACCriticNet(obs_size=params['state_space_dim'],
                                              action_size=params['action_space_dim'],
                                              hidden_sizes=params['hidden_sizes'],
                                              output_size=1,
-                                             compute_type=params['compute_type'])
+                                             compute_type=compute_type)
         self.critic_net2 = self.SACCriticNet(obs_size=params['state_space_dim'],
                                              action_size=params['action_space_dim'],
                                              hidden_sizes=params['hidden_sizes'],
                                              output_size=1,
-                                             compute_type=params['compute_type'])
+                                             compute_type=compute_type)
         self.target_critic_net1 = self.SACCriticNet(obs_size=params['state_space_dim'],
                                                     action_size=params['action_space_dim'],
                                                     hidden_sizes=params['hidden_sizes'],
                                                     output_size=1,
-                                                    compute_type=params['compute_type'])
+                                                    compute_type=compute_type)
         self.target_critic_net2 = self.SACCriticNet(obs_size=params['state_space_dim'],
                                                     action_size=params['action_space_dim'],
                                                     hidden_sizes=params['hidden_sizes'],
                                                     output_size=1,
-                                                    compute_type=params['compute_type'])
+                                                    compute_type=compute_type)
 
         self.init_policy = self.RandomPolicy(params['action_space_dim'])
         self.collect_policy = self.CollectPolicy(self.actor_net)
