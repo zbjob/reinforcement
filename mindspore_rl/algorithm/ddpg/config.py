@@ -15,7 +15,7 @@
 """
 DDPG config.
 """
-
+import mindspore
 from mindspore_rl.environment import GymEnvironment
 from mindspore_rl.core.uniform_replay_buffer import UniformReplayBuffer
 from .ddpg import DDPGActor, DDPGLearner, DDPGPolicy
@@ -29,6 +29,7 @@ policy_params = {
     'action_space_dim': 0,
     'hidden_size1': 400,
     'hidden_size2': 300,
+    'compute_type': mindspore.float32
 }
 
 learner_params = {

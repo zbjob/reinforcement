@@ -17,6 +17,7 @@ QMIX config.
 """
 
 # pylint: disable=E0402
+import mindspore
 from mindspore_rl.environment import StarCraft2Environment
 from mindspore_rl.core.uniform_replay_buffer import UniformReplayBuffer
 from .qmix import QMIXActor, QMIXLearner, QMIXPolicy
@@ -38,6 +39,7 @@ policy_params = {
     'hypernet_embed': 64,
     'time_length': 50000,
     'batch_size': BATCH_SIZE,
+    'compute_type': mindspore.float32,
 }
 
 learner_params = {
