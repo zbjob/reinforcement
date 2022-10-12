@@ -14,6 +14,7 @@
 # ============================================================================
 """MPEMultiEnvironment class."""
 #pylint: disable=E0402
+import os
 from multiprocessing import Queue
 import numpy as np
 from gym import spaces
@@ -24,7 +25,29 @@ from mindspore.ops import operations as P
 from mindspore_rl.environment.space import Space
 from mindspore_rl.environment.env_process import EnvironmentProcess
 
-from .mpe.MPE_env import MPEEnv
+
+def _prepare_mpe_env():
+    '''prepare mpe env'''
+    current_path = os.path.dirname(os.path.normpath(os.path.realpath(__file__)))
+    os.chdir(current_path)
+    # Clone mpe environment from marlbenchmark
+    os.system('git clone https://github.com/marlbenchmark/on-policy.git')
+    # Copy mpe folder to current directory
+    os.system('cp -r on-policy/onpolicy/envs/mpe ./')
+    # Download patch from mindspore_rl
+    os.system(
+        'wget https://gitee.com/mindspore/reinforcement/raw/master/example/mappo/src/mpe_environment.patch\
+             --no-check-certificate')
+    # patch mpe folder
+    os.system('patch -p0 < mpe_environment.patch')
+
+
+try:
+    from .mpe.MPE_env import MPEEnv
+
+except ModuleNotFoundError:
+    _prepare_mpe_env()
+    from .mpe.MPE_env import MPEEnv
 
 
 class MPEMultiEnvironment(nn.Cell):
