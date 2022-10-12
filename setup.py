@@ -27,7 +27,8 @@ setup(
     packages=find_packages(include=['mindspore_rl*']),
     install_requires=['numpy>=1.17.0',
                       'matplotlib>=3.1.3',
-                      'gym>=0.18.3, <=0.21.0'],
+                      'gym>=0.18.3, <=0.21.0',
+                      'importlib-metadata == 4.11.3'],
     classifiers=[
         'Development Status :: 4 - Beta',
         'Environment :: Console',
