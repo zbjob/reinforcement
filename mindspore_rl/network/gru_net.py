@@ -15,6 +15,7 @@
 """
 Cudnn Gru network.
 """
+from mindspore_rl.network._rnns import GRU
 
 import mindspore.nn as nn
 from mindspore import context
@@ -75,7 +76,8 @@ class GruNet(nn.Cell):
                  has_bias=True,
                  batch_first=False,
                  dropout=0.0,
-                 bidirectional=False):
+                 bidirectional=False,
+                 enable_fusion=True):
 
         super().__init__()
         validator.check_positive_int(hidden_size, "hidden_size", self.cls_name)
@@ -92,7 +94,7 @@ class GruNet(nn.Cell):
         self.bidirectional = bidirectional
         self.dropout = dropout
         self.enable_cudnn = context.get_context('device_target') in ['GPU']
-        if self.enable_cudnn:
+        if self.enable_cudnn and enable_fusion:
             weight_size = 0
             gate_size = 3 * hidden_size
             num_directions = 2 if bidirectional else 1
@@ -112,13 +114,14 @@ class GruNet(nn.Cell):
                                        bidirectional=bidirectional,
                                        dropout=float(dropout))
         else:
-            self.gru = nn.GRU(input_size=input_size,
-                              hidden_size=hidden_size,
-                              num_layers=num_layers,
-                              has_bias=has_bias,
-                              batch_first=batch_first,
-                              bidirectional=bidirectional,
-                              dropout=float(dropout))
+            self.gru = GRU(input_size=input_size,
+                           hidden_size=hidden_size,
+                           num_layers=num_layers,
+                           has_bias=has_bias,
+                           batch_first=batch_first,
+                           bidirectional=bidirectional,
+                           dropout=float(dropout),
+                           enable_fusion=enable_fusion)
 
     def construct(self, x_in, h_in):
         """
