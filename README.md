@@ -36,6 +36,13 @@ MindSpore Reinforcement is an open-source reinforcement learning framework that 
 
 MindSpore Reinforcement depends on the MindSpore training and inference framework. Therefore, please first install [MindSpore](https://www.mindspore.cn/install/en) following the instruction on the official website, then install MindSpore Reinforcement. You can install from `pip` or source code.
 
+### System requirements
+
+operating system： CentOS or Ubuntu
+hardware platform： Ascend910, CPU, GPU
+
+> Note: For specific algorithm, please refer to algorithm's README.
+
 ### Version dependency
 
 Due the dependency between MindSpore Reinforcement and MindSpore, please follow the table below and install the corresponding MindSpore verision from [MindSpore download page](https://www.mindspore.cn/versions/en).
