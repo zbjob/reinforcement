@@ -37,6 +37,13 @@ MindSpore Reinforcement是一个开源的强化学习框架，支持使用强化
 
 MindSpore Reinforcement依赖MindSpore训练推理框架，安装完[MindSpore](https://gitee.com/mindspore/mindspore#%E5%AE%89%E8%A3%85)，再安装MindSpore Reinforcement。可以采用pip安装或者源码编译安装两种方式。
 
+### 系统要求
+
+操作系统： CentOS或Ubuntu
+硬件平台： Ascend910、CPU、GPU
+
+> 注： 具体算法请参照算法README。
+
 ### MindSpore版本依赖关系
 
 由于MindSpore Reinforcement与MindSpore有依赖关系，请按照根据下表中所指示的对应关系，在[MindSpore下载页面](https://www.mindspore.cn/versions)下载并安装对应的whl包。
