@@ -52,7 +52,7 @@ class MCTS(nn.Cell):
         args (Tensor): any values which will be the input of MctsCreation. Please following the table below
             to provide the input value. These value will not be reset after invoke 'restore_tree_data'.
         has_init_reward (bool): Whether pass the reward to each node during the node initialization. Default: False.
-        max_action (int): The max number of action in environment. If the max_action is -1, the step in Environment
+        max_action (float): The max number of action in environment. If the max_action is -1, the step in Environment
             will accept the last action. Otherwise, it will accept max_action number of action. Default: -1.
         max_iteration (int): The max training iteration of MCTS. Default: 1000.
 
@@ -81,6 +81,8 @@ class MCTS(nn.Cell):
             raise ValueError("Device {} is illegal, it must in ['GPU','CPU'].".format(device))
         self._check_params(AlgorithmFunc, customized_func, "customized_func")
         self._check_params(int, max_iteration, "max_iteration")
+        if max_iteration <= 0:
+            raise ValueError(f"max_iteration must be larger than 0, but got {max_iteration}")
 
         current_path = os.path.dirname(os.path.normpath(os.path.realpath(__file__)))
         so_path = current_path + "/libmcts_{}.so".format(device.lower())
