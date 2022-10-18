@@ -111,6 +111,7 @@ class MCTS(nn.Cell):
 
         mcts_creation = ops.Custom("{}:MctsCreation".format(so_path), (1,),
                                    ms.int64, "aot", reg_info=mcts_creation_info)
+        mcts_creation.add_prim_attr("primitive_target", device)
         self.tree_handle = mcts_creation(*args)
         tree_handle_numpy = float(self.tree_handle.astype(ms.float32).asnumpy()[0])
 
@@ -132,6 +133,7 @@ class MCTS(nn.Cell):
             self.mcts_selection = ops.Custom("{}:MctsSelection".format(so_path),
                                              ((1,), (1,)), (ms.int64, ms.int32),
                                              "aot", reg_info=mcts_selection_info)
+        self.mcts_selection.add_prim_attr("primitive_target", device)
 
         mcts_expansion_info = CustomRegOp("add_with_attr_kernel") \
             .input(0, "visited_node") \
@@ -149,6 +151,7 @@ class MCTS(nn.Cell):
             .get_op_info()
         self.mcts_expansion = ops.Custom("{}:MctsExpansion".format(so_path), (1,),
                                          (ms.bool_), "aot", reg_info=mcts_expansion_info)
+        self.mcts_expansion.add_prim_attr("primitive_target", device)
 
         mcts_backprop_info = CustomRegOp("add_with_attr_kernel") \
             .input(0, "visited_node") \
@@ -161,6 +164,7 @@ class MCTS(nn.Cell):
         self.mcts_backpropagation = ops.Custom(
             "{}:MctsBackpropagation".format(so_path), (1,), (ms.bool_),
             "aot", reg_info=mcts_backprop_info)
+        self.mcts_backpropagation.add_prim_attr("primitive_target", device)
 
         mcts_bestaction_info = CustomRegOp("add_with_attr_kernel") \
             .output(0, "action") \
@@ -170,6 +174,7 @@ class MCTS(nn.Cell):
             .get_op_info()
         self.best_action = ops.Custom("{}:BestAction".format(so_path),
                                       (1,), (ms.int32), "aot", reg_info=mcts_bestaction_info)
+        self.best_action.add_prim_attr("primitive_target", device)
 
         mcts_outcome_info = CustomRegOp("add_with_attr_kernel") \
             .input(0, "visited_node") \
@@ -182,6 +187,7 @@ class MCTS(nn.Cell):
         self.update_leafnode_outcome = ops.Custom(
             "{}:UpdateLeafNodeOutcome".format(so_path), (1,), (ms.bool_),
             "aot", reg_info=mcts_outcome_info)
+        self.update_leafnode_outcome.add_prim_attr("primitive_target", device)
 
         mcts_terminal_info = CustomRegOp("add_with_attr_kernel") \
             .input(0, "visited_node") \
@@ -194,6 +200,7 @@ class MCTS(nn.Cell):
         self.update_leafnode_terminal = ops.Custom(
             "{}:UpdateLeafNodeTerminal".format(so_path), (1,), (ms.bool_),
             "aot", reg_info=mcts_terminal_info)
+        self.update_leafnode_terminal.add_prim_attr("primitive_target", device)
 
         mcts_leafstate_info = CustomRegOp("add_with_attr_kernel") \
             .input(0, "visited_node") \
@@ -205,6 +212,7 @@ class MCTS(nn.Cell):
             .get_op_info()
         self.update_leafnode_state = ops.Custom("{}:UpdateLeafNodeState".format(
             so_path), (1,), (ms.bool_), "aot", reg_info=mcts_leafstate_info)
+        self.update_leafnode_state.add_prim_attr("primitive_target", device)
 
         mcts_rootstate_info = CustomRegOp("add_with_attr_kernel") \
             .input(0, "state") \
@@ -216,6 +224,7 @@ class MCTS(nn.Cell):
         self.update_root_state = ops.Custom(
             "{}:UpdateRootState".format(so_path), (1,), (ms.bool_),
             "aot", reg_info=mcts_rootstate_info)
+        self.update_root_state.add_prim_attr("primitive_target", device)
 
         mcts_getlast_info = CustomRegOp("add_with_attr_kernel") \
             .input(0, "visited_node") \
@@ -226,6 +235,7 @@ class MCTS(nn.Cell):
             .get_op_info()
         self.get_last_state = ops.Custom("{}:GetLastState".format(so_path), state_shape,
                                          (ms.float32), "aot", reg_info=mcts_getlast_info)
+        self.get_last_state.add_prim_attr("primitive_target", device)
 
         mcts_globalvar_info = CustomRegOp("add_with_attr_kernel") \
             .output(0, "success") \
@@ -235,6 +245,7 @@ class MCTS(nn.Cell):
             .get_op_info()
         self.update_global_variable = ops.Custom("{}:UpdateGlobalVariable".format(so_path), (1,),
                                                  (ms.bool_), "aot", reg_info=mcts_globalvar_info)
+        self.update_global_variable.add_prim_attr("primitive_target", device)
 
         mcts_destroy_info = CustomRegOp("add_with_attr_kernel") \
             .input(0, "handle") \
@@ -245,6 +256,7 @@ class MCTS(nn.Cell):
             .get_op_info()
         self.destroy_tree = ops.Custom("{}:DestroyTree".format(so_path),
                                        (1,), (ms.bool_), "aot", reg_info=mcts_destroy_info)
+        self.destroy_tree.add_prim_attr("primitive_target", device)
 
         mcts_restore_info = CustomRegOp("add_with_attr_kernel") \
             .input(0, "dummy_handle") \
@@ -255,6 +267,7 @@ class MCTS(nn.Cell):
             .get_op_info()
         self.restore_tree = ops.Custom("{}:RestoreTree".format(so_path),
                                        (1,), (ms.bool_), "aot", reg_info=mcts_restore_info)
+        self.restore_tree.add_prim_attr("primitive_target", device)
 
         mcts_get_value_info = CustomRegOp("add_with_attr_kernel") \
             .input(0, "dummy_handle") \
@@ -267,6 +280,7 @@ class MCTS(nn.Cell):
         self.get_root_info = ops.Custom("{}:GetRootInfo".format(so_path),
                                         ((1,), (len(env.legal_action()),)), (ms.float32, ms.float32), "aot",
                                         reg_info=mcts_get_value_info)
+        self.get_root_info.add_prim_attr("primitive_target", device)
         self.depend = P.Depend()
 
         # Add side effect annotation
