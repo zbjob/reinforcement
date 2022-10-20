@@ -15,6 +15,7 @@
 """
 DQN config.
 """
+import mindspore
 from mindspore_rl.environment import GymEnvironment
 from mindspore_rl.core.uniform_replay_buffer import UniformReplayBuffer
 from .dqn import DQNActor, DQNLearner, DQNPolicy
@@ -37,6 +38,7 @@ policy_params = {
     'state_space_dim': 0,
     'action_space_dim': 0,
     'hidden_size': 100,
+    'compute_type': mindspore.float32
 }
 
 algorithm_config = {

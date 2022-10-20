@@ -36,8 +36,8 @@ def ac_eval():
     if args.device_target != 'Auto':
         context.set_context(device_target=args.device_target)
     context.set_context(mode=context.GRAPH_MODE)
-    config.trainer_params.update({'ckpt_path': args.ckpt_path})
     ac_session = ACSession(args.env_yaml, args.algo_yaml)
+    config.trainer_params.update({'ckpt_path': args.ckpt_path})
     ac_session.run(class_type=ACTrainer, is_train=False)
 
 if __name__ == "__main__":

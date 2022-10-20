@@ -36,8 +36,8 @@ def ddpg_eval():
     if args.device_target != 'Auto':
         context.set_context(device_target=args.device_target)
     context.set_context(mode=context.GRAPH_MODE, max_call_depth=100000)
-    config.trainer_params.update({'ckpt_path': args.ckpt_path})
     ddpg_session = DDPGSession(args.env_yaml, args.algo_yaml)
+    config.trainer_params.update({'ckpt_path': args.ckpt_path})
     ddpg_session.run(class_type=DDPGTrainer, is_train=False)
 
 if __name__ == "__main__":

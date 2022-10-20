@@ -36,8 +36,8 @@ def ppo_eval():
     if args.device_target != 'Auto':
         context.set_context(device_target=args.device_target)
     context.set_context(mode=context.GRAPH_MODE, max_call_depth=100000)
-    config.trainer_params.update({'ckpt_path': args.ckpt_path})
     ppo_session = PPOSession(args.env_yaml, args.algo_yaml)
+    config.trainer_params.update({'ckpt_path': args.ckpt_path})
     ppo_session.run(class_type=PPOTrainer, is_train=False)
 
 

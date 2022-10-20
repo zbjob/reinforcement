@@ -15,6 +15,7 @@
 """
 PPO config.
 """
+import mindspore
 from mindspore_rl.environment import GymEnvironment
 from mindspore_rl.core.uniform_replay_buffer import UniformReplayBuffer
 from .ppo import PPOActor, PPOLearner, PPOPolicy
@@ -28,6 +29,7 @@ policy_params = {
     'hidden_size1': 200,
     'hidden_size2': 100,
     'sigma_init_std': 0.35,
+    'compute_type': mindspore.float32,
 }
 
 learner_params = {
