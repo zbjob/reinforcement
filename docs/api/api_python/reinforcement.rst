@@ -86,3 +86,17 @@ RL 算法中使用的策略。
 
 .. automodule:: mindspore_rl.policy
     :members:
+
+mindspore_rl.utils
+-------------------------
+
+RL 算法中工具组件。
+
+.. include:: utils/mindspore_rl.utils.DiscountedReturn.rst
+
+.. include:: utils/mindspore_rl.utils.OUNoise.rst
+
+.. include:: utils/mindspore_rl.utils.SoftUpdate.rst
+
+.. automodule:: mindspore_rl.utils
+    :members:
