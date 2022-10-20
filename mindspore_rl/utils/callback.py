@@ -91,18 +91,22 @@ class CallbackManager(Callback):
         return self._stack.__exit__(*err)
 
     def begin(self, params):
+        '''Call only once before training'''
         for cb in self._callbacks:
             cb.begin(params)
 
     def end(self, params):
+        '''Call only once after training'''
         for cb in self._callbacks:
             cb.end(params)
 
     def episode_begin(self, params):
+        '''Call before each episode start'''
         for cb in self._callbacks:
             cb.episode_begin(params)
 
     def episode_end(self, params):
+        '''Call before each episode end'''
         for cb in self._callbacks:
             cb.episode_end(params)
 

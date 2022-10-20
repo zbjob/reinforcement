@@ -40,7 +40,14 @@ def _update_dict(dest, src) -> None:
 
 
 def update_config(config, env_yaml, algo_yaml) -> None:
-    '''Update the config by the provided environment'''
+    r'''
+    Update the config by the provided yamls
+
+    Args:
+        config (dict): the config to be update.
+        env_yaml (str): the environment yaml file.
+        algo_yaml (str): the algorithm yaml file.
+    '''
     if env_yaml:
         if os.path.exists(env_yaml):
             with open(env_yaml) as f:
