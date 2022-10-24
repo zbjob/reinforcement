@@ -98,5 +98,9 @@ RL 算法中工具组件。
 
 .. include:: utils/mindspore_rl.utils.SoftUpdate.rst
 
+.. include:: utils/mindspore_rl.utils.Callback.rst
+
+.. include:: utils/mindspore_rl.utils.utils.rst
+
 .. automodule:: mindspore_rl.utils
     :members:

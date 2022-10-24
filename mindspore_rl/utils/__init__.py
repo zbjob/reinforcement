@@ -22,8 +22,13 @@ from mindspore_rl.utils.soft_update import SoftUpdate
 from mindspore_rl.utils.noise import OUNoise
 from mindspore_rl.utils.callback import CallbackParam
 from mindspore_rl.utils.callback import CallbackManager
+from mindspore_rl.utils.callback import TimeCallback
+from mindspore_rl.utils.callback import LossCallback
+from mindspore_rl.utils.callback import EvaluateCallback
+from mindspore_rl.utils.callback import CheckpointCallback
 from mindspore_rl.utils.utils import update_config
 from .mcts import VanillaFunc, AlgorithmFunc, MCTS
 
-__all__ = ["DiscountedReturn", "CallbackParam", "CallbackManager", "SoftUpdate",
+__all__ = ["DiscountedReturn", "CallbackParam", "CallbackManager", "TimeCallback",
+           "LossCallback", "EvaluateCallback", "CheckpointCallback", "SoftUpdate",
            "OUNoise", "VanillaFunc", "AlgorithmFunc", "MCTS", "update_config"]
