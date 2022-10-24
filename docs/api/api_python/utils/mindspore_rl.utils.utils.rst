@@ -1,5 +1,5 @@
 
-.. py:method:: update_config(config, env_yaml, algo_yaml)
+.. py:function:: update_config(config, env_yaml, algo_yaml)
 
     通过传入的yaml文件更新config.
 
