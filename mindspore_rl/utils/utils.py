@@ -41,7 +41,7 @@ def _update_dict(dest, src) -> None:
 
 def update_config(config, env_yaml, algo_yaml) -> None:
     r'''
-    Update the config by the provided yamls
+    Update the config by the provided yamls.
 
     Args:
         config (dict): the config to be update.

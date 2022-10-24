@@ -56,13 +56,14 @@ class MCTS(nn.Cell):
             will accept the last action. Otherwise, it will accept max_action number of action. Default: -1.
         max_iteration (int): The max training iteration of MCTS. Default: 1000.
 
-            +------------------------------+-----------------+--------------------------------------------------------+
+            +------------------------------+-----------------+-----------------------------+--------------------------+
             |  MCTS Tree Type              |  MCTS Node Type |  Configuration Parameter    |  Notices                 |
-            +==============================+=================+========================================================+
+            +==============================+=================+=============================+==========================+
             |  CPUCommon                   |  CPUVanilla     |  UCT const                  |  UCT const is used to    |
-            |  GPUCommon                   |  GPUVanilla     |                             |  calculate UCT value in  |
-            |                              |                 |                             |  Selection phase         |
-            +------------------------------+-----------------+--------------------------------------------------------+
+            +------------------------------+-----------------+-----------------------------+  calculate UCT value in  |
+            |  GPUCommon                   |  GPUVanilla     |  UCT const                  |  Selection phase         |
+            |                              |                 |                             |                          |
+            +------------------------------+-----------------+-----------------------------+--------------------------+
 
     Examples:
         >>> env = TicTacToeEnvironment(None)
@@ -364,20 +365,20 @@ class MCTS(nn.Cell):
 
     @ms_function
     def restore_tree_data(self, handle):
-        """
+        r"""
         restore_tree_data will restore all the data in the tree.
 
         Args:
             handle (mindspore.int64): The unique handle of mcts tree.
 
         Returns:
-            success (mindspore.bool_): Whether restore is successful.
+            success (mindspore.bool\_): Whether restore is successful.
         """
         return self.restore_tree(handle)
 
     @ms_function
     def destroy(self, handle):
-        """
+        r"""
         destroy will destroy current tree. Please call this function ONLY when
         do not use this tree any more.
 
@@ -385,7 +386,7 @@ class MCTS(nn.Cell):
             handle (mindspore.int64): The unique handle of mcts tree.
 
         Returns:
-            success (mindspore.bool_): Whether destroy is successful.
+            success (mindspore.bool\_): Whether destroy is successful.
         """
         return self.destroy_tree(handle)
 
