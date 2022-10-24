@@ -58,9 +58,9 @@ class MonteCarloTreeFactory {
   float *GetTreeConstByHandle(int64_t handle);
 
   // Erase the tree and all the nodes which matches the input handle.
-  void DeleteTree(int64_t handle);
+  bool DeleteTree(int64_t handle);
   // Erase the tree and all the nodes which matches the input handle.
-  void DeleteTreeVariable(int64_t handle);
+  bool DeleteTreeVariable(int64_t handle);
 
  private:
   MonteCarloTreeFactory() = default;
