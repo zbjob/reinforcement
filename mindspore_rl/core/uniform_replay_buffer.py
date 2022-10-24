@@ -57,6 +57,8 @@ class UniformReplayBuffer(nn.Cell):
         types (list[mindspore.dtype]): the data type of each tensor in a buffer element.
 
     Examples:
+        >>> import mindspore as ms
+        >>> from mindspore_rl.core.uniform_replay_buffer import UniformReplayBuffer
         >>> batch_size = 10
         >>> capacity = 10000
         >>> shapes = [(4,), (1,), (1,), (4,)]
