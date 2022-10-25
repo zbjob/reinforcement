@@ -26,6 +26,12 @@ import mindspore.nn.probability.distribution as msd
 from mindspore.common import ms_function
 
 
+GPU_TREE_TYPE = ['GPUCommon']
+GPU_NODE_TYPE = ['GPUVanilla']
+CPU_TREE_TYPE = ['CPUCommon']
+CPU_NODE_TYPE = ['CPUVanilla']
+
+
 class MCTS(nn.Cell):
     """
     Monte Carlo Tree Search(MCTS) is a general search algorithm for some kinds of decision processes,
@@ -86,8 +92,9 @@ class MCTS(nn.Cell):
     def __init__(self, env, tree_type, node_type, root_player, customized_func, device,
                  args, has_init_reward=False, max_action=-1.0, max_iteration=1000):
         super().__init__()
-        if not isinstance(device, str) or device.upper() not in ["GPU", "CPU"]:
+        if not isinstance(device, str) or device not in ["GPU", "CPU"]:
             raise ValueError("Device {} is illegal, it must in ['GPU','CPU'].".format(device))
+
         self._check_params(AlgorithmFunc, customized_func, "customized_func")
         self._check_params(int, max_iteration, "max_iteration")
         if max_iteration <= 0:
@@ -114,6 +121,14 @@ class MCTS(nn.Cell):
                                                                                   "total_num_player")) \
             .target(device) \
             .get_op_info()
+        if device == 'GPU':
+            self._check_element(GPU_TREE_TYPE, tree_type, 'MCTS', 'tree_type')
+            self._check_element(GPU_NODE_TYPE, node_type, 'MCTS', 'node_type')
+        elif device == 'CPU':
+            self._check_element(CPU_TREE_TYPE, tree_type, 'MCTS', 'tree_type')
+            self._check_element(CPU_NODE_TYPE, node_type, 'MCTS', 'node_type')
+        else:
+            raise ValueError("device does not support")
         if (root_player >= env.total_num_player() or root_player < 0):
             raise ValueError("root_player {} is illegal, it needs to in range [0, {})".format(
                 root_player, env.total_num_player()))
@@ -123,6 +138,7 @@ class MCTS(nn.Cell):
         mcts_creation.add_prim_attr("primitive_target", device)
         self.tree_handle = mcts_creation(*args)
         tree_handle_numpy = float(self.tree_handle.astype(ms.float32).asnumpy()[0])
+        self.tree_handle_list = [int(tree_handle_numpy)]
 
         mcts_selection_info = CustomRegOp("add_with_attr_kernel") \
             .output(0, "visited_node") \
@@ -371,7 +387,6 @@ class MCTS(nn.Cell):
         action = self.best_action()
         return action, self.tree_handle
 
-    @ms_function
     def restore_tree_data(self, handle):
         r"""
         restore_tree_data will restore all the data in the tree, back to the initial state.
@@ -382,9 +397,9 @@ class MCTS(nn.Cell):
         Returns:
             - success (mindspore.bool\_), Whether restore is successful.
         """
+        self._check_element(self.tree_handle_list, handle, 'restore_tree_data', 'handle')
         return self.restore_tree(handle)
 
-    @ms_function
     def destroy(self, handle):
         r"""
         destroy will destroy current tree. Please call this function ONLY when
@@ -396,7 +411,10 @@ class MCTS(nn.Cell):
         Returns:
             - success (mindspore.bool\_), Whether destroy is successful.
         """
-        return self.destroy_tree(handle)
+        self._check_element(self.tree_handle_list, handle, 'destroy', 'handle')
+        ret = self.destroy_tree(handle)
+        self.tree_handle_list.pop()
+        return ret
 
     @ms_function
     def _get_root_information(self, dummpy_handle):
@@ -408,6 +426,12 @@ class MCTS(nn.Cell):
         if not isinstance(input_value, check_type):
             raise TypeError(f"Input value {name} must be {str(check_type)}, but got {type(input_value)}")
         return input_value
+
+    def _check_element(self, expected_element, input_element, func_name, arg_name):
+        """Check whether input_elemnt is in expected_element"""
+        if input_element not in expected_element:
+            raise ValueError(
+                f"The input {arg_name} of {func_name} must be in {expected_element}, but got '{input_element}'")
 
 
 class AlgorithmFunc(nn.Cell):

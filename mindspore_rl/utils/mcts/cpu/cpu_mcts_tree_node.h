@@ -18,11 +18,11 @@
 #define MINDSPORE_RL_UTILS_MCTS_CPU_CPU_MCTS_TREE_NODE_H_
 
 #include <utils/mcts/mcts_tree_node.h>
-#include <vector>
+#include <cstring>
 #include <algorithm>
 #include <memory>
 #include <string>
-#include <cstring>
+#include <vector>
 
 class CPUMonteCarloTreeNode : public MonteCarloTreeNode {
  public:

@@ -491,8 +491,11 @@ extern "C" int DestroyTree(int nparam, void **params, int *ndims, int64_t **shap
   if (tree == nullptr) {
     return kErrorCode;
   }
-  MonteCarloTreeFactory::GetInstance().DeleteTree(*tree_handle);
-  MonteCarloTreeFactory::GetInstance().DeleteTreeVariable(*tree_handle);
+  bool ret_tree = MonteCarloTreeFactory::GetInstance().DeleteTree(*tree_handle);
+  // Delete Tree Variable
+  if (!ret_tree) {
+    return kErrorCode;
+  }
   bool ret = true;
   tree->Memcpy(output, &ret, sizeof(bool));
   return 0;

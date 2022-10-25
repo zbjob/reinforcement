@@ -88,6 +88,7 @@ extern "C" int MctsCreation(int nparam, void **params, int *ndims, int64_t **sha
     return kErrorCode;
   }
   tree->Memcpy(output, &tree_handle, sizeof(int64_t));
+  cudaMemcpy(output, &tree_handle, sizeof(int64_t), cudaMemcpyHostToDevice);
   return 0;
 }
 
@@ -501,8 +502,11 @@ extern "C" int DestroyTree(int nparam, void **params, int *ndims, int64_t **shap
   if (tree == nullptr) {
     return kErrorCode;
   }
-  MonteCarloTreeFactory::GetInstance().DeleteTree(*tree_handle_host);
-  MonteCarloTreeFactory::GetInstance().DeleteTreeVariable(*tree_handle_host);
+  bool ret_tree = MonteCarloTreeFactory::GetInstance().DeleteTree(*tree_handle_host);
+  // Delete Tree Variable
+  if (!ret_tree) {
+    return kErrorCode;
+  }
   bool ret = true;
   tree->Memcpy(output, &ret, sizeof(bool));
   return 0;
@@ -590,6 +594,6 @@ extern "C" int GetRootInfoInit(int *ndims, int64_t **shapes, const char **dtypes
 
 extern "C" int GetRootInfo(int nparam, void **params, int *ndims, int64_t **shapes, const char **dtypes, void *stream,
                            void *extra) {
-  std::cout << "[ERROR] GPU does not support this function yet" << std::endl;
+  std::cout << "GPU does not support this function yet" << std::endl;
   return kErrorCode;
 }
