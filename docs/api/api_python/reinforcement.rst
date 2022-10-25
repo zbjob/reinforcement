@@ -102,5 +102,11 @@ RL 算法中工具组件。
 
 .. include:: utils/mindspore_rl.utils.utils.rst
 
+.. include:: utils/mindspore_rl.utils.MCTS.rst
+
+.. include:: utils/mindspore_rl.utils.VanillaFunc.rst
+
+.. include:: utils/mindspore_rl.utils.AlgorithmFunc.rst
+
 .. automodule:: mindspore_rl.utils
     :members:
