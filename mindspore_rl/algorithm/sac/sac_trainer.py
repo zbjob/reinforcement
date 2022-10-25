@@ -51,7 +51,7 @@ class SACTrainer(Trainer):
         i = self.zero
         while self.less(i, self.fill_value):
             new_state, action, reward, done = self.msrl.agent_act(trainer.INIT, state)
-            self.msrl.replay_buffer_insert([state, action, reward, new_state])
+            self.msrl.replay_buffer_insert([state, action, reward, new_state, done])
             state = new_state
             if done:
                 state = self.msrl.collect_environment.reset()
@@ -73,7 +73,7 @@ class SACTrainer(Trainer):
         state = self.msrl.collect_environment.reset()
         while not done:
             new_state, action, reward, done = self.msrl.agent_act(trainer.COLLECT, state)
-            self.msrl.replay_buffer_insert([state, action, reward, new_state])
+            self.msrl.replay_buffer_insert([state, action, reward, new_state, done])
             state = new_state
             total_reward += reward
             batched_transition = self.msrl.replay_buffer_sample()
