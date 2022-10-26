@@ -32,30 +32,26 @@
     .. py:method:: action_space
         :property:
 
-        **返回：**
-
-        Space，获取环境的动作空间。
+        返回：
+            Space，获取环境的动作空间。
 
     .. py:method:: config
         :property:
 
-        **返回：**
-
-        dict，获取环境信息。
+        返回：
+            dict，获取环境信息。
 
     .. py:method:: done_space
         :property:
 
-        **返回：**
-
-        Space，获取环境的终止空间。
+        返回：
+            Space，获取环境的终止空间。
 
     .. py:method:: observation_space
         :property:
 
-        **返回：**
-
-        Space，获取环境的状态空间。
+        返回：
+            Space，获取环境的状态空间。
 
     .. py:method:: reset()
 
@@ -70,9 +66,8 @@
     .. py:method:: reward_space
         :property:
 
-        **返回：**
-
-        Space，获取环境的奖励空间。
+        返回：
+            Space，获取环境的奖励空间。
 
     .. py:method:: step(action)
 

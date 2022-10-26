@@ -51,13 +51,6 @@
         - **print_rate** (int) - 打印耗时的频率。
         - **fixed_steps_in_episode** (Optional[int]) - 如果每个episode的steps是固定的，则提供一个固定步长值，否则将取实际步长。默认：None。
 
-    .. py:method:: episode_end()
-
-        在每个episode执行后调用，打印耗时。
-
-        参数:
-            - **params** (CallbackParam) - 训练参数，用于获取结果。
-
     .. py:method:: episode_begin()
 
         在每个episode执行前记录时间。
@@ -65,10 +58,16 @@
         参数:
             - **params** (CallbackParam) - 训练参数，用于获取结果。
 
+    .. py:method:: episode_end()
+
+        在每个episode执行后调用，打印耗时。
+
+        参数:
+            - **params** (CallbackParam) - 训练参数，用于获取结果。
 
 .. py:class:: mindspore_rl.utils.CheckpointCallback(Callback)
 
-    保存模型的checkpoint文件，保留最新的`max_ckpt_nums`个。
+    保存模型的checkpoint文件，保留最新的 `max_ckpt_nums` 个。
 
     参数：
         - **save_per_episode** (int) - 保存ckpt文件的频率。

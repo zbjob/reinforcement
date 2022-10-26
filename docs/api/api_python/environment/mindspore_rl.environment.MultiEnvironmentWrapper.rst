@@ -6,6 +6,30 @@
         - **env_instance** (list[Environment]) - 包含环境实例（继承Environment类）的List。
         - **num_proc** (int) - 在和环境交互时使用的进程数量。默认值： None。
 
+    .. py:method:: action_space
+        :property:
+
+        返回：
+            Space，环境的动作空间。
+
+    .. py:method:: config
+        :property:
+
+        返回：
+            dict，一个包含环境信息的字典。
+
+    .. py:method:: done_space
+        :property:
+
+        返回：
+            Space，返回环境的终止空间。
+
+    .. py:method:: observation_space
+        :property:
+
+        返回：
+            Space，返回环境的状态空间。
+
     .. py:method:: render()
 
         渲染环境，仅支持PyNative模式。
@@ -16,6 +40,12 @@
 
         返回：
             表示环境初始状态的Tensor List。
+
+    .. py:method:: reward_space
+        :property:
+
+        返回：
+            Space，返回环境的奖励空间。
 
     .. py:method:: step(action)
 
@@ -28,39 +58,4 @@
             - **state** (list(Tensor)) - 输入动作后的环境返回的新状态List。
             - **reward** (list(Tensor)) - 输入动作后环境返回的奖励List。
             - **done** (list(Tensor)) - 输入动作后环境是否终止的List。
-
-    .. py:method:: action_space
-        :property:
-
-        **返回：**
-
-        Space，环境的动作空间。
-
-    .. py:method:: config
-        :property:
-
-        **返回：**
-
-        dict，一个包含环境信息的字典。
-
-    .. py:method:: done_space
-        :property:
-
-        **返回：**
-
-        Space，返回环境的终止空间。
-
-    .. py:method:: observation_space
-        :property:
-
-        **返回：**
-
-        Space，返回环境的状态空间。
-
-    .. py:method:: reward_space
-        :property:
-
-        **返回：**
-
-        Space，返回环境的奖励空间。
 

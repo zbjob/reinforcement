@@ -1,7 +1,7 @@
 
 .. py:class:: mindspore_rl.core.UniformReplayBuffer(batch_size, capacity, shapes, types)
 
-    重放缓存类。重放缓存区中存放来自环境的经验数据。在该类中，每个元素都是一组Tensor，因此，ReplayBuffer类的构造函数将每个Tensor的形状和类型作为参数。
+    重放缓存类。重放缓存区中存放来自环境的经验数据。在该类中，每个元素都是一组Tensor。因此，ReplayBuffer类的构造函数将每个Tensor的形状和类型作为参数。
 
     参数：
         - **batch_size** (int) - 从缓存区采样的batch大小。

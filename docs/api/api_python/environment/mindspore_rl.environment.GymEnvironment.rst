@@ -2,7 +2,7 @@
     
     GymEnvironment将 `Gym <https://gym.openai.com/>`_ 封装成一个类来提供在MindSpore图模式下也能和Gym环境交互的能力。
 
-    参数：    
+    参数：
         - **params** (dict) - 字典包含GymEnvironment类中所需要的所有参数。
 
         +------------------------------+----------------------------+
@@ -15,6 +15,30 @@
 
         - **env_id** (int) - 环境id，用于设置环境内种子。
 
+    .. py:method:: action_space
+        :property:
+
+        返回：
+            Space，环境的动作空间。
+
+    .. py:method:: config
+        :property:
+
+        返回：
+            dict，一个包含环境信息的字典。
+
+    .. py:method:: done_space
+        :property:
+
+        返回：
+            Space，环境的终止空间。
+
+    .. py:method:: observation_space
+        :property:
+
+        返回：
+            Space，环境的状态空间。
+
     .. py:method:: render()
 
         渲染环境，仅支持PyNative模式。
@@ -25,6 +49,12 @@
 
         返回：
             Tensor，表示环境初始状态。
+
+    .. py:method:: reward_space
+        :property:
+
+        返回：
+            Space，环境的奖励空间。
 
     .. py:method:: step(action)
 
@@ -37,38 +67,3 @@
             - **state** (Tensor) - 输入动作后的环境返回的新状态。
             - **reward** (Tensor) - 输入动作后环境返回的奖励。
             - **done** (Tensor) - 输入动作后环境是否终止。
-
-    .. py:method:: action_space
-        :property:
-
-        **返回：**
-
-        Space，环境的动作空间。
-
-    .. py:method:: config
-        :property:
-
-        **返回：**
-
-        dict，一个包含环境信息的字典。
-
-    .. py:method:: done_space
-        :property:
-
-        **返回：**
-
-        Space，环境的终止空间。
-
-    .. py:method:: observation_space
-        :property:
-
-        **返回：**
-
-        Space，环境的状态空间。
-
-    .. py:method:: reward_space
-        :property:
-
-        **返回：**
-
-        Space，环境的奖励空间。

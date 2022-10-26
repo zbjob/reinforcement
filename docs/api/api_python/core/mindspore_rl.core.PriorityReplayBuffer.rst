@@ -14,6 +14,13 @@
         - **seed0** (int) - 随机数种子0值。默认值：0。
         - **seed1** (int) - 随机数种子1值。默认值：0。
 
+    .. py:method:: destroy()
+
+        销毁经验回放缓存。
+
+        返回：
+            - **handle** (Tensor) - 优先级经验回放缓存句柄，数据和维度分别是int64和（1,）。
+
     .. py:method:: push(*transition)
 
         将transition推送到缓存区。如果缓存区已满，则覆盖最早的数据。
@@ -44,13 +51,6 @@
         参数：
             - **indices** (Tensor) - transition在缓存区中的索引。
             - **priorities** (Tensor) - transition优先级。
-
-        返回：
-            - **handle** (Tensor) - 优先级经验回放缓存句柄，数据和维度分别是int64和（1,）。
-
-    .. py:method:: destroy()
-
-        销毁经验回放缓存。
 
         返回：
             - **handle** (Tensor) - 优先级经验回放缓存句柄，数据和维度分别是int64和（1,）。
