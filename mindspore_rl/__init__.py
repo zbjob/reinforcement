@@ -51,8 +51,7 @@ def _mindspore_version_check():
                              '0.2': '1.6',
                              '0.3': '1.7',
                              '0.5': '1.8',
-                             '0.6': '1.9',
-                             '0.7': '2.0'}
+                             '0.6': '2.0'}
 
     ms_version = ms.__version__[:3]
     required_mindspore_verision = ms_msrl_version_match[__version__[:3]]
