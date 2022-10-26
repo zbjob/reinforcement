@@ -216,11 +216,11 @@ class SACLearner(Learner):
 
     class CriticLossCell(nn.Cell):
         """CriticLossCell"""
-        def __init__(self, gamma, alpha, critic_loss_weight, reward_scale_factor, actor_net, target_critic_net1,
+        def __init__(self, gamma, log_alpha, critic_loss_weight, reward_scale_factor, actor_net, target_critic_net1,
                      target_critic_net2, critic_net1, critic_net2):
             super(SACLearner.CriticLossCell, self).__init__(auto_prefix=True)
             self.gamma = gamma
-            self.alpha = alpha
+            self.log_alpha = log_alpha
             self.reward_scale_factor = reward_scale_factor
             self.critic_loss_weight = critic_loss_weight
             self.actor_net = actor_net
@@ -233,15 +233,15 @@ class SACLearner(Learner):
             self.exp = P.Exp()
             self.mse = nn.MSELoss(reduction='none')
 
-        def construct(self, next_state, reward, state, action):
+        def construct(self, next_state, reward, state, action, done):
             """Calculate critic loss"""
             next_means, next_stds, _ = self.actor_net(next_state)
             next_action, next_log_prob = self.dist.sample_and_log_prob((), next_means, next_stds)
 
             target_q_value1 = self.target_critic_net1(next_state, next_action).squeeze(axis=-1)
             target_q_value2 = self.target_critic_net2(next_state, next_action).squeeze(axis=-1)
-            target_q_value = self.min(target_q_value1, target_q_value2) - self.exp(self.alpha) * next_log_prob
-            td_target = self.reward_scale_factor * reward + self.gamma * target_q_value
+            target_q_value = self.min(target_q_value1, target_q_value2) - self.exp(self.log_alpha) * next_log_prob
+            td_target = self.reward_scale_factor * reward + self.gamma * (1 - done) * target_q_value
 
             pred_td_target1 = self.critic_net1(state, action).squeeze(axis=-1)
             pred_td_target2 = self.critic_net2(state, action).squeeze(axis=-1)
@@ -253,9 +253,10 @@ class SACLearner(Learner):
 
     class ActorLossCell(nn.Cell):
         """ActorLossCell"""
-        def __init__(self, alpha, actor_loss_weight, actor_net, critic_net1, critic_net2):
+        def __init__(self, log_alpha, actor_loss_weight, actor_net, critic_net1, critic_net2, actor_mean_std_reg,
+                     actor_mean_reg_weight, actor_std_reg_weight):
             super(SACLearner.ActorLossCell, self).__init__(auto_prefix=False)
-            self.alpha = alpha
+            self.log_alpha = log_alpha
             self.actor_net = actor_net
             self.actor_loss_weight = actor_loss_weight
             self.critic_net1 = critic_net1
@@ -264,21 +265,34 @@ class SACLearner(Learner):
             self.min = P.Minimum()
             self.exp = P.Exp()
 
+            self.actor_mean_std_reg = actor_mean_std_reg
+            if self.actor_mean_std_reg:
+                self.actor_mean_reg_weight = actor_mean_reg_weight
+                self.actor_std_reg_weight = actor_std_reg_weight
+
         def construct(self, state):
+            """Calculate actor loss"""
             means, stds, _ = self.actor_net(state)
             action, log_prob = self.dist.sample_and_log_prob((), means, stds)
 
             target_q_value1 = self.critic_net1(state, action)
             target_q_value2 = self.critic_net2(state, action)
             target_q_value = self.min(target_q_value1, target_q_value2).squeeze(axis=-1)
-            actor_loss = (self.exp(self.alpha) * log_prob - target_q_value).mean()
-            return actor_loss * self.actor_loss_weight
+            actor_loss = (self.exp(self.log_alpha) * log_prob - target_q_value).mean()
+
+            actor_reg_loss = 0.
+            if self.actor_mean_std_reg:
+                mean_reg_loss = self.actor_mean_reg_weight * (means ** 2).mean()
+                std_reg_loss = self.actor_std_reg_weight * (stds ** 2).mean()
+                actor_reg_loss = mean_reg_loss + std_reg_loss
+
+            return actor_loss * self.actor_loss_weight + actor_reg_loss
 
     class AlphaLossCell(nn.Cell):
         """AlphaLossCell"""
-        def __init__(self, alpha, target_entropy, alpha_loss_weight, actor_net):
+        def __init__(self, log_alpha, target_entropy, alpha_loss_weight, actor_net):
             super(SACLearner.AlphaLossCell, self).__init__(auto_prefix=False)
-            self.alpha = alpha
+            self.log_alpha = log_alpha
             self.target_entropy = target_entropy
             self.alpha_loss_weight = alpha_loss_weight
             self.actor_net = actor_net
@@ -288,7 +302,7 @@ class SACLearner(Learner):
             means, stds, _ = self.actor_net(state_list)
             _, log_prob = self.dist.sample_and_log_prob((), means, stds)
             entropy_diff = -log_prob - self.target_entropy
-            alpha_loss = self.alpha * entropy_diff
+            alpha_loss = self.log_alpha * entropy_diff
             alpha_loss = alpha_loss.mean()
             return alpha_loss * self.alpha_loss_weight
 
@@ -303,11 +317,11 @@ class SACLearner(Learner):
         target_critic_net1 = params['target_critic_net1']
         target_critic_net2 = params['target_critic_net2']
 
-        init_alpha = params['init_alpha']
-        alpha = Parameter(Tensor([init_alpha,], mindspore.float32), name='alpha', requires_grad=True)
+        log_alpha = params['log_alpha']
+        log_alpha = Parameter(Tensor([log_alpha,], mindspore.float32), name='log_alpha', requires_grad=True)
 
         critic_loss_net = SACLearner.CriticLossCell(gamma,
-                                                    alpha,
+                                                    log_alpha,
                                                     params['critic_loss_weight'],
                                                     params['reward_scale_factor'],
                                                     actor_net,
@@ -315,24 +329,31 @@ class SACLearner(Learner):
                                                     target_critic_net2,
                                                     critic_net1,
                                                     critic_net2)
-        actor_loss_net = SACLearner.ActorLossCell(alpha,
+        actor_loss_net = SACLearner.ActorLossCell(log_alpha,
                                                   params['actor_loss_weight'],
                                                   actor_net,
                                                   critic_net1,
-                                                  critic_net2)
-        alpha_loss_net = SACLearner.AlphaLossCell(alpha,
-                                                  params['target_entropy'],
-                                                  params['alpha_loss_weight'],
-                                                  actor_net)
+                                                  critic_net2,
+                                                  params.get('actor_mean_std_reg', False),
+                                                  params.get('actor_mean_reg_weight', 0.),
+                                                  params.get('actor_std_reg_weight', 0.))
 
         critic_trainable_params = critic_net1.trainable_params() + critic_net2.trainable_params()
         critic_optim = nn.Adam(critic_trainable_params, learning_rate=params['critic_lr'])
         actor_optim = nn.Adam(actor_net.trainable_params(), learning_rate=params['actor_lr'])
-        alpha_optim = nn.Adam([alpha], learning_rate=params['alpha_lr'])
+
 
         self.critic_train = nn.TrainOneStepCell(critic_loss_net, critic_optim)
         self.actor_train = nn.TrainOneStepCell(actor_loss_net, actor_optim)
-        self.alpha_train = nn.TrainOneStepCell(alpha_loss_net, alpha_optim)
+
+        self.train_alpha_net = params['train_alpha_net']
+        if self.train_alpha_net:
+            alpha_loss_net = SACLearner.AlphaLossCell(log_alpha,
+                                                      params['target_entropy'],
+                                                      params['alpha_loss_weight'],
+                                                      actor_net)
+            alpha_optim = nn.Adam([log_alpha], learning_rate=params['alpha_lr'])
+            self.alpha_train = nn.TrainOneStepCell(alpha_loss_net, alpha_optim)
 
         factor, interval = params['update_factor'], params['update_interval']
         params = critic_net1.trainable_params() + critic_net2.trainable_params()
@@ -341,12 +362,16 @@ class SACLearner(Learner):
 
     def learn(self, experience):
         """learn"""
-        state, action, reward, next_state = experience
+        state, action, reward, next_state, done = experience
         reward = reward.squeeze(axis=-1)
 
-        critic_loss = self.critic_train(next_state, reward, state, action)
+        critic_loss = self.critic_train(next_state, reward, state, action, done)
         actor_loss = self.actor_train(state)
-        alpha_loss = self.alpha_train(state)
+
+        alpha_loss = 0.
+        if self.train_alpha_net:
+            alpha_loss = self.alpha_train(state)
+
         self.soft_updater()
         loss = critic_loss + actor_loss + alpha_loss
         return loss

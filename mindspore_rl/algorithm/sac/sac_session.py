@@ -29,11 +29,13 @@ class SACSession(Session):
         config.algorithm_config['replay_buffer']['data_shape'] = [env.observation_space.shape,
                                                                   env.action_space.shape,
                                                                   env.reward_space.shape,
-                                                                  env.observation_space.shape]
+                                                                  env.observation_space.shape,
+                                                                  env.done_space.shape]
         config.algorithm_config['replay_buffer']['data_type'] = [env.observation_space.ms_dtype,
                                                                  env.action_space.ms_dtype,
                                                                  env.reward_space.ms_dtype,
-                                                                 env.observation_space.ms_dtype]
+                                                                 env.observation_space.ms_dtype,
+                                                                 env.done_space.ms_dtype]
         params = config.trainer_params
         loss_cb = LossCallback()
         ckpt_cb = CheckpointCallback(config.trainer_params.get('save_per_episode'),
