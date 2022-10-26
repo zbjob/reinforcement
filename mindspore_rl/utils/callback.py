@@ -37,16 +37,36 @@ class Callback:
         "Exit and release."
 
     def begin(self, params):
-        '''Call once before train'''
+        '''
+        Call once before train
+
+        Args:
+            params (CallbackParam): Parameters for begin.
+        '''
 
     def end(self, params):
-        '''Call once after train'''
+        '''
+        Call once after train
+
+        Args:
+            params (CallbackParam): Parameters for end.
+        '''
 
     def episode_begin(self, params):
-        '''Call before each episode begining'''
+        '''
+        Call before each episode begin
+
+        Args:
+            params (CallbackParam): Parameters for episode begin.
+        '''
 
     def episode_end(self, params):
-        '''Call after each episode finished'''
+        '''
+        Call after each episode finished
+
+        Args:
+            params (CallbackParam): Parameters for episode end.
+        '''
 
 
 class CallbackParam(dict):
@@ -59,7 +79,11 @@ class CallbackParam(dict):
 
 
 class CallbackManager(Callback):
-    '''Execute callbacks sequentially'''
+    '''Execute callbacks sequentially
+
+        Args:
+            callbacks (list[Callback]): Callbacks list.
+    '''
     def __init__(self, callbacks):
         self._callbacks, self._stack = [], None
         # 1 single callback
@@ -91,22 +115,42 @@ class CallbackManager(Callback):
         return self._stack.__exit__(*err)
 
     def begin(self, params):
-        '''Call only once before training'''
+        '''
+        Call only once before training
+
+        Args:
+            params (CallbackParam): Parameters for begin.
+        '''
         for cb in self._callbacks:
             cb.begin(params)
 
     def end(self, params):
-        '''Call only once after training'''
+        '''
+        Call only once after training
+
+        Args:
+            params (CallbackParam): Parameters for end.
+        '''
         for cb in self._callbacks:
             cb.end(params)
 
     def episode_begin(self, params):
-        '''Call before each episode start'''
+        '''
+        Call before each episode start
+
+        Args:
+            params (CallbackParam): Parameters for episode begin.
+        '''
         for cb in self._callbacks:
             cb.episode_begin(params)
 
     def episode_end(self, params):
-        '''Call before each episode end'''
+        '''
+        Call before each episode end
+
+        Args:
+            params (CallbackParam): Parameters for episode end.
+        '''
         for cb in self._callbacks:
             cb.episode_end(params)
 
@@ -123,7 +167,7 @@ class LossCallback(Callback):
     Loss Callback to monitor loss in each episode.
 
     Args:
-        print_rate (int): The frequency to print loss.
+        print_rate (int): The frequency to print loss. Default: 1.
     '''
     def __init__(self, print_rate=1):
         super(LossCallback, self).__init__()
@@ -178,9 +222,10 @@ class TimeCallback(Callback):
     Time Callback to monitor time costs for each episode.
 
     Args:
-        print_rate (int): The frequency to print time.
+        print_rate (int): The frequency to print time. Default: 1.
         fixed_steps_in_episode (Optional[int]): If the number of steps in each episode is fixed, this number
             is used to calculate the step time. Otherwise, the real steps number should be provided in params.
+            Default: None.
     '''
     def __init__(self, print_rate=1, fixed_steps_in_episode=None):
         super(TimeCallback, self).__init__()
@@ -233,7 +278,7 @@ class CheckpointCallback(Callback):
     Save the checkpoint file for all the model weights. And keep the latest `max_ckpt_nums` checkpoint files.
 
     Args:
-        save_per_episode (int): The frequency to save checkpoint.
+        save_per_episode (int): The frequency to save checkpoint. Default: 0.
         directory (Optional[str]): The directory for saving checkpoints. Default is current path.
         max_ckpt_nums (int): Numbers of how many checkpoint files to be kept. Default:5.
     '''
@@ -297,7 +342,7 @@ class EvaluateCallback(Callback):
     Evaluate callback.
 
     Args:
-        eval_rate (int): The frequency to eval.
+        eval_rate (int): The frequency to eval. Default: 0.
     '''
     def __init__(self, eval_rate=0):
         super(EvaluateCallback, self).__init__()
@@ -306,11 +351,21 @@ class EvaluateCallback(Callback):
         self._eval_rate = eval_rate
 
     def begin(self, params):
-        '''Store the eval rate in the begin of training, run once.'''
+        '''
+        Store the eval rate in the begin of training, run once.
+
+        Args:
+            params (CallbackParam): Parameters for episode begin.
+        '''
         params.eval_rate = self._eval_rate
 
     def episode_end(self, params):
-        '''Run evaluate in the end of episode, and print the rewards.'''
+        '''
+        Run evaluate in the end of episode, and print the rewards.
+
+        Args:
+            params (CallbackParam): Parameters for episode end.
+        '''
         if self._eval_rate != 0 and params.cur_episode > 0 and \
             params.cur_episode % self._eval_rate == 0:
             # Call the `evaluate` function provided by user.
