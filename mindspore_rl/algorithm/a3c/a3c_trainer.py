@@ -15,10 +15,10 @@
 """A3C Trainer"""
 from mindspore_rl.agent.trainer import Trainer
 from mindspore_rl.agent import trainer
+from mindspore_rl.utils import  BatchWrite
 import mindspore
 import mindspore.nn as nn
 from mindspore.ops.operations._rl_inner_ops import MuxSend, MuxReceive
-from mindspore.nn.reinforcement._batch_read_write import  BatchWrite
 from mindspore.communication.management import init, NCCL_WORLD_COMM_GROUP, get_rank, get_group_size
 from mindspore.ops import operations as ops
 from mindspore import ms_function

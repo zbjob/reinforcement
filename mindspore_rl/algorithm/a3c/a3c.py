@@ -17,12 +17,13 @@
 from mindspore_rl.agent.learner import Learner
 from mindspore_rl.agent.actor import Actor
 from mindspore_rl.utils import DiscountedReturn
+from mindspore_rl.utils import TensorArray
+from mindspore_rl.utils import BatchRead
 import mindspore
 import mindspore.nn as nn
 from mindspore import Tensor
 from mindspore.common.parameter import ParameterTuple
 import mindspore.ops as ops
-from mindspore.nn.reinforcement._batch_read_write import BatchRead
 import mindspore.nn.probability.distribution as msd
 from mindspore.ops import operations as P
 from mindspore.ops import composite as C
@@ -119,9 +120,9 @@ class A3CActor(Actor):
         loop_size = 200
         self.loop_size = Tensor(loop_size, mindspore.int64)
         self.done = Tensor(True, mindspore.bool_)
-        self.states = nn.TensorArray(mindspore.float32, (4,), dynamic_size=False, size=loop_size)
-        self.actions = nn.TensorArray(mindspore.int32, (1,), dynamic_size=False, size=loop_size)
-        self.rewards = nn.TensorArray(mindspore.float32, (1,), dynamic_size=False, size=loop_size)
+        self.states = TensorArray(mindspore.float32, (4,), dynamic_size=False, size=loop_size)
+        self.actions = TensorArray(mindspore.int32, (1,), dynamic_size=False, size=loop_size)
+        self.rewards = TensorArray(mindspore.float32, (1,), dynamic_size=False, size=loop_size)
         self.masks = Tensor(np.zeros([loop_size, 1], dtype=np.bool_), mindspore.bool_)
         self.mask_done = Tensor([1], mindspore.bool_)
         self.shape = ops.DynamicShape()

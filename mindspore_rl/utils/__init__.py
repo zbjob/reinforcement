@@ -27,8 +27,12 @@ from mindspore_rl.utils.callback import LossCallback
 from mindspore_rl.utils.callback import EvaluateCallback
 from mindspore_rl.utils.callback import CheckpointCallback
 from mindspore_rl.utils.utils import update_config
+from mindspore_rl.utils.batch_read_write import BatchRead, BatchWrite
+from mindspore_rl.utils.tensor_array import TensorArray
+from mindspore_rl.utils.tensors_queue import TensorsQueue
 from .mcts import VanillaFunc, AlgorithmFunc, MCTS
 
 __all__ = ["DiscountedReturn", "CallbackParam", "CallbackManager", "TimeCallback",
            "LossCallback", "EvaluateCallback", "CheckpointCallback", "SoftUpdate",
-           "OUNoise", "VanillaFunc", "AlgorithmFunc", "MCTS", "update_config"]
+           "OUNoise", "VanillaFunc", "AlgorithmFunc", "MCTS", "update_config",
+           "BatchRead", "BatchWrite", "TensorArray", "TensorsQueue"]

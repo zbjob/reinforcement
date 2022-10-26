@@ -108,5 +108,11 @@ RL 算法中工具组件。
 
 .. include:: utils/mindspore_rl.utils.AlgorithmFunc.rst
 
+.. include:: utils/mindspore_rl.utils.BatchWrite.rst
+
+.. include:: utils/mindspore_rl.utils.TensorArray.rst
+
+.. include:: utils/mindspore_rl.utils.TensorsQueue.rst
+
 .. automodule:: mindspore_rl.utils
     :members:

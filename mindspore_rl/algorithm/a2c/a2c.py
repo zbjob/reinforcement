@@ -17,6 +17,7 @@
 from mindspore_rl.agent.learner import Learner
 from mindspore_rl.agent.actor import Actor
 from mindspore_rl.utils import DiscountedReturn
+from mindspore_rl.utils import TensorArray
 import mindspore
 import mindspore.nn as nn
 from mindspore import Tensor
@@ -111,9 +112,9 @@ class A2CActor(Actor):
         self.softmax = ops.Softmax()
         self.zero = Tensor(0, mindspore.int64)
         self.done = Tensor(True, mindspore.bool_)
-        self.states = nn.TensorArray(mindspore.float32, (4,), dynamic_size=False, size=loop_size)
-        self.actions = nn.TensorArray(mindspore.int32, (1,), dynamic_size=False, size=loop_size)
-        self.rewards = nn.TensorArray(mindspore.float32, (1,), dynamic_size=False, size=loop_size)
+        self.states = TensorArray(mindspore.float32, (4,), dynamic_size=False, size=loop_size)
+        self.actions = TensorArray(mindspore.int32, (1,), dynamic_size=False, size=loop_size)
+        self.rewards = TensorArray(mindspore.float32, (1,), dynamic_size=False, size=loop_size)
         self.masks = Tensor(np.zeros([loop_size, 1], dtype=np.bool_), mindspore.bool_)
         self.mask_done = Tensor([1], mindspore.bool_)
         self.print = P.Print()
