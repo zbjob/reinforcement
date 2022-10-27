@@ -21,6 +21,8 @@ from mindspore.ops import operations as P
 from mindspore_rl.agent.trainer import Trainer
 from mindspore_rl.agent import trainer
 
+from .td3_summary import RecordQueue
+
 
 class TD3Trainer(Trainer):
     """This is the trainer class of TD3 algorithm. It arranges the TD3 algorithm"""
@@ -39,6 +41,8 @@ class TD3Trainer(Trainer):
         self.false = Tensor([False], mindspore.bool_)
         self.init_collect_size = Tensor(params['init_collect_size'], mindspore.float32)
         self.inited = Parameter(Tensor(False, mindspore.bool_), name='init_flag')
+        if 'eval_episodes' in params:
+            self.eval_episodes = params['eval_episodes']
         super(TD3Trainer, self).__init__(msrl)
 
     def trainable_variables(self):
@@ -98,3 +102,25 @@ class TD3Trainer(Trainer):
             total_eval_reward += eval_reward
         avg_eval_reward = total_eval_reward / self.num_eval_episode
         return avg_eval_reward
+
+    def load_and_eval(self, ckpt_path=None):
+        """
+        The interface of the eval function for offline. A checkpoint must be provided.
+
+        Args:
+            ckpt_path (string): The checkpoint file to restore net.
+        """
+        if ckpt_path is None:
+            raise RuntimeError("Please provide a ckpt_path.")
+        self._init_or_restore(ckpt_path)
+        if self.eval_episodes <= 0:
+            raise ValueError("In order to get average rewards,\
+                evaluate episodes should be larger than 0, but got {}".format(self.eval_episodes))
+        rewards = RecordQueue()
+        for _ in range(self.eval_episodes):
+            reward = self.evaluate()
+            rewards.add(reward)
+        avg_reward = rewards.mean().asnumpy()
+        print("-----------------------------------------")
+        print(f"Average evaluate result is {avg_reward:.3f}, checkpoint file in {ckpt_path}")
+        print("-----------------------------------------")

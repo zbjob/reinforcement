@@ -11,7 +11,7 @@ Same as DDPG algorithm, TD3 algorithm applies an open source reinforcement learn
 
 TD3 has solved the game called [HalfCheetah-v2](https://www.gymlibrary.ml/environments/mujoco/half_cheetah/) in OpenAI Gym. If you would like to run this game, implement and train TD3 algorithm, it is necessary to install an additional library named [MuJoCo](https://github.com/openai/mujoco-py). The interface of this game is shown below (image from https://www.gymlibrary.dev/environments/mujoco/half_cheetah/):
 
-![half_cheetah](./img/half_cheetah.gif)
+<img src="./img/half_cheetah.gif" alt="half_cheetah" style="zoom:50%;" />
 
 ## How to run TD3
 
@@ -19,7 +19,7 @@ Before running TD3, you should first install [MindSpore](https://www.mindspore.c
 
 - [MindInsight](https://mindspore.cn/mindinsight/docs/en/r1.8/mindinsight_install.html) (whose version should be same as installed MindSpore in your device. Installation via pip is recommended.)
 - numpy >= 1.22.0
-- [gym](https://github.com/openai/gym) >= 0.21.3
+- [gym](https://github.com/openai/gym) <= 0.21.3
 - [mujoco-py](https://github.com/openai/mujoco-py)<2.2,>=2.1
 
 It has been practical to monitor the training process of TD3 on [MindInsight](https://mindspore.cn/mindinsight/docs/en/r1.8/index.html)dashboard, which is convenient for users to witness the real-time results returned from training process.
@@ -39,30 +39,29 @@ It has been practical to monitor the training process of TD3 on [MindInsight](ht
 You will obtain outputs which is similar to the following lines in `td3_train_log.txt`.
 
 ```shell
-Episode 0 has 1000.0 steps, cost time: 26480.130 ms, per step time: 26.480 ms
-Episode 0: loss is -2.387, rewards is -465.396
-Episode 1 has 1000.0 steps, cost time: 5216.369 ms, per step time: 5.216 ms
-Episode 1: loss is 2.088, rewards is -536.777
-Episode 2 has 1000.0 steps, cost time: 4607.308 ms, per step time: 4.607 ms
-Episode 2: loss is 1.311, rewards is -509.436
-Episode 3 has 1000.0 steps, cost time: 4895.000 ms, per step time: 4.895 ms
-Episode 3: loss is -2.143, rewards is -484.398
-Episode 4 has 1000.0 steps, cost time: 5132.120 ms, per step time: 5.132 ms
-Episode 4: loss is -0.563, rewards is -504.957
-Episode 5 has 1000.0 steps, cost time: 5128.416 ms, per step time: 5.128 ms
-Episode 5: loss is 0.886, rewards is -535.614
-Episode 6 has 1000.0 steps, cost time: 5028.265 ms, per step time: 5.028 ms
-Episode 6: loss is 1.338, rewards is -558.457
-Episode 7 has 1000.0 steps, cost time: 4774.283 ms, per step time: 4.774 ms
-Episode 7: loss is -0.599, rewards is -465.199
-Episode 8 has 1000.0 steps, cost time: 4625.283 ms, per step time: 4.625 ms
-Episode 8: loss is 7.29, rewards is -318.291
-Episode 9 has 1000.0 steps, cost time: 4840.158 ms, per step time: 4.840 ms
-Episode 9: loss is 6.913, rewards is -511.637
-Episode 10 has 1000.0 steps, cost time: 6550.410 ms, per step time: 6.550 ms
-Episode 10: loss is 13.045, rewards is -517.86
+Episode 691 has 1000.0 steps, cost time: 2943.193 ms, per step time: 2.943 ms
+Episode 691: loss is -1096.728, rewards is 6039.843
+Episode 692 has 1000.0 steps, cost time: 3090.188 ms, per step time: 3.090 ms
+Episode 692: loss is -1100.922, rewards is 6106.94
+Episode 693 has 1000.0 steps, cost time: 3133.215 ms, per step time: 3.133 ms
+Episode 693: loss is -1084.129, rewards is 5324.56
+Episode 694 has 1000.0 steps, cost time: 2941.922 ms, per step time: 2.942 ms
+Episode 694: loss is -1085.789, rewards is 4138.977
+Episode 695 has 1000.0 steps, cost time: 3191.591 ms, per step time: 3.192 ms
+Episode 695: loss is -1093.76, rewards is 5302.855
+Episode 696 has 1000.0 steps, cost time: 3027.516 ms, per step time: 3.028 ms
+Episode 696: loss is -1095.033, rewards is 5111.147
+Episode 697 has 1000.0 steps, cost time: 3169.541 ms, per step time: 3.170 ms
+Episode 697: loss is -1076.511, rewards is 4854.681
+Episode 698 has 1000.0 steps, cost time: 3140.257 ms, per step time: 3.140 ms
+Episode 698: loss is -1108.791, rewards is 5507.21
+Episode 699 has 1000.0 steps, cost time: 3124.557 ms, per step time: 3.125 ms
+Episode 699: loss is -1077.485, rewards is 5656.699
+Episode 700 has 1000.0 steps, cost time: 3207.832 ms, per step time: 3.208 ms
+Episode 700: loss is -1102.35, rewards is 5428.018
 -----------------------------------------
-Evaluate for episode 10 total rewards is -567.105
+Evaluate for episode 700 total rewards is 6000.618
+-----------------------------------------
 ```
 
 #### Start MindInsight Dashboard
@@ -87,9 +86,9 @@ If you had installed MindInsight, it can be opened as long as you visit `http://
 You will obtain outputs which is similar with the things below in `td3_eval_log.txt`.
 
 ```shell
-Load file /path/ckpt/actor_net/actor_net_950.ckpt
+Load file  ./ckpt/actor_net/actor_net_1800.ckpt
 -----------------------------------------
-Evaluate result is 6000.300, checkpoint file in /path/ckpt/actor_net/actor_net_950.ckpt
+Average evaluate result is 7896.422, checkpoint file in ./ckpt/actor_net/actor_net_1800.ckpt
 -----------------------------------------
 ```
 
