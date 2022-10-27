@@ -1,6 +1,6 @@
 .. py:class:: mindspore_rl.environment.TicTacToeEnvironment(params, env_id=0)
 
-    井字棋是一款有名的纸笔游戏<en.wikipedia.org/wiki/Tic-tac-toe>。这个游戏的规则是两个玩家在一个3X3的格子上交互的画O和X。当三个相同的标记在水平，垂直或者对角线连成一条线时，对应的玩家将获得胜利。下图就是一个井字棋游戏的例子。
+    井字棋是一款有名的纸笔游戏<https://en.wikipedia.org/wiki/Tic-tac-toe>。这个游戏的规则是两个玩家在一个3X3的格子上交互的画O和X。当三个相同的标记在水平，垂直或者对角线连成一条线时，对应的玩家将获得胜利。下图就是一个井字棋游戏的例子。
 
     +---+---+---+
     | o |   | x |
@@ -12,7 +12,7 @@
 
     参数：
         - **params** (dict) - 字典包含TicTacToeEnvironment类中所需要的所有参数。
-        - **env_id** (int) - 环境id，用于设置环境内种子。
+        - **env_id** (int) - 环境id，用于设置环境内种子。默认：0。
 
     .. py:method:: action_space
         :property:

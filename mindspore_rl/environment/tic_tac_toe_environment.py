@@ -24,9 +24,9 @@ from mindspore_rl.environment import Space
 
 class TicTacToeEnvironment(Environment):
     """
-    Tic-Tac-Toe is a famous paper-and-pencil game (en.wikipedia.org/wiki/Tic-tac-toe). The rule is that two players
-    draw Os or Xs in a three-by-tree grid. When three of their marks are in a Horizontal, vertical or diagonal row,
-    that player will be the winner. The following figure is an example of Tic-Tac-Toe.
+    Tic-Tac-Toe is a famous paper-and-pencil game (https://en.wikipedia.org/wiki/Tic-tac-toe). The rule is that two
+    players draw Os or Xs in a three-by-tree grid. When three of their marks are in a Horizontal, vertical or diagonal
+    row, that player will be the winner. The following figure is an example of Tic-Tac-Toe.
 
     +---+---+---+
     | o |   | x |
@@ -38,7 +38,7 @@ class TicTacToeEnvironment(Environment):
 
     Args:
         params (dict): A dictionary contains all the parameters which are used in this class.
-        env_id (int): A integer which is used to set the seed of this environment.
+        env_id (int): A integer which is used to set the seed of this environment. Default: 0.
 
     Supported Platforms:
         ``Ascend`` ``GPU`` ``CPU``
