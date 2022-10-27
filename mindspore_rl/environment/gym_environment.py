@@ -39,7 +39,7 @@ class GymEnvironment(Environment):
             +------------------------------+----------------------------+
             |  seed                        |  seed used in Gym          |
             +------------------------------+----------------------------+
-        env_id (int): A integer which is used to set the seed of this environment.
+        env_id (int): A integer which is used to set the seed of this environment. Default: 0.
 
     Supported Platforms:
         ``Ascend`` ``GPU`` ``CPU``
