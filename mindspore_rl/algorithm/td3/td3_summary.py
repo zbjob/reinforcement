@@ -105,7 +105,7 @@ class SummaryCallback(Callback):
 
 class EvalRecordCallback(EvaluateCallback):
     r'''
-    Evaluate callback.
+    Evaluate callback for MindInsight record.
 
     Args:
         eval_rate (int): The frequency to eval.
