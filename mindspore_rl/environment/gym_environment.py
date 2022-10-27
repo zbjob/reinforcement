@@ -26,7 +26,7 @@ from mindspore_rl.environment.space import Space
 
 class GymEnvironment(Environment):
     """
-    The GymEnvironment class is a wrapper that encapsulates the Gym(https://gym.openai.com/) to
+    The GymEnvironment class is a wrapper that encapsulates `Gym <https://gym.openai.com/>`_ to
     provide the ability to interact with Gym environments in MindSpore Graph Mode.
 
     Args:
