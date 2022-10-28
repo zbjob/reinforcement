@@ -234,7 +234,7 @@ Evaluate for episode 10 total rewards is 9.600
     </tr>
     <tr>
         <td align="center"><a href="https://gitee.com/mindspore/reinforcement/tree/master/example/ac">C51</a></td>
-        <td align="center">>= 0.7</td>
+        <td align="center">>= 0.6</td>
         <td align="center">✔️</td>
         <td align="center">/</td>
         <td align="center">✔️</td>
