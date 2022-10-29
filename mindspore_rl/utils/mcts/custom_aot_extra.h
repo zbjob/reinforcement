@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-#ifndef ST_MINDSPORE_CCSRC_UTILS_CUSTOM_AOT_EXTRA_H
-#define ST_MINDSPORE_CCSRC_UTILS_CUSTOM_AOT_EXTRA_H
+#ifndef MINDSPORE_RL_UTILS_MCTS_CUSTOM_AOT_EXTRA_H_
+#define MINDSPORE_RL_UTILS_MCTS_CUSTOM_AOT_EXTRA_H_
 
 #include <string>
 #include <vector>
@@ -29,6 +29,8 @@ class AotKernelData {
 
 class AotExtra {
  public:
+  AotExtra() = default;
+  virtual ~AotExtra() = default;
   virtual bool HasAttr(std::string name) = 0;
 
   template <typename T>
@@ -43,21 +45,19 @@ class AotExtra {
   AotKernelData *KernelData() const { return kernel_data_; }
 
   void DestructKernelData() {
-    if (kernel_data_ != nullptr) {
-      delete kernel_data_;
-      kernel_data_ = nullptr;
-    }
+    delete kernel_data_;
+    kernel_data_ = nullptr;
   }
 
  private:
   virtual bool GetAttrBool(std::string name) = 0;
-  virtual int GetAttrInt(std::string name) = 0;
+  virtual int64_t GetAttrInt(std::string name) = 0;
   virtual float GetAttrFloat(std::string name) = 0;
   virtual std::string GetAttrStr(std::string name) = 0;
 
-  virtual std::vector<int> GetAttrIntVec(std::string name) = 0;
+  virtual std::vector<int64_t> GetAttrIntVec(std::string name) = 0;
   virtual std::vector<float> GetAttrFloatVec(std::string name) = 0;
-  virtual std::vector<std::vector<int>> GetAttrInt2DVec(std::string name) = 0;
+  virtual std::vector<std::vector<int64_t>> GetAttrInt2DVec(std::string name) = 0;
   virtual std::vector<std::vector<float>> GetAttrFloat2DVec(std::string name) = 0;
   std::vector<size_t> workspace_;
 
@@ -70,7 +70,7 @@ inline bool AotExtra::Attr(std::string name) {
 }
 
 template <>
-inline int AotExtra::Attr(std::string name) {
+inline int64_t AotExtra::Attr(std::string name) {
   return GetAttrInt(name);
 }
 
@@ -85,7 +85,7 @@ inline std::string AotExtra::Attr(std::string name) {
 }
 
 template <>
-inline std::vector<int> AotExtra::Attr(std::string name) {
+inline std::vector<int64_t> AotExtra::Attr(std::string name) {
   return GetAttrIntVec(name);
 }
 
@@ -95,7 +95,7 @@ inline std::vector<float> AotExtra::Attr(std::string name) {
 }
 
 template <>
-inline std::vector<std::vector<int>> AotExtra::Attr(std::string name) {
+inline std::vector<std::vector<int64_t>> AotExtra::Attr(std::string name) {
   return GetAttrInt2DVec(name);
 }
 
@@ -103,4 +103,4 @@ template <>
 inline std::vector<std::vector<float>> AotExtra::Attr(std::string name) {
   return GetAttrFloat2DVec(name);
 }
-#endif  // ST_MINDSPORE_CCSRC_UTILS_CUSTOM_AOT_EXTRA_H
+#endif  // MINDSPORE_RL_UTILS_MCTS_CUSTOM_AOT_EXTRA_H_
