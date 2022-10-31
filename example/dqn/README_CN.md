@@ -8,13 +8,13 @@
 
 ## 使用的游戏
 
-DQN算法使用了OpenAI开发的一个强化学习环境库[Gym](https://github.com/openai/gym)，来作为算法的游戏环境。
+DQN算法使用了OpenAI开发的一个强化学习环境库[Gym](https://github.com/openai/gym) ，来作为算法的游戏环境。
 
-在DQN算法中，解决了倒立摆([**CartPole-v0**](https://gym.openai.com/envs/CartPole-v0/))游戏。“一根杆子通过一个关节连接在一个小车上，这个小车可以沿着没有摩擦的轨道上左右移动。系统会对这个小车施加+1或者-1的力。这个游戏的目标是防止这根杆子从车上倒下。“[1](https://gym.openai.com/envs/CartPole-v0/)
+在DQN算法中，解决了倒立摆([**CartPole-v0**](https://github.com/openai/gym/wiki/CartPole-v0)) 游戏。“一根杆子通过一个关节连接在一个小车上，这个小车可以沿着没有摩擦的轨道上左右移动。系统会对这个小车施加+1或者-1的力。这个游戏的目标是防止这根杆子从车上倒下。“[1](https://github.com/openai/gym/wiki/CartPole-v0)
 
 ## 如何运行DQN
 
-在运行DQN前，首先需要安装[MindSpore](https://www.mindspore.cn/install)和MindSpore-Reinforcement。除此之外，还需要安装以下依赖。请根据官网的教程安装。
+在运行DQN前，首先需要安装[MindSpore](https://www.mindspore.cn/install) 和MindSpore-Reinforcement。除此之外，还需要安装以下依赖。请根据官网的教程安装。
 
 - MindSpore >= 1.6.0
 
@@ -71,3 +71,35 @@ Evaluate result is 199.300, checkpoint file in /path/ckpt/policy_net/policy_net_
 ## 支持平台
 
 DQN算法支持GPU，CPU和Ascend。
+
+## GPU 运行ONNX推理脚本
+
+首先需要通过前面提到的训练过程获取ckpt文件
+
+```shell
+> cd example/dqn/scripts
+> bash run_standalone_train.sh [TRAIN_EPISODE](可选) [DEVICE_TARGET](可选)
+```
+
+训练得到的ckpt文件位于`example/dqn/scripts/ckpt/`中，
+接着需要通过export.py导出onnx文件，导出的onnx文件位于`example/dqn/scripts/onnx/`中。
+
+```python
+python export.py
+```
+
+运行onnx推理脚本
+
+```shell
+> cd example/dqn/scripts
+> bash run_infer_onnx.sh [ONNX_PATH](可选)
+```
+
+你会在`example/dqn/scripts/dqn_infer_onnx_log.txt`中获得和下面内容相似的输出
+
+```shell
+-----------------------------------------
+Evaluate result is 200.0, onnx file in ./onnx/policy_net/policy_net_1000.onnx
+-----------------------------------------
+eval end
+```
