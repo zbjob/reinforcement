@@ -69,7 +69,8 @@ class MAPPOPolicy():
                                           bias_init=0)
             self.ones_like = P.OnesLike()
             self.gru = GruNet(input_size=64,
-                              hidden_size=64)
+                              hidden_size=64,
+                              enable_fusion=False)
             self.expand_dims = P.ExpandDims()
             self.transpose = P.Transpose()
             self.reshape = P.Reshape()
@@ -150,7 +151,8 @@ class MAPPOPolicy():
                                                Orthogonal(gain=0.01), [1, 64]),
                                            bias_init=0)
             self.gru_critic = GruNet(input_size=64,
-                                     hidden_size=64)
+                                     hidden_size=64,
+                                     enable_fusion=False)
             self.expand_dims = P.ExpandDims()
             self.transpose = P.Transpose()
             self.stack = P.Stack()
@@ -273,39 +275,20 @@ class MAPPOActor(Actor):
     #pylint: disable=W0221
     def act(self, inputs_data):
         """Use collect policy to calculate the action"""
-        local_obs, global_obs, hn_actor, hn_critic, masks, num_agent, onehot_action, \
-            concated_action, concated_log_prob, concated_ht_actor, concated_value_prediction, \
-            concated_ht_critic = inputs_data
+        local_obs, global_obs, hn_actor, hn_critic, masks, onehot_action, concated_action, \
+        concated_log_prob, concated_ht_actor, concated_value_prediction, concated_ht_critic = inputs_data
 
         collect_data = (local_obs, hn_actor, masks)
         actions, log_prob, ht_actor = self.collect_policy(collect_data)
-        value_prediction, ht_critic = self.critic_net(
-            global_obs, hn_critic, masks)
+        value_prediction, ht_critic = self.critic_net(global_obs, hn_critic, masks)
 
-        temp_onehot_action = onehot_action
-        temp_onehot_action[:, num_agent] = self.onehot(
-            actions, 5, self.one_float, self.zero_float).squeeze(1)
+        temp_onehot_action = self.onehot(actions, 5, self.one_float, self.zero_float).squeeze(1)
         self.assign(onehot_action, temp_onehot_action)
-
-        temp_concated_action = concated_action
-        temp_concated_action[num_agent] = actions
-        self.assign(concated_action, temp_concated_action)
-
-        temp_concated_log_prob = concated_log_prob
-        temp_concated_log_prob[num_agent] = log_prob
-        self.assign(concated_log_prob, temp_concated_log_prob)
-
-        temp_concated_ht_actor = concated_ht_actor
-        temp_concated_ht_actor[num_agent] = ht_actor
-        self.assign(concated_ht_actor, temp_concated_ht_actor)
-
-        temp_concated_value_prediction = concated_value_prediction
-        temp_concated_value_prediction[num_agent] = value_prediction
-        self.assign(concated_value_prediction, temp_concated_value_prediction)
-
-        temp_concated_ht_critic = concated_ht_critic
-        temp_concated_ht_critic[num_agent] = ht_critic
-        self.assign(concated_ht_critic, temp_concated_ht_critic)
+        self.assign(concated_action, actions)
+        self.assign(concated_log_prob, log_prob)
+        self.assign(concated_ht_actor, ht_actor)
+        self.assign(concated_value_prediction, value_prediction)
+        self.assign(concated_ht_critic, ht_critic)
 
         return self.true
 
@@ -435,9 +418,11 @@ class MAPPOLearner(Learner):
         self.concat = P.Concat()
         self.value_normalizer = ValueNormalizer()
         actor_optimizer = nn.Adam(self.actor_net.trainable_params(),
-                                  learning_rate=params['learning_rate'])
+                                  learning_rate=params['learning_rate'],
+                                  use_amsgrad=True)
         critic_optimizer = nn.Adam(self.critic_net.trainable_params(),
-                                   learning_rate=params['learning_rate'])
+                                   learning_rate=params['learning_rate'],
+                                   use_amsgrad=True)
         actor_loss_cell = self.MAPPOActorLossCell(self.actor_net)
         self.actor_train = nn.TrainOneStepCell(
             actor_loss_cell, actor_optimizer)
@@ -453,7 +438,7 @@ class MAPPOLearner(Learner):
     #pylint: disable=W0221
     def learn(self, samples):
         """The learn method of MAPPO, it will calculate the loss and update the neural network"""
-        local_obs, hn_actor, hn_critic, mask, actions, log_prob, value, reward, global_obs = samples
+        local_obs, hn_actor, hn_critic, mask, actions, log_prob, value, reward, global_obs, init_loss = samples
 
         def reshape_tensor_2d(tensor):
             reshaped_tensor = self.reshape(tensor.transpose(
@@ -511,8 +496,8 @@ class MAPPOLearner(Learner):
         hn_actor = self.gather(hn_actor, ind, 0)
         hn_critic = self.gather(hn_critic, ind, 0)
         iter_learn_time = self.zero
-        actor_loss = self.zero
-        critic_loss = self.zero
+        actor_loss = init_loss
+        critic_loss = init_loss
 
         while iter_learn_time < self.iter_time:
             actor_loss += self.actor_train(actions, local_obs,
