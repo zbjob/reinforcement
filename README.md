@@ -36,13 +36,6 @@ MindSpore Reinforcement is an open-source reinforcement learning framework that 
 
 MindSpore Reinforcement depends on the MindSpore training and inference framework. Therefore, please first install [MindSpore](https://www.mindspore.cn/install/en) following the instruction on the official website, then install MindSpore Reinforcement. You can install from `pip` or source code.
 
-### System requirements
-
-operating system： CentOS or Ubuntu
-hardware platform： Ascend910, CPU, GPU
-
-> Note: For specific algorithm, please refer to algorithm's README.
-
 ### Version dependency
 
 Due the dependency between MindSpore Reinforcement and MindSpore, please follow the table below and install the corresponding MindSpore verision from [MindSpore download page](https://www.mindspore.cn/versions/en).
@@ -53,7 +46,8 @@ pip install https://ms-release.obs.cn-north-4.myhuaweicloud.com/{MindSpore-Versi
 
 | MindSpore Reinforcement Version |                            Branch                            | MindSpore version |
 | :-----------------------------: | :----------------------------------------------------------: | :---------------: |
-|              0.6.0              | [r0.6](https://gitee.com/mindspore/reinforcement/tree/r0.6/) |       2.0.0       |
+|              0.7.0              | [r0.7](https://gitee.com/mindspore/reinforcement/tree/r0.7/) |       2.0.0       |
+|              0.6.0              | [r0.6](https://gitee.com/mindspore/reinforcement/tree/r0.6/) |       1.9.0       |
 |              0.5.0              | [r0.5](https://gitee.com/mindspore/reinforcement/tree/r0.5/) |       1.8.0       |
 |              0.3.0              | [r0.3](https://gitee.com/mindspore/reinforcement/tree/r0.3/) |       1.7.0       |
 |              0.2.0              | [r0.2](https://gitee.com/mindspore/reinforcement/tree/r0.2/) |       1.6.0       |
@@ -236,6 +230,16 @@ For more details about the installation guide, tutorials, and APIs, see [MindSpo
         <td align="center">✔️</td>
         <td align="center">/</td>
         <td align="center"><a href="https://www.gymlibrary.ml/environments/mujoco/half_cheetah/">HalfCheetah-v2</a></td>
+    </tr>
+    <tr>
+        <td align="center"><a href="https://gitee.com/mindspore/reinforcement/tree/master/example/ac">C51</a></td>
+        <td align="center">>= 0.6</td>
+        <td align="center">✔️</td>
+        <td align="center">/</td>
+        <td align="center">✔️</td>
+        <td align="center">/</td>
+        <td align="center">/</td>
+        <td align="center"><a href="https://www.gymlibrary.ml/environments/classic_control/cart_pole/">CartPole-v0</a></td>
     </tr>
 </table>
 

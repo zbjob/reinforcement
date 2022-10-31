@@ -37,13 +37,6 @@ MindSpore Reinforcement是一个开源的强化学习框架，支持使用强化
 
 MindSpore Reinforcement依赖MindSpore训练推理框架，安装完[MindSpore](https://gitee.com/mindspore/mindspore#%E5%AE%89%E8%A3%85)，再安装MindSpore Reinforcement。可以采用pip安装或者源码编译安装两种方式。
 
-### 系统要求
-
-操作系统： CentOS或Ubuntu
-硬件平台： Ascend910、CPU、GPU
-
-> 注： 具体算法请参照算法README。
-
 ### MindSpore版本依赖关系
 
 由于MindSpore Reinforcement与MindSpore有依赖关系，请按照根据下表中所指示的对应关系，在[MindSpore下载页面](https://www.mindspore.cn/versions)下载并安装对应的whl包。
@@ -54,7 +47,8 @@ pip install https://ms-release.obs.cn-north-4.myhuaweicloud.com/{MindSpore-Versi
 
 | MindSpore Reinforcement |                             分支                             | MindSpore |
 | :---------------------: | :----------------------------------------------------------: | :-------: |
-|          0.6.0          | [r0.6](https://gitee.com/mindspore/reinforcement/tree/r0.6/) |   2.0.0   |
+|          0.7.0          | [r0.7](https://gitee.com/mindspore/reinforcement/tree/r0.7/) |   2.0.0   |
+|          0.6.0          | [r0.6](https://gitee.com/mindspore/reinforcement/tree/r0.6/) |   1.9.0   |
 |          0.5.0          | [r0.5](https://gitee.com/mindspore/reinforcement/tree/r0.5/) |   1.8.0   |
 |          0.3.0          | [r0.3](https://gitee.com/mindspore/reinforcement/tree/r0.3/) |   1.7.0   |
 |          0.2.0          | [r0.2](https://gitee.com/mindspore/reinforcement/tree/r0.2/) |   1.6.0   |
@@ -237,6 +231,16 @@ Evaluate for episode 10 total rewards is 9.600
         <td align="center">✔️</td>
         <td align="center">/</td>
         <td align="center"><a href="https://www.gymlibrary.ml/environments/mujoco/half_cheetah/">HalfCheetah-v2</a></td>
+    </tr>
+    <tr>
+        <td align="center"><a href="https://gitee.com/mindspore/reinforcement/tree/master/example/ac">C51</a></td>
+        <td align="center">>= 0.6</td>
+        <td align="center">✔️</td>
+        <td align="center">/</td>
+        <td align="center">✔️</td>
+        <td align="center">/</td>
+        <td align="center">/</td>
+        <td align="center"><a href="https://www.gymlibrary.ml/environments/classic_control/cart_pole/">CartPole-v0</a></td>
     </tr>
 </table>
 
