@@ -11,12 +11,10 @@
     参数：
         - **gamma** (float) - 折扣系数。
 
-    .. py:method:: construct(reward, done, last_state_value)
+    输入：
+        - **reward** (Tensor) - 包含多个episode的奖励序列。 张量的维度 :math:`(Timestep, Batch, ...)`。
+        - **done** (Tensor) - Episode结束标识。 张量维度 :math:`(Timestep, Batch)`。
+        - **last_state_value** (Tensor) - 表示最后一个epsode的最后一个step的价值， 张量的维度 :math:`(Batch, ...)`。
 
-        参数:
-            - **reward** (Tensor) - 包含多个episode的奖励序列. 张量的维度 :math:`(Timestep, Batch, ...)`
-            - **done** (Tensor) - Episode结束标识. 张量维度 :math:`(Timestep, Batch)`.
-            - **last_state_value** (Tensor) - 表示最后一个epsode的最后一个step的价值. 张量的维度 :math:`(Batch, ...)`.
-
-        返回：
-            折扣回报。
+    返回：
+        折扣回报。
