@@ -94,7 +94,8 @@ class GruNet(nn.Cell):
         self.bidirectional = bidirectional
         self.dropout = dropout
         self.enable_cudnn = context.get_context('device_target') in ['GPU']
-        if self.enable_cudnn and enable_fusion:
+        self.enable_fusion = enable_fusion
+        if self.enable_cudnn and self.enable_fusion:
             weight_size = 0
             gate_size = 3 * hidden_size
             num_directions = 2 if bidirectional else 1
@@ -140,7 +141,7 @@ class GruNet(nn.Cell):
         """
         x_out = None
         h_out = None
-        if self.enable_cudnn:
+        if self.enable_cudnn and self.enable_fusion:
             x_out, h_out, _, _ = self.gru(x_in, h_in, self.weight)
         else:
             x_out, h_out = self.gru(x_in, h_in)
