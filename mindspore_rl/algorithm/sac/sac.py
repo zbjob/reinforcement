@@ -75,7 +75,7 @@ class SACPolicy():
             std = self.exp(log_std)
 
             action = self.tanh(mean)
-            return mean, std, action
+            return mean, std, log_std, action
 
     class SACCriticNet(nn.Cell):
         """
@@ -119,7 +119,7 @@ class SACPolicy():
             self.dist = TanhMultivariateNormalDiag(reduce_axis=-1)
 
         def construct(self, obs):
-            means, stds, _ = self.actor_net(obs)
+            means, stds, _, _ = self.actor_net(obs)
             actions = self.dist.sample((), means, stds)
             return actions
 
@@ -131,7 +131,7 @@ class SACPolicy():
             self.actor_net = actor_net
 
         def construct(self, obs):
-            _, _, action = self.actor_net(obs)
+            _, _, _, action = self.actor_net(obs)
             return action
 
     def __init__(self, params):
@@ -272,7 +272,7 @@ class SACLearner(Learner):
 
         def construct(self, state):
             """Calculate actor loss"""
-            means, stds, _ = self.actor_net(state)
+            means, stds, log_std, _ = self.actor_net(state)
             action, log_prob = self.dist.sample_and_log_prob((), means, stds)
 
             target_q_value1 = self.critic_net1(state, action)
@@ -283,7 +283,7 @@ class SACLearner(Learner):
             actor_reg_loss = 0.
             if self.actor_mean_std_reg:
                 mean_reg_loss = self.actor_mean_reg_weight * (means ** 2).mean()
-                std_reg_loss = self.actor_std_reg_weight * (stds ** 2).mean()
+                std_reg_loss = self.actor_std_reg_weight * (log_std ** 2).mean()
                 actor_reg_loss = mean_reg_loss + std_reg_loss
 
             return actor_loss * self.actor_loss_weight + actor_reg_loss
@@ -299,7 +299,7 @@ class SACLearner(Learner):
             self.dist = TanhMultivariateNormalDiag(reduce_axis=-1)
 
         def construct(self, state_list):
-            means, stds, _ = self.actor_net(state_list)
+            means, stds, _, _ = self.actor_net(state_list)
             _, log_prob = self.dist.sample_and_log_prob((), means, stds)
             entropy_diff = -log_prob - self.target_entropy
             alpha_loss = self.log_alpha * entropy_diff
