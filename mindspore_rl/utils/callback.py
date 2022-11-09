@@ -279,8 +279,8 @@ class CheckpointCallback(Callback):
 
     Args:
         save_per_episode (int): The frequency to save checkpoint. Default: 0.
-        directory (Optional[str]): The directory for saving checkpoints. Default is current path.
-        max_ckpt_nums (int): Numbers of how many checkpoint files to be kept. Default:5.
+        directory (str, optional): The directory for saving checkpoints. Default is current path.
+        max_ckpt_nums (int, optional): Numbers of how many checkpoint files to be kept. Default:5.
     '''
     def __init__(self, save_per_episode=0, directory=None, max_ckpt_nums=5):
         super(CheckpointCallback, self).__init__()
