@@ -8,7 +8,7 @@
 
     .. py:method:: construct(dst, src)
 
-        将`src`中的参数覆盖到`dst`。
+        将 `src` 中的参数覆盖到 `dst` 。
 
         参数:
             - **dst** (tuple(Parameters)) - 目标位置的参数列表。
@@ -26,7 +26,7 @@
 
     .. py:method:: construct(dst, src)
 
-        读取`src`中的参数覆盖到`dst`。
+        读取 `src` 中的参数覆盖到 `dst` 。
 
         参数:
             - **dst** (tuple(Parameters)) - 目标位置的参数列表。
