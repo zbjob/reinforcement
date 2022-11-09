@@ -9,7 +9,7 @@
     依次执行回调函数。
 
     参数：
-        - **callbacks** (Callback) - 回调函数。
+        - **callbacks** (list[Callback]) - 回调函数。
 
     .. py:method:: begin(params)
 
