@@ -88,17 +88,6 @@ class TicTacToeEnvironment(Environment):
         self._reward_ops = P.PyFunc(self._rewards, (), (), (ms.float32,), ((2,),))
 
     @property
-    def observation_space(self):
-        """
-        Get the state space of the environment.
-
-        Returns:
-            The state space of environment.
-        """
-
-        return self._observation_space
-
-    @property
     def action_space(self):
         """
         Get the action space of the environment.
@@ -110,14 +99,14 @@ class TicTacToeEnvironment(Environment):
         return self._action_space
 
     @property
-    def reward_space(self):
+    def config(self):
         """
-        Get the reward space of the environment.
+        Get the config of environment.
 
         Returns:
-            The reward space of environment.
+            A dictionary which contains environment's info.
         """
-        return self._reward_space
+        return {}
 
     @property
     def done_space(self):
@@ -130,14 +119,25 @@ class TicTacToeEnvironment(Environment):
         return self._done_space
 
     @property
-    def config(self):
+    def observation_space(self):
         """
-        Get the config of environment.
+        Get the state space of the environment.
 
         Returns:
-            A dictionary which contains environment's info.
+            The state space of environment.
         """
-        return {}
+
+        return self._observation_space
+
+    @property
+    def reward_space(self):
+        """
+        Get the reward space of the environment.
+
+        Returns:
+            The reward space of environment.
+        """
+        return self._reward_space
 
     def reset(self):
         """

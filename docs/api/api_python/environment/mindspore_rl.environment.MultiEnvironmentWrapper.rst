@@ -9,11 +9,15 @@
     .. py:method:: action_space
         :property:
 
+        获取环境的动作空间。
+
         返回：
             Space，环境的动作空间。
 
     .. py:method:: config
         :property:
+
+        获取环境的配置信息。
 
         返回：
             dict，一个包含环境信息的字典。
@@ -21,11 +25,15 @@
     .. py:method:: done_space
         :property:
 
+        获取环境的终止空间。
+
         返回：
-            Space，返回环境的终止空间。
+            Space，环境的终止空间。
 
     .. py:method:: observation_space
         :property:
+
+        获取环境的状态空间。
 
         返回：
             Space，返回环境的状态空间。
@@ -44,8 +52,10 @@
     .. py:method:: reward_space
         :property:
 
+        获取环境的状态空间。
+
         返回：
-            Space，返回环境的奖励空间。
+            Space，环境的奖励空间。
 
     .. py:method:: step(action)
 

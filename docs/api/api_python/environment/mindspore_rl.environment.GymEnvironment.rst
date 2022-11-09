@@ -1,6 +1,6 @@
 .. py:class:: mindspore_rl.environment.GymEnvironment(params, env_id=0)
     
-    GymEnvironment将 `Gym <https://gym.openai.com/>`_ 封装成一个类来提供在MindSpore图模式下也能和Gym环境交互的能力。
+    GymEnvironment将 `Gym <https://www.gymlibrary.dev/>`_ 封装成一个类来提供在MindSpore图模式下也能和Gym环境交互的能力。
 
     参数：
         - **params** (dict) - 字典包含GymEnvironment类中所需要的所有参数。
@@ -18,11 +18,15 @@
     .. py:method:: action_space
         :property:
 
+        获取环境的动作空间。
+
         返回：
             Space，环境的动作空间。
 
     .. py:method:: config
         :property:
+
+        获取环境的配置信息。
 
         返回：
             dict，一个包含环境信息的字典。
@@ -30,11 +34,15 @@
     .. py:method:: done_space
         :property:
 
+        获取环境的终止空间。
+
         返回：
             Space，环境的终止空间。
 
     .. py:method:: observation_space
         :property:
+
+        获取环境的状态空间。
 
         返回：
             Space，环境的状态空间。
@@ -52,6 +60,8 @@
 
     .. py:method:: reward_space
         :property:
+
+        获取环境的状态空间。
 
         返回：
             Space，环境的奖励空间。
