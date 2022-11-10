@@ -235,13 +235,13 @@ class SACLearner(Learner):
 
         def construct(self, next_state, reward, state, action, done):
             """Calculate critic loss"""
-            next_means, next_stds, _ = self.actor_net(next_state)
+            next_means, next_stds, _, _ = self.actor_net(next_state)
             next_action, next_log_prob = self.dist.sample_and_log_prob((), next_means, next_stds)
 
             target_q_value1 = self.target_critic_net1(next_state, next_action).squeeze(axis=-1)
             target_q_value2 = self.target_critic_net2(next_state, next_action).squeeze(axis=-1)
             target_q_value = self.min(target_q_value1, target_q_value2) - self.exp(self.log_alpha) * next_log_prob
-            td_target = self.reward_scale_factor * reward + self.gamma * (1 - done) * target_q_value
+            td_target = self.reward_scale_factor * reward + self.gamma * (1 - done.squeeze(axis=-1)) * target_q_value
 
             pred_td_target1 = self.critic_net1(state, action).squeeze(axis=-1)
             pred_td_target2 = self.critic_net2(state, action).squeeze(axis=-1)
