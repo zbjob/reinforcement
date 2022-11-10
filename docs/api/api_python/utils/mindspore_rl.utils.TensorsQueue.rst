@@ -12,6 +12,11 @@
         - **size** (int) - Tensor队列的大小。默认：0。
         - **name** (str) - Tensor队列的名字。默认："TQ"。
 
+    异常:
+        - **TypeError** - `dtype` 不是 MindSpore 数字类型.
+        - **ValueError** - `size` 小于0.
+        - **ValueError** - `shapes` 的长度小于1.
+
     .. py:method:: clear()
 
         清理创建的Tensor队列。仅重置该队列，清理数据和重置大小，保留队列实例。

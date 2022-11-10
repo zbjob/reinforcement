@@ -37,7 +37,7 @@ class TensorsQueue(Cell):
         name (str): the name of this TensorsQueue. Default: "TQ".
 
     Raises:
-        TypeError: If `dtype` is not mindpore number type.
+        TypeError: If `dtype` is not MindSpore number type.
         ValueError: If `size` is less than 0.
         ValueError: If `shapes` size is less than 1.
 
