@@ -44,6 +44,7 @@ class GruNet(nn.Cell):
             GRU layer except the last layer. Default 0.0. The range of dropout is [0.0, 1.0).
         bidirectional (bool): Specifies whether it is a bidirectional GRU,
             num_directions=2 if bidirectional=True otherwise 1. Default: False.
+        enable_fusion (bool): Whether need to use GRU fusion ops. Default: True.
 
     Inputs:
         - **x_in** (Tensor) - Tensor of data type mindspore.float32 and
