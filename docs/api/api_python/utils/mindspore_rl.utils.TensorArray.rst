@@ -13,19 +13,19 @@
         - **size** (int) - 如果 `dynamic_size=False` , 则 `size` 表示该数组的最大容量。
         - **name** (str) - 动态数组的名字。默认："TA"。
 
+    .. py:method:: clear()
+
+        清理创建的动态数组。仅重置该数组，清理数据和重置大小，保留数组实例。
+
+        返回：
+            True。
+
     .. py:method:: close()
 
         关闭动态数组。
 
         .. warning::
             - 一旦关闭了动态数组，每个属于该动态数组的方法都将失效。所有该数组中的资源也将被清除。如果该数组还将在别的地方使用，如下一个循环，请用 `clear` 代替。
-
-        返回：
-            True。
-
-    .. py:method:: clear()
-
-        清理创建的动态数组。仅重置该数组，清理数据和重置大小，保留数组实例。
 
         返回：
             True。
@@ -40,19 +40,19 @@
         返回：
             Tensor, 指定位置的值。
 
-    .. py:method:: stack()
-
-        堆叠动态数组中的Tensor为一个整体。
-
-        返回：
-            Tensor, 动态数组中的所有Tensor将堆叠成一个整体。
-
     .. py:method:: size()
 
         动态数组的逻辑大小。
 
         返回：
             Tensor, 动态数组大小。
+
+    .. py:method:: stack()
+
+        堆叠动态数组中的Tensor为一个整体。
+
+        返回：
+            Tensor, 动态数组中的所有Tensor将堆叠成一个整体。
 
     .. py:method:: write(index, value)
 

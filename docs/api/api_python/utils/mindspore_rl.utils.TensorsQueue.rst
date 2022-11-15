@@ -8,7 +8,7 @@
 
     参数：
         - **dtype** (mindspore.dtype) - Tensor队列的数据类型。每个Tensor需要相同的类型。
-        - **shapes** (tuple(int64)) - Tensor队列中每个Tensor的shapes。
+        - **shapes** (tuple[int64]) - Tensor队列中每个Tensor的shapes。
         - **size** (int) - Tensor队列的大小。默认：0。
         - **name** (str) - Tensor队列的名字。默认："TQ"。
 
@@ -53,7 +53,7 @@
         向Tensor队列的底部放入元素（tuple(Tensors)）。
 
         参数：
-            - **element** (tuple(Tensors)) - 写入的元素。
+            - **element** (tuple(Tensor) 或 list[tensor]) - 写入的元素。
 
         返回：
             True。
