@@ -22,7 +22,10 @@ from mindspore.ops.operations._rl_inner_ops import MuxSend, MuxReceive
 from mindspore.communication.management import init, NCCL_WORLD_COMM_GROUP, get_rank, get_group_size
 from mindspore.ops import operations as ops
 from mindspore import ms_function
+from mindspore import context
 
+# Dynamic networking is only supported in GRAPH_MODE, but the default mode in MS is PYNATIVE_MODE.
+context.set_context(mode=context.GRAPH_MODE)
 init()
 rank_id = get_rank()
 rank_size = get_group_size()
