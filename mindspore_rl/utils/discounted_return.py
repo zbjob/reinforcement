@@ -45,6 +45,9 @@ class DiscountedReturn(nn.Cell):
         - **last_state_value** (Tensor) - The value after final step of last episode.
           Tensor of shape :math:`(Batch, ...)`
 
+    Returns:
+        Discounted return.
+
     Examples:
         >>> net = DiscountedReturn(gamma=0.99)
         >>> reward = Tensor([[1, 1, 1, 1]], dtype=mindspore.float32)

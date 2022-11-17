@@ -8,11 +8,9 @@
         - **damping** (float) - Ornstein-Uhlenbeck (OU) 噪声阻尼。
         - **action_shape** (tuple) - 动作的维度。
 
-    .. py:method:: construct(actions)
+    输入：
+        - **actions** (Tensor) - 添加OU噪声之前的动作。
 
-        参数:
-            - **actions** (Tensor) - 添加OU噪声之前的动作。
-
-        返回：
-            - **actions** (Tensor) - 添加OU噪声之后的动作。
+    返回：
+        - **actions** (Tensor) - 添加OU噪声之后的动作。
 
