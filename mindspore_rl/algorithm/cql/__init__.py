@@ -14,12 +14,12 @@
 # ============================================================================
 
 """
-    Components for sac.
+    Components for CQL.
 """
 
-from mindspore_rl.algorithm.sac import config
-from mindspore_rl.algorithm.sac.sac_session import SACSession
-from mindspore_rl.algorithm.sac.sac_trainer import SACTrainer
-from mindspore_rl.algorithm.sac.sac import SACActor, SACLearner, SACPolicy
+from mindspore_rl.algorithm.cql import config
+from mindspore_rl.algorithm.cql.cql_session import CQLSession
+from mindspore_rl.algorithm.cql.cql_trainer import CQLTrainer
+from mindspore_rl.algorithm.cql.cql import CQLActor, CQLLearner, CQLPolicyAndNetwork
 
-__all__ = ["config", "SACSession", "SACActor", "SACLearner", "SACPolicy", "SACTrainer"]
+__all__ = ["config", "CQLSession", "CQLActor", "CQLLearner", "CQLPolicyAndNetwork", "CQLTrainer"]
