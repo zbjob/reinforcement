@@ -60,14 +60,7 @@ class A2CPolicyAndNetwork():
             self.log = ops.Log()
             self.gather = ops.GatherD()
             self.softmax = ops.Softmax()
-            self.minimum = ops.Minimum()
-            self.abs = ops.Abs()
-            self.expand_dims = ops.ExpandDims()
-            self.add = ops.Add()
-            self.square = ops.Square()
-            self.mul = ops.Mul()
-            self.delta = Tensor(1, mindspore.float32)
-            self.h_d = Tensor(0.5, mindspore.float32)
+            self.smoothl1_loss = nn.SmoothL1Loss(beta=1.0, reduction='sum')
 
         def construct(self, states, actions, returns):
             '''Calculate actor loss and critic loss'''
@@ -78,10 +71,7 @@ class A2CPolicyAndNetwork():
             action_log_probs = self.log(action_probs)
             adv_mul_prob = action_log_probs * advantage
             actor_loss = -self.reduce_sum(adv_mul_prob)
-            q = self.minimum(self.abs(advantage), self.delta)
-            l = self.abs(advantage) - q
-            loss = self.add(self.mul(self.h_d, self.mul(q, q)), l)
-            critic_loss = self.reduce_sum(loss)
+            critic_loss = self.smoothl1_loss(values, returns)
             return critic_loss + actor_loss
 
     def __init__(self, params):
