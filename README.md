@@ -159,7 +159,7 @@ For more details about the installation guide, tutorials, and APIs, see [MindSpo
         <td align="center">✔️</td>
         <td align="center">✔️</td>
         <td align="center">✔️</td>
-        <td align="center"><a href="https://www.gymlibrary.ml/environments/classic_control/cart_pole/">CartPole-v0</a></td>
+        <td align="center"><a href="https://www.gymlibrary.dev/environments/classic_control/cart_pole/">CartPole-v0</a></td>
     </tr>
     <tr>
         <td align="center"><a href="https://gitee.com/mindspore/reinforcement/tree/master/example/ppo">PPO</a></td>
@@ -169,7 +169,7 @@ For more details about the installation guide, tutorials, and APIs, see [MindSpo
         <td align="center">✔️</td>
         <td align="center">✔️</td>
         <td align="center">✔️</td>
-        <td align="center"><a href="https://www.gymlibrary.ml/environments/mujoco/half_cheetah/">HalfCheetah-v2</a></td>
+        <td align="center"><a href="https://www.gymlibrary.dev/environments/mujoco/half_cheetah/">HalfCheetah-v2</a></td>
     </tr>
     <tr>
         <td align="center"><a href="https://gitee.com/mindspore/reinforcement/tree/master/example/ac">AC</a></td>
@@ -179,7 +179,7 @@ For more details about the installation guide, tutorials, and APIs, see [MindSpo
         <td align="center">✔️</td>
         <td align="center">✔️</td>
         <td align="center">/</td>
-        <td align="center"><a href="https://www.gymlibrary.ml/environments/classic_control/cart_pole/">CartPole-v0</a></td>
+        <td align="center"><a href="https://www.gymlibrary.dev/environments/classic_control/cart_pole/">CartPole-v0</a></td>
     </tr>
     <tr>
         <td align="center"><a href="https://gitee.com/mindspore/reinforcement/tree/master/example/a2c">A2C</a></td>
@@ -189,7 +189,7 @@ For more details about the installation guide, tutorials, and APIs, see [MindSpo
         <td align="center">✔️</td>
         <td align="center">✔️</td>
         <td align="center">/</td>
-        <td align="center"><a href="https://www.gymlibrary.ml/environments/classic_control/cart_pole/">CartPole-v0</a></td>
+        <td align="center"><a href="https://www.gymlibrary.dev/environments/classic_control/cart_pole/">CartPole-v0</a></td>
     </tr>
     <tr>
         <td align="center"><a href="https://gitee.com/mindspore/reinforcement/tree/master/example/ddpg">DDPG</a></td>
@@ -199,7 +199,7 @@ For more details about the installation guide, tutorials, and APIs, see [MindSpo
         <td align="center">✔️</td>
         <td align="center">✔️</td>
         <td align="center">✔️</td>
-        <td align="center"><a href="https://www.gymlibrary.ml/environments/mujoco/half_cheetah/">HalfCheetah-v2</a></td>
+        <td align="center"><a href="https://www.gymlibrary.dev/environments/mujoco/half_cheetah/">HalfCheetah-v2</a></td>
     </tr>
     <tr>
         <td align="center"><a href="https://gitee.com/mindspore/reinforcement/tree/master/example/qmix">QMIX</a></td>
@@ -219,7 +219,7 @@ For more details about the installation guide, tutorials, and APIs, see [MindSpo
         <td align="center">✔️</td>
         <td align="center">✔️</td>
         <td align="center">✔️</td>
-        <td align="center"><a href="https://www.gymlibrary.ml/environments/mujoco/half_cheetah/">HalfCheetah-v2</a></td>
+        <td align="center"><a href="https://www.gymlibrary.dev/environments/mujoco/half_cheetah/">HalfCheetah-v2</a></td>
     </tr>
     <tr>
         <td align="center"><a href="https://gitee.com/mindspore/reinforcement/tree/master/example/td3">TD3</a></td>
@@ -229,17 +229,37 @@ For more details about the installation guide, tutorials, and APIs, see [MindSpo
         <td align="center">✔️</td>
         <td align="center">✔️</td>
         <td align="center">/</td>
-        <td align="center"><a href="https://www.gymlibrary.ml/environments/mujoco/half_cheetah/">HalfCheetah-v2</a></td>
+        <td align="center"><a href="https://www.gymlibrary.dev/environments/mujoco/half_cheetah/">HalfCheetah-v2</a></td>
     </tr>
     <tr>
-        <td align="center"><a href="https://gitee.com/mindspore/reinforcement/tree/master/example/ac">C51</a></td>
+        <td align="center"><a href="https://gitee.com/mindspore/reinforcement/tree/master/example/c51">C51</a></td>
         <td align="center">>= 0.6</td>
         <td align="center">✔️</td>
         <td align="center">/</td>
         <td align="center">✔️</td>
         <td align="center">/</td>
         <td align="center">/</td>
-        <td align="center"><a href="https://www.gymlibrary.ml/environments/classic_control/cart_pole/">CartPole-v0</a></td>
+        <td align="center"><a href="https://www.gymlibrary.dev/environments/classic_control/cart_pole/">CartPole-v0</a></td>
+    </tr>
+    <tr>
+        <td align="center"><a href="https://gitee.com/mindspore/reinforcement/tree/master/example/a3c">A3C</a></td>
+        <td align="center">>= 0.7</td>
+        <td align="center">✔️</td>
+        <td align="center">/</td>
+        <td align="center">/</td>
+        <td align="center">✔️</td>
+        <td align="center">/</td>
+        <td align="center"><a href="https://www.gymlibrary.dev/environments/classic_control/cart_pole/">CartPole-v0</a></td>
+    </tr>
+    <tr>
+        <td align="center"><a href="https://gitee.com/mindspore/reinforcement/tree/master/example/cql">CQL</a></td>
+        <td align="center">>= 0.7</td>
+        <td align="center">/</td>
+        <td align="center">✔️</td>
+        <td align="center">✔️</td>
+        <td align="center">✔️</td>
+        <td align="center">/</td>
+        <td align="center"><a href="https://www.gymlibrary.dev/environments/mujoco/hopper">Hopper-v0</a></td>
     </tr>
 </table>
 
