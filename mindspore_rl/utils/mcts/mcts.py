@@ -107,7 +107,7 @@ class MCTS(nn.Cell):
         for shape in state_shape:
             state_size *= shape
 
-        mcts_creation_info = CustomRegOp("add_with_attr_kernel") \
+        mcts_creation_info = CustomRegOp("creation_kernel") \
             .input(0, "uct_value") \
             .output(0, "tree_handle") \
             .dtype_format(DataType.None_None, DataType.None_None) \
@@ -140,7 +140,7 @@ class MCTS(nn.Cell):
         tree_handle_numpy = float(self.tree_handle.astype(ms.float32).asnumpy()[0])
         self.tree_handle_list = [int(tree_handle_numpy)]
 
-        mcts_selection_info = CustomRegOp("add_with_attr_kernel") \
+        mcts_selection_info = CustomRegOp("selection_kernel") \
             .output(0, "visited_node") \
             .output(1, "last_action") \
             .dtype_format(DataType.None_None, DataType.None_None) \
@@ -160,7 +160,7 @@ class MCTS(nn.Cell):
                                              "aot", reg_info=mcts_selection_info)
         self.mcts_selection.add_prim_attr("primitive_target", device)
 
-        mcts_expansion_info = CustomRegOp("add_with_attr_kernel") \
+        mcts_expansion_info = CustomRegOp("expansion_kernel") \
             .input(0, "visited_node") \
             .input(1, "legal_action") \
             .input(2, "prior") \
@@ -178,7 +178,7 @@ class MCTS(nn.Cell):
                                          (ms.bool_), "aot", reg_info=mcts_expansion_info)
         self.mcts_expansion.add_prim_attr("primitive_target", device)
 
-        mcts_backprop_info = CustomRegOp("add_with_attr_kernel") \
+        mcts_backprop_info = CustomRegOp("backprop_kernel") \
             .input(0, "visited_node") \
             .input(1, "returns") \
             .output(0, "solved") \
@@ -191,7 +191,7 @@ class MCTS(nn.Cell):
             "aot", reg_info=mcts_backprop_info)
         self.mcts_backpropagation.add_prim_attr("primitive_target", device)
 
-        mcts_bestaction_info = CustomRegOp("add_with_attr_kernel") \
+        mcts_bestaction_info = CustomRegOp("bestaction_kernel") \
             .output(0, "action") \
             .dtype_format(DataType.None_None) \
             .attr("tree_handle", "required", "all", value=self._check_params(float, tree_handle_numpy, "tree_handle")) \
@@ -201,7 +201,7 @@ class MCTS(nn.Cell):
                                       (1,), (ms.int32), "aot", reg_info=mcts_bestaction_info)
         self.best_action.add_prim_attr("primitive_target", device)
 
-        mcts_outcome_info = CustomRegOp("add_with_attr_kernel") \
+        mcts_outcome_info = CustomRegOp("outcome_kernel") \
             .input(0, "visited_node") \
             .input(1, "reward") \
             .output(0, "success") \
@@ -214,7 +214,7 @@ class MCTS(nn.Cell):
             "aot", reg_info=mcts_outcome_info)
         self.update_leafnode_outcome.add_prim_attr("primitive_target", device)
 
-        mcts_terminal_info = CustomRegOp("add_with_attr_kernel") \
+        mcts_terminal_info = CustomRegOp("terminal_kernel") \
             .input(0, "visited_node") \
             .input(1, "terminal") \
             .output(0, "success") \
@@ -227,7 +227,7 @@ class MCTS(nn.Cell):
             "aot", reg_info=mcts_terminal_info)
         self.update_leafnode_terminal.add_prim_attr("primitive_target", device)
 
-        mcts_leafstate_info = CustomRegOp("add_with_attr_kernel") \
+        mcts_leafstate_info = CustomRegOp("leafstate_kernel") \
             .input(0, "visited_node") \
             .input(1, "state") \
             .output(0, "success") \
@@ -239,7 +239,7 @@ class MCTS(nn.Cell):
             so_path), (1,), (ms.bool_), "aot", reg_info=mcts_leafstate_info)
         self.update_leafnode_state.add_prim_attr("primitive_target", device)
 
-        mcts_rootstate_info = CustomRegOp("add_with_attr_kernel") \
+        mcts_rootstate_info = CustomRegOp("rootstate_kernel") \
             .input(0, "state") \
             .output(0, "success") \
             .dtype_format(DataType.None_None, DataType.None_None) \
@@ -251,7 +251,7 @@ class MCTS(nn.Cell):
             "aot", reg_info=mcts_rootstate_info)
         self.update_root_state.add_prim_attr("primitive_target", device)
 
-        mcts_getlast_info = CustomRegOp("add_with_attr_kernel") \
+        mcts_getlast_info = CustomRegOp("getlast_kernel") \
             .input(0, "visited_node") \
             .output(0, "state") \
             .dtype_format(DataType.None_None, DataType.None_None) \
@@ -262,7 +262,7 @@ class MCTS(nn.Cell):
                                          (ms.float32), "aot", reg_info=mcts_getlast_info)
         self.get_last_state.add_prim_attr("primitive_target", device)
 
-        mcts_globalvar_info = CustomRegOp("add_with_attr_kernel") \
+        mcts_globalvar_info = CustomRegOp("globalvar_kernel") \
             .output(0, "success") \
             .dtype_format(DataType.None_None) \
             .attr("tree_handle", "required", "all", value=self._check_params(float, tree_handle_numpy, "tree_handle")) \
@@ -272,7 +272,7 @@ class MCTS(nn.Cell):
                                                  (ms.bool_), "aot", reg_info=mcts_globalvar_info)
         self.update_global_variable.add_prim_attr("primitive_target", device)
 
-        mcts_destroy_info = CustomRegOp("add_with_attr_kernel") \
+        mcts_destroy_info = CustomRegOp("destroy_kernel") \
             .input(0, "handle") \
             .output(0, "success") \
             .dtype_format(DataType.None_None, DataType.None_None) \
@@ -283,7 +283,7 @@ class MCTS(nn.Cell):
                                        (1,), (ms.bool_), "aot", reg_info=mcts_destroy_info)
         self.destroy_tree.add_prim_attr("primitive_target", device)
 
-        mcts_restore_info = CustomRegOp("add_with_attr_kernel") \
+        mcts_restore_info = CustomRegOp("restore_kernel") \
             .input(0, "dummy_handle") \
             .output(0, "success") \
             .dtype_format(DataType.None_None, DataType.None_None) \
@@ -294,7 +294,7 @@ class MCTS(nn.Cell):
                                        (1,), (ms.bool_), "aot", reg_info=mcts_restore_info)
         self.restore_tree.add_prim_attr("primitive_target", device)
 
-        mcts_get_value_info = CustomRegOp("add_with_attr_kernel") \
+        mcts_get_value_info = CustomRegOp("get_value_kernel") \
             .input(0, "dummy_handle") \
             .output(0, "value") \
             .output(1, 'norm_explore_count') \
