@@ -11,6 +11,6 @@
     输入：
         - **actions** (Tensor) - 添加OU噪声之前的动作。
 
-    返回：
+    输出：
         - **actions** (Tensor) - 添加OU噪声之后的动作。
 

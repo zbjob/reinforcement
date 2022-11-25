@@ -1,5 +1,5 @@
 
-.. py:class:: mindspore_rl.network.GruNet(input_size, hidden_size, weight_init='normal', num_layers=1, has_bias=True, batch_first=False, dropout=0.0, bidirectional=False)
+.. py:class:: mindspore_rl.network.GruNet(input_size, hidden_size, weight_init='normal', num_layers=1, has_bias=True, batch_first=False, dropout=0.0, bidirectional=False, enable_fusion=True)
 
     GRU (门控递归单元)层。
     将GRU层应用于输入。

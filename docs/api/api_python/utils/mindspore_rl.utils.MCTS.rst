@@ -36,17 +36,17 @@
 
         销毁当前这棵树。请在算法结束或不再需要这棵树时调用。
         
-        参数:
+        参数：
             - **handle** (mindspore.int64) - 独有的蒙特卡洛树句柄。
 
         返回：
             - **action** (mindspore.bool\_) - 是否成功重置。
 
     .. py:method:: mcts_search(*args)
-        
+
         mcts_search是MCTS中的主要方法。调用此方法会返回当前状态下的最优动作。
         
-        参数:
+        参数：
             - **args** (Tensor) - 在迭代中会更新的变量，并且在调用'restore_tree_data'中会重置。输入值需要和算法对应。
 
         返回：
@@ -57,7 +57,7 @@
 
         restore_tree_data会重置树中的所有信息，回到只有根节点的状态。
         
-        参数:
+        参数：
             - **handle** (mindspore.int64) - 独有的蒙特卡洛树句柄。
 
         返回：
