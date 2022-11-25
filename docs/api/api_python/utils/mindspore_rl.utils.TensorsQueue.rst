@@ -12,7 +12,7 @@
         - **size** (int) - Tensor队列的大小。默认：0。
         - **name** (str) - Tensor队列的名字。默认："TQ"。
 
-    异常:
+    异常：
         - **TypeError** - `dtype` 不是 MindSpore 数字类型.
         - **ValueError** - `size` 小于0.
         - **ValueError** - `shapes` 的长度小于1.
@@ -39,14 +39,14 @@
         从Tensor队列的头部取出一个元素。
 
         返回：
-            tuple(Tensor), 一个元素。
+            tuple(Tensor)，一个元素。
 
     .. py:method:: pop()
 
         从Tensor队列的头部取出一个元素并删除。
 
         返回：
-            tuple(Tensor), 一个元素。
+            tuple(Tensor)，一个元素。
 
     .. py:method:: put(element)
 
@@ -63,4 +63,4 @@
         Tensor队列的已使用大小。
 
         返回：
-            Tensor(mindspore.int64), Tensor队列的已使用大小。
+            Tensor(mindspore.int64)，Tensor队列的已使用大小。
