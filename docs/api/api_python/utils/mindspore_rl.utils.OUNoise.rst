@@ -1,5 +1,5 @@
 
-.. py:class:: mindspore_rl.utils.OUNoise(input_network)
+.. py:class:: mindspore_rl.utils.OUNoise(stddev, damping, action_shape)
 
     在action上加入Ornstein-Uhlenbeck (OU)噪声。
 

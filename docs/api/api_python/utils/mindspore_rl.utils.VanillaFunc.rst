@@ -10,7 +10,7 @@
 
         calculate_prior的功能是计算输入合法动作的先验概率
         
-        参数:
+        参数：
             - **new_state** (mindspore.float32) - 环境的状态。
             - **legal_action** (mindspore.int32) - 环境输出的合法动作。
 
@@ -22,7 +22,7 @@
 
         simulation的功能是计算输入状态的奖励（评估价值）
         
-        参数:
+        参数：
             - **new_state** (mindspore.float32) - 环境的状态
 
         返回：
