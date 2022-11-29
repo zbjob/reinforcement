@@ -34,8 +34,8 @@
 
         从动态数组的指定位置读Tensor。
 
-        参数:
-            - **index** ([int\, mindspore.int64]) - 读取的位置。
+        参数：
+            - **index** ([int, mindspore.int64]) - 读取的位置。
 
         返回：
             Tensor, 指定位置的值。
@@ -58,8 +58,8 @@
 
         向动态数组的指定位置写入值（Tensor）。
 
-        参数:
-            - **index** ([int\, mindspore.int64]) - 写入的位置。
+        参数：
+            - **index** ([int, mindspore.int64]) - 写入的位置。
             - **value** (Tensor) - 写入的Tensor。
 
         返回：

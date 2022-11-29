@@ -1,5 +1,5 @@
 
-.. py:class:: mindspore_rl.utils.SoftUpdate(input_network)
+.. py:class:: mindspore_rl.utils.SoftUpdate(factor, update_interval, behavior_params, target_params)
 
     采用滑动凭据方式更新目标网络的参数。
 
