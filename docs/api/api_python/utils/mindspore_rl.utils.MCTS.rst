@@ -14,11 +14,11 @@
 
     参数：
         - **env** (Environment) - 必须是Environment的子类。
-        - **tree_type** (string) - 树类型的名字。
-        - **node_type** (string) - 节点类型的名字。
+        - **tree_type** (str) - 树类型的名字。
+        - **node_type** (str) - 节点类型的名字。
         - **root_player** (float) - 根节点的玩家，数值需要小于总玩家数。
         - **customized_func** (AlgorithmFunc) - 算法相关的类。更多信息请参考AlgorithmFunc的文档。
-        - **device** (string) - 运行MCTS的设备['CPU', 'GPU']，Ascend当前不支持。
+        - **device** (str) - 运行MCTS的设备['CPU', 'GPU']，Ascend当前不支持。
         - **args** (Tensor) - 在MctsCreation中传入的常量值。请参考以下表格根据算法传入输入值。这里传入的值不会在'restore_tree_data'方法中被重置。
         - **has_init_reward** (bool) - 是否把奖励在初始化时传给节点。默认：False。
         - **max_action** (float) - 环境的最大动作。当max_action是-1.0时，环境的step函数只会获得最后一个动作，否则环境的step函数会获得所有动作。默认：-1.0.

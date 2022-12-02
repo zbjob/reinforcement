@@ -52,12 +52,12 @@ class MCTS(nn.Cell):
 
     Args:
         env (Environment): It must be the subclass of Environment.
-        tree_type (string): The name of tree type.
-        node_type (string): The name of node type.
+        tree_type (str): The name of tree type.
+        node_type (str): The name of node type.
         root_player (float): The root player, which should be less than the total number of player.
         customized_func (AlgorithmFunc): Some algorithm specific class. For more detail, please have a look at
             documentation of AlgorithmFunc.
-        device (string): The device type in ["CPU", "GPU"], Ascend is not support yet.
+        device (str): The device type in ["CPU", "GPU"], Ascend is not support yet.
         args (Tensor): any values which will be the input of MctsCreation. Please following the table below
             to provide the input value. These value will not be reset after invoke 'restore_tree_data'.
         has_init_reward (bool): Whether pass the reward to each node during the node initialization. Default: False.
