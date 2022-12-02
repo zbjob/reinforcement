@@ -41,5 +41,18 @@ mindspore_rl.policy
 mindspore_rl.utils
 -------------------
 
+.. autoclass:: mindspore_rl.utils.DiscountedReturn
+    :exclude-members: construct
+    :members:
+
+.. autoclass:: mindspore_rl.utils.OUNoise
+    :exclude-members: construct
+    :members:
+
+.. autoclass:: mindspore_rl.utils.SoftUpdate
+    :exclude-members: construct
+    :members:
+
 .. automodule:: mindspore_rl.utils
+    :exclude-members: OUNoise, DiscountedReturn, SoftUpdate
     :members:

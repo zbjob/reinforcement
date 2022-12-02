@@ -70,9 +70,9 @@ class BatchWrite(Cell):
         """
         Write the source parameter list to assign the dst.
 
-        Inputs:
-            - **dst** (tuple(Parameters)) - A paramameter tuple of the dst model.
-            - **src** (tuple(Parameters)) - A paramameter tuple of the source model.
+        Args:
+            dst (tuple(Parameters)): A paramameter tuple of the dst model.
+            src (tuple(Parameters)): A paramameter tuple of the source model.
 
         Returns:
             Bool, true.
@@ -131,9 +131,9 @@ class BatchRead(Cell):
         """
         Read the source parameter list to assign the dst.
 
-        Inputs:
-            - **dst** (tuple(Parameters)) - A paramameter tuple of the dst model.
-            - **src** (tuple(Parameters)) - A paramameter tuple of the source model.
+        Args:
+            dst (tuple(Parameters)): A paramameter tuple of the dst model.
+            src (tuple(Parameters)): A paramameter tuple of the source model.
 
         Returns:
             Bool, true.
