@@ -12,6 +12,7 @@ trainer_params = {
     'ckpt_path': './ckpt',
     'save_per_episode': 50,
     'eval_per_episode': 10,
+    'td_step': 1,
 }
 
 collect_env_params = {'name': 'CartPole-v0'}
