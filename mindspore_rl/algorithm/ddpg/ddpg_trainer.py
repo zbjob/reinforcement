@@ -14,7 +14,6 @@
 # ============================================================================
 """DDPG Trainer"""
 import mindspore
-import mindspore.nn as nn
 from mindspore.common.api import ms_function
 from mindspore import Tensor, Parameter
 from mindspore.ops import operations as P
@@ -26,7 +25,7 @@ class DDPGTrainer(Trainer):
     """This is the trainer class of DDPG algorithm. It arranges the DDPG algorithm"""
 
     def __init__(self, msrl, params=None):
-        nn.Cell.__init__(self, auto_prefix=False)
+        super(DDPGTrainer, self).__init__(msrl)
         self.zero = Tensor(0, mindspore.float32)
         self.assign = P.Assign()
         self.squeeze = P.Squeeze()
@@ -41,7 +40,6 @@ class DDPGTrainer(Trainer):
         self.zero_value = Tensor(0, mindspore.float32)
         self.init_collect_size = Tensor(1000, mindspore.float32)
         self.inited = Parameter(Tensor(False, mindspore.bool_), name='init_flag')
-        super(DDPGTrainer, self).__init__(msrl)
 
     def trainable_variables(self):
         """Trainable variables for saving."""

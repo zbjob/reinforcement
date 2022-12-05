@@ -16,7 +16,6 @@
 import numpy as np
 from mindspore_rl.agent.trainer import Trainer
 import mindspore
-import mindspore.nn as nn
 from mindspore.ops import operations as ops
 from mindspore import ms_function
 from mindspore import Tensor
@@ -51,7 +50,7 @@ class InitBuffer():
 class CQLTrainer(Trainer):
     '''CQLTrainer'''
     def __init__(self, msrl, params):
-        nn.Cell.__init__(self, auto_prefix=False)
+        super(CQLTrainer, self).__init__(msrl)
         self.env = msrl.eval_environment
         self.zero = Tensor(0., mindspore.float32)
         self.done = Tensor(False, mindspore.bool_)
@@ -61,7 +60,6 @@ class CQLTrainer(Trainer):
         self.ms_buffer = msrl.buffers
         #pylint: disable=W0212
         InitBuffer(self.env._env, self.ms_buffer)
-        super(CQLTrainer, self).__init__(msrl)
 
     @ms_function
     def train_one_episode(self):

@@ -14,7 +14,6 @@
 # ============================================================================
 """SAC Trainer"""
 import mindspore
-import mindspore.nn as nn
 from mindspore.common.api import ms_function
 from mindspore import Tensor, Parameter
 from mindspore.ops import operations as P
@@ -27,7 +26,7 @@ class SACTrainer(Trainer):
     """This is the trainer class of SAC algorithm. It arranges the SAC algorithm"""
 
     def __init__(self, msrl, params=None):
-        nn.Cell.__init__(self, auto_prefix=False)
+        super(SACTrainer, self).__init__(msrl)
         self.inited = Parameter(Tensor([False], mindspore.bool_), name='init_flag')
         self.zero = Tensor([0], mindspore.float32)
         self.fill_value = Tensor([10000], mindspore.float32)

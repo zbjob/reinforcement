@@ -54,7 +54,8 @@ class Session():
     """
 
     def __init__(self, alg_config, deploy_config=None, params=None, callbacks=None):
-        self.msrl = MSRL(alg_config, deploy_config)
+        if alg_config is not None:
+            self.msrl = MSRL(alg_config, deploy_config)
         self.params = params
         self.callbacks = callbacks
         self.dist = False

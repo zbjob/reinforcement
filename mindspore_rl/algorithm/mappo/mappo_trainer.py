@@ -15,7 +15,6 @@
 """MAPPO Trainer"""
 #pylint: disable=W0613
 import mindspore as ms
-import mindspore.nn as nn
 import mindspore.numpy as mnp
 from mindspore.common.api import ms_function
 from mindspore import Tensor, Parameter, set_seed, vmap
@@ -32,7 +31,7 @@ class MAPPOTrainer(Trainer):
     """This is the trainer class of MAPPO algorithm. It arranges the MAPPO algorithm"""
 
     def __init__(self, msrl, params):
-        nn.Cell.__init__(self, auto_prefix=False)
+        super(MAPPOTrainer, self).__init__(self.msrl)
         self.msrl = msrl
         self.params = params
         self.zero = Tensor(0, ms.int32)
@@ -88,8 +87,6 @@ class MAPPOTrainer(Trainer):
                         self.concated_value_prediction, self.concated_ht_critic]
 
         self.zero_reward = self.zeros((self.num_agent, 128, 1), ms.float32)
-
-        super(MAPPOTrainer, self).__init__(self.msrl)
 
     def train(self, episodes, callbacks=None, ckpt_path=None):
         """
