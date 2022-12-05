@@ -14,7 +14,6 @@
 # ============================================================================
 """PPO Trainer"""
 import mindspore
-import mindspore.nn as nn
 from mindspore.common.api import ms_function
 from mindspore import Tensor
 from mindspore.ops import operations as P
@@ -27,7 +26,7 @@ class PPOTrainer(Trainer):
     """This is the trainer class of PPO algorithm. It arranges the PPO algorithm"""
 
     def __init__(self, msrl, params=None):
-        nn.Cell.__init__(self, auto_prefix=False)
+        super(PPOTrainer, self).__init__(msrl)
         self.zero = Tensor(0, mindspore.float32)
         self.assign = P.Assign()
         self.squeeze = P.Squeeze()
@@ -37,7 +36,6 @@ class PPOTrainer(Trainer):
         self.reduce_mean = P.ReduceMean()
         self.duration = params['duration']
         self.num_eval_episode = params['num_eval_episode']
-        super(PPOTrainer, self).__init__(msrl)
 
     def trainable_variables(self):
         """Trainable variables for saving."""

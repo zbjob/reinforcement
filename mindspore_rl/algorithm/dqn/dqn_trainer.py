@@ -14,7 +14,6 @@
 # ============================================================================
 """DQN Trainer"""
 import mindspore as ms
-import mindspore.nn as nn
 from mindspore.common.api import ms_function
 from mindspore import Tensor, Parameter
 from mindspore.ops import operations as P
@@ -26,7 +25,7 @@ class DQNTrainer(Trainer):
     """DQN Trainer"""
 
     def __init__(self, msrl, params):
-        nn.Cell.__init__(self, auto_prefix=False)
+        super(DQNTrainer, self).__init__(msrl)
         self.zero = Tensor(0, ms.float32)
         self.squeeze = P.Squeeze()
         self.less = P.Less()
@@ -38,7 +37,6 @@ class DQNTrainer(Trainer):
         self.true = Tensor((True,), ms.bool_)
         self.num_evaluate_episode = params['num_evaluate_episode']
         self.update_period = Tensor(5, ms.float32)
-        super(DQNTrainer, self).__init__(msrl)
 
     def trainable_variables(self):
         """Trainable variables for saving."""

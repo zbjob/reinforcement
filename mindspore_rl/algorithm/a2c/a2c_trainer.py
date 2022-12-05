@@ -19,7 +19,6 @@ import tqdm
 
 from mindspore_rl.agent.trainer import Trainer
 from mindspore_rl.agent import trainer
-import mindspore.nn as nn
 from mindspore.ops import operations as ops
 from mindspore import ms_function
 
@@ -27,9 +26,8 @@ from mindspore import ms_function
 class A2CTrainer(Trainer):
     '''A2CTrainer'''
     def __init__(self, msrl):
-        nn.Cell.__init__(self, auto_prefix=False)
-        self.reduce_sum = ops.ReduceSum()
         super(A2CTrainer, self).__init__(msrl)
+        self.reduce_sum = ops.ReduceSum()
 
     def train(self, episodes, callbacks=None, ckpt_path=None):
         '''Train A2C'''

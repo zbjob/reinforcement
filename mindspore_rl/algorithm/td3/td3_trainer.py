@@ -14,7 +14,6 @@
 # ============================================================================
 """TD3 Trainer"""
 import mindspore
-import mindspore.nn as nn
 from mindspore.common.api import ms_function
 from mindspore import Tensor, Parameter
 from mindspore.ops import operations as P
@@ -28,7 +27,7 @@ class TD3Trainer(Trainer):
     """This is the trainer class of TD3 algorithm. It arranges the TD3 algorithm"""
 
     def __init__(self, msrl, params=None):
-        nn.Cell.__init__(self, auto_prefix=False)
+        super(TD3Trainer, self).__init__(msrl)
         self.zero = Tensor(0, mindspore.float32)
         self.assign = P.Assign()
         self.squeeze = P.Squeeze()
@@ -43,7 +42,6 @@ class TD3Trainer(Trainer):
         self.inited = Parameter(Tensor(False, mindspore.bool_), name='init_flag')
         if 'eval_episodes' in params:
             self.eval_episodes = params['eval_episodes']
-        super(TD3Trainer, self).__init__(msrl)
 
     def trainable_variables(self):
         """Trainable variables for saving."""

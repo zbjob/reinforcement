@@ -17,7 +17,6 @@ from mindspore_rl.agent.trainer import Trainer
 from mindspore_rl.agent import trainer
 from mindspore_rl.utils import  BatchWrite
 import mindspore
-import mindspore.nn as nn
 from mindspore.ops.operations._rl_inner_ops import MuxSend, MuxReceive
 from mindspore.communication.management import init, NCCL_WORLD_COMM_GROUP, get_rank, get_group_size
 from mindspore.ops import operations as ops
@@ -34,7 +33,7 @@ rank_size = get_group_size()
 class A3CTrainer(Trainer):
     '''A3CTrainer'''
     def __init__(self, msrl):
-        nn.Cell.__init__(self, auto_prefix=False)
+        super(A3CTrainer, self).__init__(msrl)
         self.reduce_sum = ops.ReduceSum()
         self.actor_nums = msrl.actors.__len__()
         self.learner_rank = self.actor_nums
@@ -58,7 +57,6 @@ class A3CTrainer(Trainer):
 
         self.depend = ops.Depend
         self.update = BatchWrite()
-        super(A3CTrainer, self).__init__(msrl)
 
     #pylint: disable=W0613
     def train(self, episodes, callbacks=None, ckpt_path=None):

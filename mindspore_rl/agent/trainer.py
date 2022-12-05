@@ -42,6 +42,7 @@ class Trainer(nn.Cell):
     """
 
     def __init__(self, msrl):
+        super(Trainer, self).__init__()
         self.msrl = msrl
         self.vars = {}
 

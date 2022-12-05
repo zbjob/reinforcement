@@ -15,7 +15,6 @@
 """QMIX Trainer"""
 
 import numpy as np
-import mindspore.nn as nn
 import mindspore as ms
 from mindspore.common.api import ms_function
 from mindspore import Tensor, Parameter
@@ -29,7 +28,7 @@ class QMIXTrainer(Trainer):
     This is the trainer class of QMIX, which provides the logic of this algorithm.
     """
     def __init__(self, msrl, params):
-        nn.Cell.__init__(self, auto_prefix=False)
+        super().__init__(msrl)
         self.msrl = msrl
         self.batch = params['batch_size']
         self.false = Tensor([False], ms.bool_)
@@ -71,7 +70,6 @@ class QMIXTrainer(Trainer):
             Tensor(0, ms.int32), requires_grad=False, name='epsilon_steps')
         self.squeeze = P.Squeeze(axis=0)
         self.greater_equal = P.GreaterEqual()
-        super().__init__(msrl)
 
     def trainable_variables(self):
         """trainable variables uses to save model"""

@@ -16,7 +16,6 @@
 from mindspore_rl.agent.trainer import Trainer
 from mindspore_rl.agent import trainer
 import mindspore
-import mindspore.nn as nn
 from mindspore.common.api import ms_function
 from mindspore import Tensor
 from mindspore.ops import operations as P
@@ -27,7 +26,7 @@ class ACTrainer(Trainer):
     '''ACTrainer'''
 
     def __init__(self, msrl, params):
-        nn.Cell.__init__(self, auto_prefix=False)
+        super(ACTrainer, self).__init__(msrl)
         self.num_evaluate_episode = params['num_evaluate_episode']
         self.zero = Parameter(Tensor(0, mindspore.float32), name='zero')
         self.done_r = Parameter(Tensor([-20.0], mindspore.float32), name='done_r')
@@ -36,7 +35,6 @@ class ACTrainer(Trainer):
         self.false = Tensor(False, mindspore.bool_)
         self.less = P.Less()
         self.select = P.Select()
-        super(ACTrainer, self).__init__(msrl)
 
     def trainable_variables(self):
         '''Trainable variables for saving.'''
