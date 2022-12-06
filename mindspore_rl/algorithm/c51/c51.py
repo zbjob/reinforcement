@@ -28,6 +28,7 @@ from mindspore_rl.agent.learner import Learner
 from mindspore_rl.policy import RandomPolicy
 from mindspore_rl.agent.actor import Actor
 from mindspore_rl.utils.soft_update import SoftUpdate
+from mindspore_rl.utils.discounted_return import DiscountedReturn
 
 
 class CategoricalDQNPolicy():
@@ -202,6 +203,7 @@ class CategoricalDQNLearner(Learner):
         self.get_range = ops.Range()
         self.tile = ops.Tile()
         self.target_support = mnp.linspace(params['v_min'], params['v_max'], params['atoms_num'])
+        self.discount_op = DiscountedReturn(gamma=params['gamma'])
         self.updater = SoftUpdate(0.95, 5, self.policy_param, self.target_param)
 
     def next_distribution(self, next_observation, batch_size):
@@ -217,7 +219,7 @@ class CategoricalDQNLearner(Learner):
         next_qt_index = self.concat((batch_indices, next_qt_argmax))
         return self.gather_nd(next_target_probabilities, next_qt_index)
 
-    def projection_distribution(self, next_observation, reward):
+    def projection_distribution(self, next_observation, reward, done):
         """get the discretized distribution"""
 
         batch_size = self.shape(next_observation)[0]
@@ -228,8 +230,13 @@ class CategoricalDQNLearner(Learner):
 
         support = self.tile(self.target_support, (batch_size,))
         support = support.reshape(batch_size, num_dims)
-        reward = self.expand_dims(reward.squeeze(1), 1)
-        supports = reward + support * self.gamma
+        if reward.shape[1] > 1:
+            reward_td = self.discount_op(reward.T, done.T, Tensor([0.], dtype=ms.float32))[0]
+            reward_td = reward_td.expand_dims(1)
+            final_gamma = ops.prod(self.gamma * (1-done), 1).expand_dims(1)
+            supports = reward_td+support * final_gamma
+        else:
+            supports = reward+support * self.gamma
 
         clipped_support = self.expand_dims(ops.clip_by_value(supports, self.v_min, self.v_max), 1)
         tiled_support = self.tile(clipped_support, (1, 1, num_dims, 1))
@@ -247,8 +254,8 @@ class CategoricalDQNLearner(Learner):
     def learn(self, experience):
         """Update the c51"""
 
-        observation, action, reward, next_observation = experience
-        proj_dist = self.projection_distribution(next_observation, reward)
+        observation, action, reward, next_observation, done = experience
+        proj_dist = self.projection_distribution(next_observation, reward, done)
         success = self.policy_network_train(observation, action, proj_dist)
         if self.use_noisy:
             self.policy_network.reset_nosiy()
