@@ -271,6 +271,16 @@ For more details about the installation guide, tutorials, and APIs, see [MindSpo
         <td align="center"><a href="https://github.com/openai/multiagent-particle-envs">Simple Spread</a></td>
     </tr>
     <tr>
+        <td align="center"><a href="https://gitee.com/mindspore/reinforcement/tree/master/example/gail">GAIL</a></td>
+        <td align="center">>= 0.6</td>
+        <td align="center">/</td>
+        <td align="center">✔️</td>
+        <td align="center">✔️</td>
+        <td align="center">✔️</td>
+        <td align="center">/</td>
+        <td align="center"><a href="https://www.gymlibrary.dev/environments/mujoco/half_cheetah/">HalfCheetah-v2</a></td>
+    </tr>
+    <tr>
         <td align="center"><a href="https://gitee.com/mindspore/reinforcement/tree/master/example/mcts">MCTS</a></td>
         <td align="center">>= 0.6</td>
         <td align="center">✔️</td>
@@ -311,7 +321,7 @@ In general, researchers use native Python data structures or numpy data structur
         <th align="center">CPU</th><th align="center">GPU</th><th align="center">Ascend</th>
     </tr>
     <tr>
-        <td align="center"><a href="https://gitee.com/mindspore/reinforcement/blob/master/mindspore_rl/core/replay_buffer.py">UniformReplayBuffer</a></td>
+        <td align="center"><a href="https://gitee.com/mindspore/reinforcement/blob/master/mindspore_rl/core/uniform_replay_buffer.py">UniformReplayBuffer</a></td>
         <td align="left">1 FIFO, fist in fist out. <br>2 Support batch input.</a></td>
         <td align="center">✔️ </td>
         <td align="center">✔️ </td>
