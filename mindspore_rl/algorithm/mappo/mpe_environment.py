@@ -19,10 +19,10 @@ from multiprocessing import Queue
 import numpy as np
 from gym import spaces
 
-import mindspore.nn as nn
 from mindspore.ops import operations as P
 
 from mindspore_rl.environment.space import Space
+from mindspore_rl.environment import Environment
 from mindspore_rl.environment.env_process import EnvironmentProcess
 
 
@@ -50,7 +50,7 @@ except ModuleNotFoundError:
     from .mpe.MPE_env import MPEEnv
 
 
-class MPEMultiEnvironment(nn.Cell):
+class MPEMultiEnvironment(Environment):
     """
     This is the wrapper of Multi-Agent Particle Environment(MPE) which is modified by MAPPO author from
     (https://github.com/marlbenchmark/on-policy/tree/main/onpolicy). A simple multi-agent particle world with
@@ -80,10 +80,11 @@ class MPEMultiEnvironment(nn.Cell):
         >>> environment = MPEMultiEnvironment(env_params, 0)
         >>> print(environment)
     """
+
     def __init__(self,
                  params,
                  env_id=0):
-        super(MPEMultiEnvironment, self).__init__(auto_prefix=False)
+        super(MPEMultiEnvironment, self).__init__()
         self.params = params
         self._nums = params["num"]
         self._proc_num = params['proc_num']
@@ -232,6 +233,20 @@ class MPEMultiEnvironment(nn.Cell):
 
         """
         return self.reset_ops()[0]
+
+    def close(self):
+        r"""
+        Close the environment to release the resource.
+
+        Returns:
+            Success(np.bool\_), Whether shutdown the process or threading successfully.
+        """
+        for env in self._envs:
+            env.close()
+        for env_proc in self.mpe_env_procs:
+            env_proc.terminate()
+            env_proc.join()
+        return True
 
     def _step(self, actions):
         """Inner step function"""

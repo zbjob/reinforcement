@@ -18,12 +18,13 @@
 #pylint: disable=W0212
 from multiprocessing import Queue
 import numpy as np
-import mindspore.nn as nn
+
 from mindspore.ops import operations as P
 from mindspore_rl.environment.env_process import EnvironmentProcess
+from mindspore_rl.environment import Environment
 
 
-class MultiEnvironmentWrapper(nn.Cell):
+class MultiEnvironmentWrapper(Environment):
     """
     The MultiEnvironmentWrapper is a wrapper for multi environment scenario. User implements
     their single environment class and set the environment number larger than 1 in configuration
@@ -72,8 +73,8 @@ class MultiEnvironmentWrapper(nn.Cell):
                                   [obs_type,],
                                   [obs_shape,])
 
+        self.mpe_env_procs = []
         if self.num_proc != 1:
-            self.mpe_env_procs = []
             self.action_queues = []
             self.exp_queues = []
             self.init_state_queues = []
@@ -100,42 +101,6 @@ class MultiEnvironmentWrapper(nn.Cell):
                                               action_q, exp_q, init_state_q)
                 self.mpe_env_procs.append(env_proc)
                 env_proc.start()
-
-    def render(self):
-        """
-        Render the game. Only support on PyNative mode.
-        """
-        try:
-            self._envs[0].render()
-        except:
-            raise RuntimeError("Failed to render, run in PyNative mode and comment the ms_function.")
-
-    def reset(self):
-        """
-        Reset the environment to the initial state. It is always used at the beginning of each
-        episode. It will return the value of initial state of each environment.
-
-        Returns:
-            A list of tensor which states for all the initial states of each environment.
-
-        """
-
-        return self._reset_op()[0]
-
-    def step(self, action):
-        """
-        Execute the environment step, which means that interact with environment once.
-
-        Args:
-            action (Tensor): A tensor that contains the action information.
-
-        Returns:
-            - state (list(Tensor)), a list of environment state after performing the action.
-            - reward (list(Tensor)), a list of reward after performing the action.
-            - done (list(Tensor)), whether the simulations of each environment finishes or not.
-        """
-
-        return self._step_op(action)
 
     @property
     def observation_space(self):
@@ -188,6 +153,57 @@ class MultiEnvironmentWrapper(nn.Cell):
             A dictionary which contains environment's info.
         """
         return self._envs[0].config
+
+    def render(self):
+        """
+        Render the game. Only support on PyNative mode.
+        """
+        try:
+            self._envs[0].render()
+        except:
+            raise RuntimeError("Failed to render, run in PyNative mode and comment the ms_function.")
+
+    def reset(self):
+        """
+        Reset the environment to the initial state. It is always used at the beginning of each
+        episode. It will return the value of initial state of each environment.
+
+        Returns:
+            A list of tensor which states for all the initial states of each environment.
+
+        """
+
+        return self._reset_op()[0]
+
+    def step(self, action):
+        """
+        Execute the environment step, which means that interact with environment once.
+
+        Args:
+            action (Tensor): A tensor that contains the action information.
+
+        Returns:
+            - state (list(Tensor)), a list of environment state after performing the action.
+            - reward (list(Tensor)), a list of reward after performing the action.
+            - done (list(Tensor)), whether the simulations of each environment finishes or not.
+        """
+
+        return self._step_op(action)
+
+    def close(self):
+        r"""
+        Close the environment to release the resource.
+
+
+        Returns:
+            Success(np.bool\_), Whether shutdown the process or threading successfully.
+        """
+        for env in self._envs:
+            env.close()
+        for env_proc in self.mpe_env_procs:
+            env_proc.terminate()
+            env_proc.join()
+        return True
 
     def _reset(self):
         """

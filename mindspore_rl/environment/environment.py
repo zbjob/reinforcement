@@ -27,30 +27,6 @@ class Environment(nn.Cell):
     def __init__(self):
         super(Environment, self).__init__(auto_prefix=False)
 
-    def reset(self):
-        """
-        Reset the environment to the initial state. It is always used at the beginning of each
-        episode. It will return the value of initial state or other initial information.
-
-        Returns:
-            A tensor which states for the initial state of environment or a tuple contains
-            initial information, such as new state, action, reward, etc.
-
-        """
-        raise NotImplementedError("Method should be overridden by subclass.")
-
-    def step(self, action):
-        r"""
-        Execute the environment step, which means that interact with environment once.
-
-        Args:
-            action (Tensor): A tensor that contains the action information.
-
-        Returns:
-            A tuple of Tensor which contains information after interacting with environment.
-        """
-        raise NotImplementedError("Method should be overridden by subclass.")
-
     @property
     def action_space(self):
         """
@@ -100,3 +76,36 @@ class Environment(nn.Cell):
             A dictionary which contains environment's info.
         """
         raise NotImplementedError("Method should be overridden by subclass.")
+
+    def reset(self):
+        """
+        Reset the environment to the initial state. It is always used at the beginning of each
+        episode. It will return the value of initial state or other initial information.
+
+        Returns:
+            A tensor which states for the initial state of environment or a tuple contains
+            initial information, such as new state, action, reward, etc.
+
+        """
+        raise NotImplementedError("Method should be overridden by subclass.")
+
+    def step(self, action):
+        r"""
+        Execute the environment step, which means that interact with environment once.
+
+        Args:
+            action (Tensor): A tensor that contains the action information.
+
+        Returns:
+            A tuple of Tensor which contains information after interacting with environment.
+        """
+        raise NotImplementedError("Method should be overridden by subclass.")
+
+    def close(self):
+        r"""
+        Close the environment to release the resource.
+
+        Returns:
+            Success(np.bool_), Whether shutdown the process or threading successfully.
+        """
+        return True

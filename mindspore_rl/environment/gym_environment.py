@@ -84,44 +84,6 @@ class GymEnvironment(Environment):
         self.action_dtype = self._action_space.ms_dtype
         self.cast = P.Cast()
 
-    def render(self):
-        """
-        Render the game. Only support on PyNative mode.
-        """
-        try:
-            self._env.render()
-        except:
-            raise RuntimeError("Failed to render, run in PyNative mode and comment the ms_function.")
-
-    def reset(self):
-        """
-        Reset the environment to the initial state. It is always used at the beginning of each
-        episode. It will return the value of initial state.
-
-        Returns:
-            A tensor which states for the initial state of environment.
-
-        """
-
-        return self._reset_op()[0]
-
-    def step(self, action):
-        r"""
-        Execute the environment step, which means that interact with environment once.
-
-        Args:
-            action (Tensor): A tensor that contains the action information.
-
-        Returns:
-            - state (Tensor), the environment state after performing the action.
-            - reward (Tensor), the reward after performing the action.
-            - done (Tensor), whether the simulation finishes or not.
-        """
-
-        # Add cast ops for mixed precision case. Redundant cast ops will be eliminated automatically.
-        action = self.cast(action, self.action_dtype)
-        return self._step_op(action)
-
     @property
     def observation_space(self):
         """
@@ -173,6 +135,54 @@ class GymEnvironment(Environment):
             A dictionary which contains environment's info.
         """
         return {}
+
+    def close(self):
+        r"""
+        Close the environment to release the resource.
+
+        Returns:
+            Success(np.bool\_), Whether shutdown the process or threading successfully.
+        """
+        self._env.close()
+        return True
+
+    def render(self):
+        """
+        Render the game. Only support on PyNative mode.
+        """
+        try:
+            self._env.render()
+        except:
+            raise RuntimeError("Failed to render, run in PyNative mode and comment the ms_function.")
+
+    def reset(self):
+        """
+        Reset the environment to the initial state. It is always used at the beginning of each
+        episode. It will return the value of initial state.
+
+        Returns:
+            A tensor which states for the initial state of environment.
+
+        """
+
+        return self._reset_op()[0]
+
+    def step(self, action):
+        r"""
+        Execute the environment step, which means that interact with environment once.
+
+        Args:
+            action (Tensor): A tensor that contains the action information.
+
+        Returns:
+            - state (Tensor), the environment state after performing the action.
+            - reward (Tensor), the reward after performing the action.
+            - done (Tensor), whether the simulation finishes or not.
+        """
+
+        # Add cast ops for mixed precision case. Redundant cast ops will be eliminated automatically.
+        action = self.cast(action, self.action_dtype)
+        return self._step_op(action)
 
     def _reset(self):
         """
