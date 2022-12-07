@@ -144,6 +144,16 @@ class StarCraft2Environment(Environment):
         """
         return self._get_step_info_ops()
 
+    def close(self):
+        r"""
+        Close the environment to release the resource.
+
+        Returns:
+            Success(np.bool\_), Whether shutdown the process or threading successfully.
+        """
+        self._env.close()
+        return True
+
     def _step(self, action):
         reward, done, self.step_info = self._env.step(action)
         new_state = np.array(self._env.get_obs(),

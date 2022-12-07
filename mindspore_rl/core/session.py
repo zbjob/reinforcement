@@ -16,7 +16,6 @@
 Implementation of the session class.
 """
 from mindspore_rl.core import MSRL
-from mindspore_rl.environment.multi_environment_wrapper import MultiEnvironmentWrapper
 from mindspore.communication import init, get_rank
 
 
@@ -29,6 +28,7 @@ class _Workers():
         fragment_list (dict): All the fragmets for distribution.
         episode (int): The eposide for each training.
     '''
+
     def __init__(self, msrl, fragment_list, duration, episode):
         self.rank_id = get_rank()
         self.fid = str(self.rank_id)
@@ -39,6 +39,7 @@ class _Workers():
         print("Start fragment ", self.fid, " on worker ", self.rank_id)
         self.worker.run()
         print("Finish fragment ", self.fid)
+
 
 class Session():
     """
@@ -100,12 +101,8 @@ class Session():
                 else:
                     print('Please provide a ckpt_path for eval.')
 
-        if isinstance(self.msrl.collect_environment, MultiEnvironmentWrapper):
-            if self.msrl.collect_environment.num_proc != 1:
-                for collect_env in self.msrl.collect_environment.mpe_env_procs:
-                    collect_env.terminate()
-
-        if isinstance(self.msrl.eval_environment, MultiEnvironmentWrapper):
-            if self.msrl.eval_environment.num_proc != 1:
-                for eval_env in self.msrl.eval_environment.mpe_env_procs:
-                    eval_env.terminate()
+        # Close the environment to release the resource
+        if self.msrl.collect_environment is not None:
+            self.msrl.collect_environment.close()
+        if self.msrl.eval_environment is not None:
+            self.msrl.eval_environment.close()

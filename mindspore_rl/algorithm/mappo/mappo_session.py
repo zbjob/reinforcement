@@ -27,6 +27,7 @@ class MAPPOSession(Session):
         update_config(config, env_yaml, algo_yaml)
         env_config = config.algorithm_config.get('collect_environment')
         env = env_config.get('type')(env_config.get('params'))
+        env.close()
         env_num = config.collect_env_params.get('num')
         agent_num = config.NUM_AGENT
         _, obs_dtype = env.observation_space.shape, env.observation_space.ms_dtype
