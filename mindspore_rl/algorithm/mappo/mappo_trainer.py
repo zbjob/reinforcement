@@ -31,7 +31,7 @@ class MAPPOTrainer(Trainer):
     """This is the trainer class of MAPPO algorithm. It arranges the MAPPO algorithm"""
 
     def __init__(self, msrl, params):
-        super(MAPPOTrainer, self).__init__(self.msrl)
+        super(MAPPOTrainer, self).__init__(msrl)
         self.msrl = msrl
         self.params = params
         self.zero = Tensor(0, ms.int32)
