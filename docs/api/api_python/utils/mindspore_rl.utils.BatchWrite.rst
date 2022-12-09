@@ -10,7 +10,7 @@
 
         将 `src` 中的参数覆盖到 `dst` 。
 
-        参数:
+        参数：
             - **dst** (tuple(Parameters)) - 目标位置的参数列表。
             - **src** (tuple(Parameters)) - 源位置的参数列表。
 
@@ -28,7 +28,7 @@
 
         读取 `src` 中的参数覆盖到 `dst` 。
 
-        参数:
+        参数：
             - **dst** (tuple(Parameters)) - 目标位置的参数列表。
             - **src** (tuple(Parameters)) - 源位置的参数列表。
 
