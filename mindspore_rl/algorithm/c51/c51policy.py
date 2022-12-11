@@ -3,6 +3,7 @@ import numpy as np
 import mindspore as ms
 from mindspore import Tensor
 import mindspore.numpy as mnp
+import mindspore.nn as nn
 from mindspore_rl.policy import RandomPolicy
 from mindspore_rl.policy import policy
 
@@ -19,6 +20,7 @@ class GreedyPolicyForValueDistribution(policy.Policy):
         self.v_min = v_min
         self.v_max = v_max
         self.action_dim = action_space_dim
+        self.softmax = nn.Softmax()
 
     # pylint:disable=W0221
     def construct(self, state):
@@ -32,6 +34,7 @@ class GreedyPolicyForValueDistribution(policy.Policy):
             action_max, the best action.
         """
         actions_distribution = self._input_network(state)
+        actions_distribution = self.softmax(actions_distribution)
         actions_distribution = self.mul(actions_distribution, mnp.linspace(Tensor(self.v_min, ms.float32),
                                                                            Tensor(self.v_max, ms.float32),
                                                                            self.atoms_num))

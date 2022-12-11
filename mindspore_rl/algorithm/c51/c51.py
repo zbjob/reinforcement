@@ -14,8 +14,6 @@
 # ============================================================================
 """C51"""
 
-from fullyconnectednet_noisy import FullyConnectedNet
-from c51policy import EpsilonGreedyPolicyForValueDistribution, GreedyPolicyForValueDistribution
 import mindspore as ms
 import mindspore.nn as nn
 import mindspore.numpy as mnp
@@ -29,6 +27,8 @@ from mindspore_rl.policy import RandomPolicy
 from mindspore_rl.agent.actor import Actor
 from mindspore_rl.utils.soft_update import SoftUpdate
 from mindspore_rl.utils.discounted_return import DiscountedReturn
+from .fullyconnectednet_noisy import FullyConnectedNet
+from .c51policy import EpsilonGreedyPolicyForValueDistribution, GreedyPolicyForValueDistribution
 
 
 class CategoricalDQNPolicy():
@@ -41,16 +41,14 @@ class CategoricalDQNPolicy():
             params['action_space_dim']*params['atoms_num'],
             params['action_space_dim'],
             params['atoms_num'],
-            params['compute_type'],
-            params['use_noisy'])
+            params['compute_type'])
         self.target_network = FullyConnectedNet(
             params['state_space_dim'],
             params['hidden_size'],
             params['action_space_dim']*params['atoms_num'],
             params['action_space_dim'],
             params['atoms_num'],
-            params['compute_type'],
-            params['use_noisy'])
+            params['compute_type'])
 
         self.init_policy = RandomPolicy(params['action_space_dim'])
         self.collect_policy = EpsilonGreedyPolicyForValueDistribution(
@@ -142,12 +140,14 @@ class CategoricalDQNLearner(Learner):
             self.shape = ops.Shape()
             self.log = ops.Log()
             self.expand_dims = P.ExpandDims()
+            self.softmax = nn.Softmax()
 
         def construct(self, x, action, label):
             """constructor for Loss Cell"""
 
             # Obtain the current Q-value logits for the selected actions.
             dist = self._backbone(x)
+            dist = self.softmax(dist)
             batch_size = self.shape(action)[0]
             indices = mnp.arange(0, batch_size, 1)
             batch_indices = self.expand_dims(indices, 1).reshape(batch_size, 1)
@@ -166,7 +166,6 @@ class CategoricalDQNLearner(Learner):
         super(CategoricalDQNLearner, self).__init__()
         self.policy_network = params['policy_network']
         self.target_network = params['target_network']
-        self.use_noisy = self.policy_network.use_noisy
         self.policy_param = ParameterTuple(
             self.policy_network.get_parameters())
         self.target_param = ParameterTuple(
@@ -202,14 +201,16 @@ class CategoricalDQNLearner(Learner):
         self.concat = ops.Concat(-1)
         self.get_range = ops.Range()
         self.tile = ops.Tile()
+        self.softmax = nn.Softmax()
         self.target_support = mnp.linspace(params['v_min'], params['v_max'], params['atoms_num'])
         self.discount_op = DiscountedReturn(gamma=params['gamma'])
-        self.updater = SoftUpdate(0.95, 5, self.policy_param, self.target_param)
+        self.updater = SoftUpdate(0.95, 10, self.policy_param, self.target_param)
 
     def next_distribution(self, next_observation, batch_size):
         """get the distribution of next step"""
 
         next_target_probabilities = self.target_network(next_observation)
+        next_target_probabilities = self.softmax(next_target_probabilities)
         next_target_q_values = (self.target_support * next_target_probabilities).sum(-1)
         next_action = self.get_max_index(next_target_q_values)[0]
         next_qt_argmax = self.expand_dims(next_action, 1)
@@ -257,9 +258,6 @@ class CategoricalDQNLearner(Learner):
         observation, action, reward, next_observation, done = experience
         proj_dist = self.projection_distribution(next_observation, reward, done)
         success = self.policy_network_train(observation, action, proj_dist)
-        if self.use_noisy:
-            self.policy_network.reset_nosiy()
-            self.target_network.reset_nosiy()
         return success
 
     def update(self):

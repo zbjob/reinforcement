@@ -18,16 +18,16 @@
 """
 
 from mindspore_rl.algorithm.c51 import config
-from mindspore_rl.algorithm.c51.c51_session import c51Session
+from mindspore_rl.algorithm.c51.c51_session import CategoricalSession
 from mindspore_rl.algorithm.c51.c51_trainer import CategoricalDQNTrainer
 from mindspore_rl.algorithm.c51.c51 import CategoricalDQNActor
 from mindspore_rl.algorithm.c51.c51 import CategoricalDQNLearner
 from mindspore_rl.algorithm.c51.c51 import CategoricalDQNPolicy
-from mindspore_rl.algorithm.c51.c51Policy import GreedyPolicyForValueDistribution
-from mindspore_rl.algorithm.c51.c51Policy import EpsilonGreedyPolicyForValueDistribution
-from mindspore_rl.algorithm.c51.noisy_layer import NoisyLinear
+from mindspore_rl.algorithm.c51.c51policy import GreedyPolicyForValueDistribution
+from mindspore_rl.algorithm.c51.c51policy import EpsilonGreedyPolicyForValueDistribution
 from mindspore_rl.algorithm.c51.fullyconnectednet_noisy import FullyConnectedNet
 
-__all__ = ["config", "c51Session", "CategoricalDQNTrainer", "CategoricalDQNActor",
-           "CategoricalDQNLearner", "CategoricalDQNPolicy", "CategoricalDQNTrainer",
-           "EpsilonGreedyPolicyForValueDistribution", "NoisyLinear", "FullyConnectedNet"]
+__all__ = ["config", "CategoricalSession", "CategoricalDQNTrainer",
+           "CategoricalDQNActor", "CategoricalDQNLearner", "CategoricalDQNPolicy",
+           "CategoricalDQNTrainer", "EpsilonGreedyPolicyForValueDistribution",
+           "FullyConnectedNet"]

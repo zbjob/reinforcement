@@ -22,7 +22,7 @@ from mindspore_rl.algorithm.c51.c51_session import CategoricalSession
 
 
 parser = argparse.ArgumentParser(description='MindSpore Reinforcement c51')
-parser.add_argument('--episode', type=int, default=2000, help='total episode numbers.')
+parser.add_argument('--episode', type=int, default=600, help='total episode numbers.')
 parser.add_argument('--device_target', type=str, default='CPU', choices=['CPU'],
                     help='Choose a device to run the c51 example(Default: CPU).')
 parser.add_argument('--env_yaml', type=str, default='../env_yaml/CartPole-v0.yaml',
