@@ -65,7 +65,7 @@ class GAILTrainer(Trainer):
 
         obs = self.collect_environment.reset()
         total_reward = Tensor([0.])
-        done = Tensor(False)
+        done = Tensor([False])
         while not done:
             action = self.collect_policy(obs.expand_dims(0)).squeeze()
             next_obs, reward, done = self.collect_environment.step(action)
