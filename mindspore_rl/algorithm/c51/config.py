@@ -1,7 +1,7 @@
 """c51 config"""
 from mindspore_rl.environment import GymEnvironment
 from mindspore_rl.core.uniform_replay_buffer import UniformReplayBuffer
-from c51 import CategoricalDQNActor, CategoricalDQNPolicy, CategoricalDQNLearner
+from .c51 import CategoricalDQNActor, CategoricalDQNPolicy, CategoricalDQNLearner
 
 
 categorical_params = {'atoms_num': 51, 'v_min': -10, 'v_max': 10}
@@ -25,7 +25,6 @@ policy_params = {
     'state_space_dim': 0,
     'action_space_dim': 0,
     'hidden_size': 100,
-    'use_noisy': False,
 }
 policy_params.update(categorical_params)
 algorithm_config = {

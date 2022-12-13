@@ -18,6 +18,8 @@ n step buffer.
 
 
 import mindspore as ms
+import mindspore.nn as nn
+from mindspore import Tensor
 from mindspore.ops import operations as P
 from mindspore_rl.core.uniform_replay_buffer import UniformReplayBuffer
 
@@ -50,7 +52,7 @@ class NStepBuffer(nn.Cell):
         >>> test.clear()
     '''
     def __init__(self, data_shapes, data_types, td_step, buffer_size=10000):
-        """Initialize TensorsQueue"""
+        """Initialize n step buffer"""
         super(NStepBuffer, self).__init__()
         self.buffer = UniformReplayBuffer(1, buffer_size, data_shapes, data_types)
         self.td_data = UniformReplayBuffer(1, td_step, data_shapes, data_types)
@@ -83,7 +85,7 @@ class NStepBuffer(nn.Cell):
         if self.buffer.count <= self.td:
             check = self.false
         m = self.zero_value
-        while self.less(m, self.td):
+        while self.less(m, self.td) and check:
             keep = self.buffer.get_item(self.buffer.count-self.td+m)
             self.td_data.insert(keep)
             m += 1
