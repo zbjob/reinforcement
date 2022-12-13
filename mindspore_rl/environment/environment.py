@@ -106,6 +106,6 @@ class Environment(nn.Cell):
         Close the environment to release the resource.
 
         Returns:
-            Success(np.bool_), Whether shutdown the process or threading successfully.
+            Success(np.bool\_), Whether shutdown the process or threading successfully.
         """
         return True
