@@ -89,7 +89,7 @@ class CQLLearner(Learner):
             '''sample an action'''
             act_mean, std, _, action = self.policy(obs)
             x_t = self.dist.sample((), act_mean, std)
-            action = self.tanh(x_t).clip(xmin=-0.995, xmax=0.995)
+            action = self.tanh(x_t).clip(min=-0.995, max=0.995)
 
             log_prob_row = self.dist.log_prob(x_t, act_mean, std)
             log_prob_new = log_prob_row - self.log((self.one - action.pow(2)) + self.eps)
@@ -179,8 +179,8 @@ class CQLLearner(Learner):
             self.curr_step = Parameter(Tensor(0, mindspore.float32), name="cur_step", requires_grad=False)
 
         def atanh(self, x):
-            one_plus_x = (self.one + x).clip(xmin=1e-6, xmax=None)
-            one_minus_x = (self.one - x).clip(xmin=1e-6, xmax=None)
+            one_plus_x = (self.one + x).clip(min=1e-6, max=None)
+            one_minus_x = (self.one - x).clip(min=1e-6, max=None)
             ans = 0.5 * self.log(one_plus_x / one_minus_x)
             return ans
 
@@ -189,7 +189,7 @@ class CQLLearner(Learner):
             ## sample
             act_mean, std, _, _ = self.policy(obs)
             x_t = self.dist.sample((), act_mean, std)
-            act = self.tanh(x_t).clip(xmin=-0.995, xmax=0.995)
+            act = self.tanh(x_t).clip(min=-0.995, max=0.995)
             log_pi_row = self.dist.log_prob(x_t, act_mean, std)
             log_pi_new = log_pi_row - self.log((self.one - act.pow(2)) + self.eps)
             log_pi = log_pi_new.sum(-1, keepdims=True)
