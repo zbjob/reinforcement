@@ -10,6 +10,13 @@
         返回：
             返回环境的动作空间。
 
+    .. py:method:: close
+
+        关闭环境以释放环境资源
+
+        返回：
+            - **Success** (bool) - 是否成功释放资源。
+
     .. py:method:: config
         :property:
 
