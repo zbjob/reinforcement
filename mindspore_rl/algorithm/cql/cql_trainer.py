@@ -17,7 +17,7 @@ import numpy as np
 from mindspore_rl.agent.trainer import Trainer
 import mindspore
 from mindspore.ops import operations as ops
-from mindspore import ms_function
+from mindspore.common.api import jit
 from mindspore import Tensor
 #pylint: disable=W0702
 #pylint: disable=W0611
@@ -61,14 +61,14 @@ class CQLTrainer(Trainer):
         #pylint: disable=W0212
         InitBuffer(self.env._env, self.ms_buffer)
 
-    @ms_function
+    @jit
     def train_one_episode(self):
         '''Train one episode'''
         experience = self.ms_buffer.sample()
         critic_loss, actor_loss = self.msrl.agent_learn(experience)
         return (critic_loss, actor_loss), self.zero, self.zero
 
-    @ms_function
+    @jit
     def evaluate(self):
         '''Default evaluate'''
         avg_reward = self.zero

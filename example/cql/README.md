@@ -3,6 +3,7 @@
 ## Related Paper
 
 1. Kumar, A., Zhou, A., Tucker, G., & Levine, S.. [Conservative Q-Learning for Offline Reinforcement Learning](https://arxiv.org/abs/2006.04779)
+2. Fu, J., Kumar, A., Nachum, O., Tucker, G., & Levine, S. (2021). [D4rl: datasets for deep data-driven reinforcement learning](https://arxiv.org/abs/2004.07219)
 
 CQL is a classical algorithm in Offline RL. Offline reinforcement learning needs to solve the problem of how to maximize the use of offline historical data to train agents (without interaction with the environment during the period), and finally apply it to the actual environment. Generally, the offline method has a fatal flaw: the overestimation of Q value caused by the difference between the offline data and the actual learning policy distribution, especially when the distribution of the actual environment and the training data is different (distribution offset), it will lead to the failure to correctly judge the training policy.
 In this paper, a conservative Q-learning (CQL) algorithm is proposed, which aims to address these limitations by learning a conservative Q-function such that the expected value of a policy under this Q-function lower-bounds its true value.
