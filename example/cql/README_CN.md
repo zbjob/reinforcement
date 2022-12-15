@@ -3,6 +3,7 @@
 ## 相关论文
 
 1. Kumar, A., Zhou, A., Tucker, G., & Levine, S.. [Conservative Q-Learning for Offline Reinforcement Learning](https://arxiv.org/abs/2006.04779)
+2. Fu, J., Kumar, A., Nachum, O., Tucker, G., & Levine, S. (2021). [D4rl: datasets for deep data-driven reinforcement learning](https://arxiv.org/abs/2004.07219)
 
 CQL算法是Offline RL算法中比较经典的一个算法。离线强化学习需要解决的是如何最大化利用离线的历史数据训练智能体(期间不与环境交互），最终应用于实际环境中的问题。通常情况下Offline的方法会有一个致命的缺陷：由于离线数据与实际学习的策略分布不同而引起的Q值过估问题，尤其是当实际应用环境的与训练数据的分布不同时（分布偏移），会导致训练的策略无法正确判断。
 本文提出了一种Conservative Q-learning(CQL)算法，它通过学习一个较为保守的Q函数，使得该策略下的Q函数的期望值低于其真实值。

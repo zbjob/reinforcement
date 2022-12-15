@@ -13,35 +13,32 @@
 # limitations under the License.
 # ============================================================================
 """
-AWAC training example.
+AWAC eval example.
 """
-
-#pylint: disable=C0413
 import argparse
-from mindspore_rl.algorithm.awac.awac_trainer import AWACTrainer
-from mindspore_rl.algorithm.awac.awac_session import AWACSession
+from mindspore_rl.algorithm.awac import config
+from mindspore_rl.algorithm.awac import AWACTrainer
+from mindspore_rl.algorithm.awac import AWACSession
 from mindspore import context
 
 parser = argparse.ArgumentParser(description='MindSpore Reinforcement AWAC')
-parser.add_argument('--episode', type=int, default=500, help='total episode numbers.')
 parser.add_argument('--device_target', type=str, default='Auto', choices=['CPU', 'GPU', 'Auto'],
                     help='Choose a device to run the awac example(Default: Auto).')
+parser.add_argument('--ckpt_path', type=str, default=None, help='The ckpt file in eval.')
 parser.add_argument('--env_yaml', type=str, default='../env_yaml/ant-expert-v2.yaml',
-                    help='Choose an environment yaml to update (Default: ant-expert-v2.yaml).')
+                    help='Choose an environment yaml to update the awac (Default: ant-expert-v2.yaml).')
 parser.add_argument('--algo_yaml', type=str, default=None,
                     help='Choose an algo yaml to update the awac example(Default: None).')
-options, _ = parser.parse_known_args()
+args = parser.parse_args()
 
 
-def train(episode=options.episode):
-    """start to train awac algorithm"""
-    if options.device_target != 'Auto':
-        context.set_context(device_target=options.device_target)
-    context.set_context(enable_graph_kernel=True)
+def awac_eval():
+    if args.device_target != 'Auto':
+        context.set_context(device_target=args.device_target)
     context.set_context(mode=context.GRAPH_MODE)
-    ac_session = AWACSession(options.env_yaml, options.algo_yaml)
-    ac_session.run(class_type=AWACTrainer, episode=episode)
-
+    awac_session = AWACSession(args.env_yaml, args.algo_yaml)
+    config.trainer_params.update({'ckpt_path': args.ckpt_path})
+    awac_session.run(class_type=AWACTrainer, is_train=False)
 
 if __name__ == "__main__":
-    train()
+    awac_eval()

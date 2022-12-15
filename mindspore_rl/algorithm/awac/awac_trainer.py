@@ -16,9 +16,8 @@
 import numpy as np
 from mindspore_rl.agent.trainer import Trainer
 import mindspore
-import mindspore.nn as nn
 from mindspore.ops import operations as ops
-from mindspore import ms_function
+from mindspore.common.api import jit
 from mindspore import Tensor
 from mindspore import Parameter
 #pylint: disable=W0702
@@ -52,7 +51,7 @@ class InitBuffer():
 class AWACTrainer(Trainer):
     '''AWACTrainer'''
     def __init__(self, msrl, params):
-        nn.Cell.__init__(self, auto_prefix=False)
+        super(AWACTrainer, self).__init__(msrl)
         self.env = msrl.eval_environment
         self.zero = Tensor(0., mindspore.float32)
         self.done = Tensor(False, mindspore.bool_)
@@ -68,9 +67,8 @@ class AWACTrainer(Trainer):
         self.offline_train_steps = Tensor(params['offline_train_steps'], mindspore.float32)
         self.n_steps_per_episode = Tensor(params['n_steps_per_episode'], mindspore.float32)
         self.need_reset = Tensor(True, mindspore.bool_)
-        super(AWACTrainer, self).__init__(msrl)
 
-    @ms_function
+    @jit
     def train_one_episode(self):
         '''Train one episode'''
         obs = self.msrl.collect_environment.reset().expand_dims(0)
@@ -96,7 +94,7 @@ class AWACTrainer(Trainer):
             self.warmup += 1
         return (critic_loss, actor_loss, mean_std), self.zero, self.zero
 
-    @ms_function
+    @jit
     def evaluate(self):
         '''Default evaluate'''
         avg_reward = self.zero
