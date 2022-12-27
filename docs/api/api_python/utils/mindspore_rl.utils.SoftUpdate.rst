@@ -3,9 +3,9 @@
 
     采用滑动凭据方式更新目标网络的参数。
 
-    设目标网络参数为 :math:`target_param`，行为网络参数为 :math:`behavior_param`，
+    设目标网络参数为 :math:`target\_param`，行为网络参数为 :math:`behavior\_param`，
     滑动平均系数为 :math:`factor`。
-    则 :math:`target_param = (1. - factor) * behavior_param + factor * target_param`。
+    则 :math:`target\_param = (1. - factor) * behavior\_param + factor * target\_param`。
 
     参数：
         - **factor** (float) - 滑动平均系数，范围[0, 1]。

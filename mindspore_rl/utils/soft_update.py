@@ -29,9 +29,9 @@ class SoftUpdate(nn.Cell):
     r"""
     Update target network parameters with moving average algorithm.
 
-    Set target network parameter as :math:`target_param`, behavior network parameter as :math:`behavior_param`,
+    Set target network parameter as :math:`target\_param`, behavior network parameter as :math:`behavior\_param`,
     moving averaget factor as :math:`factor`.
-    Then :math:`target_param = (1. - factor) * behavior_param + factor * target_param`.
+    Then :math:`target\_param = (1. - factor) * behavior\_param + factor * target\_param`.
 
     Args:
         factor (float): moving average factor between [0, 1].
