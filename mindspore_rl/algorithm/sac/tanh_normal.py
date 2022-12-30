@@ -1,4 +1,4 @@
-# Copyright 2022 Huawei Technologies Co., Ltd
+# Copyright 2022-2023 Huawei Technologies Co., Ltd
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -15,9 +15,11 @@
 """TanhMultivariateNormalDiag"""
 import numpy as np
 import mindspore
+import mindspore.ops as ops
 import mindspore.nn.probability.distribution as msd
 import mindspore.nn.probability.bijector as msb
 from mindspore.ops import operations as P
+from mindspore.ops import composite as C
 from mindspore import Tensor
 
 
@@ -49,6 +51,8 @@ class TanhBijector(msb.Bijector):
         return self.tanh(x)
 
 
+#pylint: disable=W0613
+#pylint: disable=E1130
 class MultivariateNormalDiag(msd.Normal):
     """MultivariateNormalDiag distribute"""
     def __init__(self,
@@ -61,11 +65,46 @@ class MultivariateNormalDiag(msd.Normal):
         super(MultivariateNormalDiag, self).__init__(loc, scale, seed, dtype, name)
         self.reduce_axis = reduce_axis
 
+        self.reduce_sum = P.ReduceSum()
+        self.square = P.Square()
+        self.expand_dims = P.ExpandDims()
+
     def _log_prob(self, value, mean=None, sd=None):
         log_prob = super()._log_prob(value, mean=mean, sd=sd)
         if self.reduce_axis is not None:
             log_prob = log_prob.sum(axis=self.reduce_axis)
         return log_prob
+
+    def _squared_frobenius_norm(self, x):
+        return self.reduce_sum(self.square(x), [-2, -1])
+
+    def _kl_loss(self, dist, mean_b, sd_b, mean=None, sd=None):
+        diag_b_std = ops.matrix_diag(sd_b)
+        diag_a_std = ops.matrix_diag(sd)
+        b_inv_a = self.expand_dims(sd / sd_b, -1)
+        solved_value = self.expand_dims((1. / sd_b), -1) * (self.expand_dims((mean_b - mean), -1))
+        kl_div = (diag_b_std.log_matrix_determinant()[1] - diag_a_std.log_matrix_determinant()[1] + 0.5 * (
+            (-sd_b.shape[-1]) + self._squared_frobenius_norm(b_inv_a) + self._squared_frobenius_norm(solved_value)))
+        return kl_div
+
+    def _sample(self, shape=(), mean=None, sd=None, independent=None):
+        """sample function for multivariate normal diag with independent input"""
+        shape = self.checktuple(shape, 'shape')
+        mean, sd = self._check_param_type(mean, sd)
+        batch_shape = self.shape(mean + sd)
+        origin_shape = shape + batch_shape
+        if origin_shape == ():
+            sample_shape = (1,)
+        else:
+            sample_shape = origin_shape
+        if independent is not None:
+            sample_shape = sample_shape[-independent:]
+        sample_norm = C.normal(sample_shape, mean, sd, self.seed)
+        value = self.cast(sample_norm, self.dtype)
+        if origin_shape == ():
+            value = self.squeeze(value)
+        return value
+
 
 
 class TanhMultivariateNormalDiag(msd.TransformedDistribution):

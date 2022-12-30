@@ -36,6 +36,7 @@ class DiscountedReturn(nn.Cell):
 
     Args:
         gamma (float): Discounted factor between [0, 1].
+        need_bprop (bool): Whether need to calculate the backpropagation of discounted returns.
 
     Inputs:
         - **reward** (Tensor) - The reward sequence contains multi-episode.
@@ -58,13 +59,14 @@ class DiscountedReturn(nn.Cell):
         (2, 2)
     """
 
-    def __init__(self, gamma):
+    def __init__(self, gamma, need_bprop=False):
         super(DiscountedReturn, self).__init__()
         if gamma > 1.0 or gamma < 0.0:
             raise ValueError('The discounted factor should be a number in range [0, 1], but got {}.'.format(gamma))
 
         # Fused operator only supported in GPU backend so far. Ascend and CPU backends will support it soon.
         self.enable_op_fusion = context.get_context('device_target') in ['GPU']
+        self.need_bprop = need_bprop
         self.fused_op = rl_ops.DiscountedReturn(gamma)
 
         self.gamma = Tensor([gamma], mindspore.float32)
@@ -75,7 +77,7 @@ class DiscountedReturn(nn.Cell):
         Returns discounted return.
         """
 
-        if self.enable_op_fusion:
+        if self.enable_op_fusion and not self.need_bprop:
             return self.fused_op(reward, done, last_state_value)
 
         discounted_return = self.zeros_like(reward)
