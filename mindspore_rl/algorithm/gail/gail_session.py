@@ -20,7 +20,7 @@ import random
 import mindspore
 from mindspore import nn
 from mindspore_rl.core import Session
-from mindspore_rl.utils.callback import CheckpointCallback, LossCallback, EvaluateCallback
+from mindspore_rl.utils.callback import CheckpointCallback, LossCallback, EvaluateCallback, TimeCallback
 from mindspore_rl.core.uniform_replay_buffer import UniformReplayBuffer
 from mindspore_rl.algorithm.gail.gail import ExpertReplayBuffer, Discriminator, DiscriminatorLossCell, GAILLearner
 
@@ -92,7 +92,8 @@ class GAILSession(Session):
         loss_cb = LossCallback()
         ckpt_cb = CheckpointCallback(save_per_episode=10, directory='./ckpt')
         eval_cb = EvaluateCallback(eval_rate=10)
-        cbs = [loss_cb, ckpt_cb, eval_cb]
+        time_cb = TimeCallback()
+        cbs = [loss_cb, ckpt_cb, eval_cb, time_cb]
 
         trainer_params = {
             'save_per_episode': 100,
