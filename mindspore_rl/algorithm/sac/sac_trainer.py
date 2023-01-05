@@ -36,7 +36,6 @@ class SACTrainer(Trainer):
         self.reduce_mean = P.ReduceMean()
         self.duration = params['duration']
         self.num_eval_episode = params['num_eval_episode']
-        super(SACTrainer, self).__init__(msrl)
 
     def trainable_variables(self):
         """Trainable variables for saving."""
