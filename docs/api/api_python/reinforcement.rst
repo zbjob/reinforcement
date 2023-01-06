@@ -56,6 +56,8 @@ mindspore_rl.environment
 
 .. include:: environment/mindspore_rl.environment.TicTacToeEnvironment.rst
 
+.. include:: environment/mindspore_rl.environment.DeepMindControlEnvironment.rst
+
 .. automodule:: mindspore_rl.environment
     :members:
 

@@ -17,7 +17,7 @@ Dreamer session.
 """
 from mindspore_rl.core import Session
 from mindspore_rl.utils.utils import update_config
-from mindspore_rl.utils.callback import LossCallback, TimeCallback, EvaluateCallback
+from mindspore_rl.utils.callback import LossCallback, EvaluateCallback
 from mindspore_rl.algorithm.dreamer import config
 
 
@@ -41,8 +41,7 @@ class DreamerSession(Session):
                                               (int(episode_limits/action_repeat)+1,) + reward_shape]
         replay_buffer_config['data_type'] = [obs_dtype, action_dtype, reward_dtype, reward_dtype]
         loss_cb = LossCallback()
-        time_cb = TimeCallback()
         eval_cb = EvaluateCallback(50)
-        cbs = [time_cb, loss_cb, eval_cb]
+        cbs = [loss_cb, eval_cb]
         params = config.trainer_params
         super().__init__(config.algorithm_config, None, params=params, callbacks=cbs)
