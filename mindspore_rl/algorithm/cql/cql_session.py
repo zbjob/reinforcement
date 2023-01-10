@@ -41,7 +41,7 @@ class MyLossCallback(Callback):
         for loss in losses:
             losses_out.append(round(float(np.mean(loss.asnumpy())), 3))
         if (params.cur_episode % self.interval) == 0:
-            print("Episode {}: critic_loss is {}, actor_loss is {}, per_setp_time {:5.3f} ms".format(\
+            print("Episode {}: critic_loss is {}, actor_loss is {}, per_step_time {:5.3f} ms".format(\
                 params.cur_episode, losses_out[0], losses_out[1], epoch_ms), flush=True)
 
 
