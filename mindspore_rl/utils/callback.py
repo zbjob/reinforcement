@@ -231,10 +231,10 @@ class TimeCallback(Callback):
         super(TimeCallback, self).__init__()
         if not isinstance(print_rate, int) or print_rate < 0:
             raise ValueError("The arg of 'print_rate' must be int and >= 0, but get ", print_rate)
-        if fixed_steps_in_episode is not None and (isinstance(fixed_steps_in_episode, int) \
-            or fixed_steps_in_episode < 0):
-            raise ValueError("The arg of 'fixed_steps_in_episode' must be int and > 0, but get ", \
-                 fixed_steps_in_episode)
+        if fixed_steps_in_episode is not None:
+            if not (isinstance(fixed_steps_in_episode, int) and fixed_steps_in_episode > 0):
+                raise ValueError("The arg of 'fixed_steps_in_episode' must be int and > 0, but get ", \
+                    fixed_steps_in_episode)
 
         self._print_rate = print_rate
         self._steps_in_episode = fixed_steps_in_episode
