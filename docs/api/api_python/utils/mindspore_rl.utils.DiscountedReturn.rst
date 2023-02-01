@@ -1,5 +1,5 @@
 
-.. py:class:: mindspore_rl.utils.DiscountedReturn(gamma)
+.. py:class:: mindspore_rl.utils.DiscountedReturn(gamma, need_bprop)
 
     计算折扣回报。
 
