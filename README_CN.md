@@ -208,7 +208,7 @@ Evaluate for episode 10 total rewards is 9.600
         <td align="center">/</td>
         <td align="center">✔️</td>
         <td align="center">✔️</td>
-        <td align="center">/</td>
+        <td align="center">✔️</td>
         <td align="center"><a href="https://github.com/oxwhirl/smac/">SMAC</a></td>
     </tr>
     <tr>
@@ -268,7 +268,7 @@ Evaluate for episode 10 total rewards is 9.600
         <td align="center">/</td>
         <td align="center">✔️</td>
         <td align="center">✔️</td>
-        <td align="center">/</td>
+        <td align="center">✔️</td>
         <td align="center"><a href="https://github.com/openai/multiagent-particle-envs">Simple Spread</a></td>
     </tr>
     <tr>
